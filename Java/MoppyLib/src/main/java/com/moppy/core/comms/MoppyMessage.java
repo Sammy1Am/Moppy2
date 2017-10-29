@@ -1,4 +1,4 @@
-package com.moppy.core.comm;
+package com.moppy.core.comms;
 
 import java.util.Arrays;
 
@@ -22,7 +22,7 @@ public class MoppyMessage {
     public static final MoppyMessage SYS_START = new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x01, CommandByte.SYS_START});
     public static final MoppyMessage SYS_STOP = new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x01, CommandByte.SYS_STOP});
     
-    
+
     protected MoppyMessage(byte[] messageBytes) {
         if (messageBytes.length < 4) {
             throw new IllegalArgumentException("Not enough bytes for a MoppyMessage!");
