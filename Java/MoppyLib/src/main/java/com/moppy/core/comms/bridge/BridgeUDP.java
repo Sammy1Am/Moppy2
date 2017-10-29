@@ -38,6 +38,7 @@ public class BridgeUDP extends NetworkBridge {
     public void connect() throws IOException {
         // Create and connect socket
         socket = new MulticastSocket(MOPPY_PORT);
+        //socket.connect(groupAddress, MOPPY_PORT);
         socket.joinGroup(groupAddress);
         
         // Create and start listener thread
@@ -48,7 +49,7 @@ public class BridgeUDP extends NetworkBridge {
 
     @Override
     public void sendMessage(MoppyMessage messageToSend) throws IOException {
-        if (socket == null || !socket.isConnected()) {
+        if (socket == null /*|| !socket.isConnected()*/) {
             Logger.getLogger(MultiBridge.class.getName()).log(Level.FINE, "UDP Socket null or not connected");
             return; // We're not connected-- just silently fail.
         }
@@ -92,7 +93,7 @@ public class BridgeUDP extends NetworkBridge {
             DatagramPacket bufferPacket = new DatagramPacket(new byte[259], 259);
             byte[] packetData;
             
-            while (socket.isConnected()) {
+            while (!socket.isClosed() /*&& socket.isConnected()*/) {
                 try {
                     socket.receive(bufferPacket);
                     packetData = bufferPacket.getData();
@@ -106,8 +107,6 @@ public class BridgeUDP extends NetworkBridge {
                     Logger.getLogger(BridgeUDP.class.getName()).log(Level.WARNING, null, ex);
                 }
             }
-            
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
         
     }

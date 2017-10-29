@@ -25,3 +25,5 @@
 hs_err_pid*
 /Java/MoppyLib/.nb-gradle/
 /Java/MoppyLib/build/
+/Java/MoppyDeviceGUI/.nb-gradle/
+/Java/MoppyDeviceGUI/build/
