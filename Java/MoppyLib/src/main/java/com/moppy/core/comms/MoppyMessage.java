@@ -70,5 +70,11 @@ public class MoppyMessage {
         return Arrays.copyOfRange(messageBytes, bodyStart, bodyStart + bodyLength);
     }
     
+    public byte getMessageCommandByte() {
+        return getMessageBody()[0];
+    }
     
+    public byte[] getMessageCommandPayload() {
+        return Arrays.copyOfRange(getMessageBody(), 1, getMessageBody().length);
+    }
 }

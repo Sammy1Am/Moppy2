@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="AnchorPane" prefHeight="188.0" prefWidth="539.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.moppy.device.gui.MainWindowController">
+   <children>
+      <Button fx:id="connectButton" layoutX="257.0" layoutY="47.0" mnemonicParsing="false" onAction="#doConnect" text="Connect" />
+      <Button fx:id="disconnectButton" disable="true" layoutX="250.0" layoutY="82.0" mnemonicParsing="false" onAction="#doDisconnect" text="Disconnect" />
+      <Label alignment="TOP_CENTER" layoutY="14.0" prefHeight="25.0" prefWidth="574.0" text="Press connect to begin listening for UDP packets from a Moppy Controller.  Press Disconnect to stop." />
+   </children>
+</AnchorPane>

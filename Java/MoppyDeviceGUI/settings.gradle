@@ -1,0 +1,4 @@
+rootProject.name = 'MoppyDeviceGUI'
+
+include ':MoppyLib'
+project(':MoppyLib').projectDir = new File(settingsDir, '../MoppyLib')
