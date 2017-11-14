@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 /**
  * UDP-based network bridge for MoppyMessages.
  * 
- * This bridge will utilize mutlicast?broadcast? addresses to simplify communication
+ * This bridge will utilize multicast addresses to simplify communication
  * to multiple Moppy devices on a Network.  Ideally this should be an effectively zero-conf
  * bridge and work out of the box on any normal network.
  */
@@ -93,7 +93,7 @@ public class BridgeUDP extends NetworkBridge {
             DatagramPacket bufferPacket = new DatagramPacket(new byte[259], 259);
             byte[] packetData;
             
-            while (!socket.isClosed() /*&& socket.isConnected()*/) {
+            while (!socket.isClosed() && !Thread.interrupted()) {
                 try {
                     socket.receive(bufferPacket);
                     packetData = bufferPacket.getData();

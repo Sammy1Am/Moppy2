@@ -11,8 +11,8 @@ import static com.moppy.core.comms.MoppyMessage.SYSTEM_ADDRESS;
  * Class for building common MoppyMessages.
  */
 public class MoppyMessageFactory {
-    public static MoppyMessage systemPong(byte deviceAddress, byte numberOfSubAddresses) {
-        return new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x03, SYS_PONG, deviceAddress, numberOfSubAddresses});
+    public static MoppyMessage systemPong(byte deviceAddress, byte minSubAddress, byte maxSubAddress) {
+        return new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x03, SYS_PONG, deviceAddress, minSubAddress, maxSubAddress});
     }
     
     public static MoppyMessage deviceReset(byte deviceAddress) {
