@@ -71,7 +71,7 @@ public class DeviceImpl extends MoppyDevice implements Closeable {
     @Override
     public void gotSystemPing() {
         try {
-            network.sendMessage(MoppyMessageFactory.systemPong(deviceAddress, numberOfDevices));
+            network.sendMessage(MoppyMessageFactory.systemPong(deviceAddress, (byte)1, numberOfDevices));
         } catch (IOException ex) {
             Logger.getLogger(DeviceImpl.class.getName()).log(Level.WARNING, null, ex);
         }

@@ -26,7 +26,7 @@ public class MoppyMIDIReceiverBridge implements Receiver {
     @Override
     public void send(MidiMessage message, long timeStamp) {
         Set<MoppyMessage> messagesToSend = mappers.mapEvent(message);
-        
+
         messagesToSend.forEach((messageToSend) -> {
             try {
                 netBridge.sendMessage(messageToSend);
