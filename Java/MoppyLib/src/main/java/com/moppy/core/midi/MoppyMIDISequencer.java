@@ -1,5 +1,6 @@
 package com.moppy.core.midi;
 
+import com.moppy.core.status.StatusBus;
 import com.moppy.core.status.StatusConsumer;
 import com.moppy.core.status.StatusUpdate;
 import java.io.Closeable;
@@ -12,7 +13,6 @@ import javax.sound.midi.MetaEventListener;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Receiver;
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
 
@@ -24,13 +24,14 @@ import javax.sound.midi.Sequencer;
 public class MoppyMIDISequencer implements MetaEventListener, Closeable {
     private static final Logger LOG = Logger.getLogger(MoppyMIDISequencer.class.getName());
     private final Sequencer seq;
-    private final StatusConsumer statusConsumer;
+    private final StatusBus statusBus;
 
-    public MoppyMIDISequencer(Receiver midiReceiver, StatusConsumer statusConsumer) throws MidiUnavailableException {
-        this.statusConsumer = statusConsumer;
+    public MoppyMIDISequencer(StatusBus statusBus, MoppyMIDIReceiverSender receiverSender) throws MidiUnavailableException {
+        this.statusBus = statusBus;
+        this.statusBus.registerConsumer(receiverSender); // Register receiverSender to send seq messages to network
         seq = MidiSystem.getSequencer(false);
         seq.open();
-        seq.getTransmitter().setReceiver(midiReceiver);
+        seq.getTransmitter().setReceiver(receiverSender);
         seq.addMetaEventListener(this);
     }
 
@@ -55,24 +56,24 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
         }
         else if (meta.getType() == 47) {
             //MrSolidSnake745: Exposing end of sequence event to status consumers
-            statusConsumer.receiveUpdate(StatusUpdate.SEQUENCE_END);
+            statusBus.receiveUpdate(StatusUpdate.SEQUENCE_END);
         }
     }
     
     public void play() {
         seq.start();
-        statusConsumer.receiveUpdate(StatusUpdate.SEQUENCE_START);
+        statusBus.receiveUpdate(StatusUpdate.SEQUENCE_START);
     }
     
     public void pause() {
         seq.stop();
-        statusConsumer.receiveUpdate(StatusUpdate.SEQUENCE_PAUSE);
+        statusBus.receiveUpdate(StatusUpdate.SEQUENCE_PAUSE);
     }
     
     public void stop() {
         seq.stop();
         seq.setTickPosition(0);
-        statusConsumer.receiveUpdate(StatusUpdate.SEQUENCE_END);
+        statusBus.receiveUpdate(StatusUpdate.SEQUENCE_END);
     }
     
     public void loadSequence(String filePath) throws IOException, InvalidMidiDataException {
@@ -83,7 +84,7 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
         Sequence sequenceToLoad = MidiSystem.getSequence(sequenceFile);
         
         seq.setSequence(sequenceToLoad);
-        statusConsumer.receiveUpdate(StatusUpdate.sequenceLoaded(sequenceToLoad));
+        statusBus.receiveUpdate(StatusUpdate.sequenceLoaded(sequenceToLoad));
         
         LOG.info(String.format("Loaded sequence with %s tracks", sequenceToLoad.getTracks().length-1)); // -1 for system track?
     }
@@ -102,7 +103,7 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
     
     public void setTempo(float newTempo){
         seq.setTempoInBPM(newTempo);
-        statusConsumer.receiveUpdate(StatusUpdate.tempoChange(newTempo));
+        statusBus.receiveUpdate(StatusUpdate.tempoChange(newTempo));
         LOG.info(String.format("Tempo changed to %s", newTempo));
     }
 }
