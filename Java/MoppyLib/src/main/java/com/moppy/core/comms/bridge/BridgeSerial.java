@@ -8,6 +8,7 @@ package com.moppy.core.comms.bridge;
 import com.fazecast.jSerialComm.SerialPort;
 import com.moppy.core.comms.MoppyMessage;
 import com.moppy.core.comms.MoppyMessageFactory;
+import com.moppy.core.comms.NetworkReceivedMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -62,9 +63,9 @@ public class BridgeSerial extends NetworkBridge {
     private class SerialListener implements Runnable {
 
         private final SerialPort serialPort;
-        private final Consumer<MoppyMessage> messageConsumer;
+        private final Consumer<NetworkReceivedMessage> messageConsumer;
         
-        public SerialListener(SerialPort serialPort, Consumer<MoppyMessage> messageConsumer) {
+        public SerialListener(SerialPort serialPort, Consumer<NetworkReceivedMessage> messageConsumer) {
             this.serialPort = serialPort;
             this.messageConsumer = messageConsumer;
         }
@@ -93,7 +94,11 @@ public class BridgeSerial extends NetworkBridge {
                             serialIn.read(buffer, 4, buffer[3]); // Read body into buffer
                             totalMessageLength = 4 + buffer[3];
                         }
-                        messageConsumer.accept(MoppyMessageFactory.fromBytes(Arrays.copyOf(buffer, totalMessageLength)));
+                        messageConsumer.accept(MoppyMessageFactory.networkReceivedFromBytes(
+                                Arrays.copyOf(buffer, totalMessageLength),
+                                BridgeSerial.class.getName(),
+                                serialPort.getDescriptivePortName(),
+                                null));
                     }
                 }
             } catch (IOException ex) {

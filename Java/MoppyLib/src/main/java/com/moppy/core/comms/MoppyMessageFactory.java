@@ -44,4 +44,8 @@ public class MoppyMessageFactory {
     public static MoppyMessage fromBytes(byte[] bytes) {
         return new MoppyMessage(bytes);
     }
+    
+    public static NetworkReceivedMessage networkReceivedFromBytes(byte[] bytes, String networkType, String networkIdentifier, String remoteIdentifier) {
+        return new NetworkReceivedMessage(bytes, networkType, networkIdentifier, remoteIdentifier);
+    }
 }

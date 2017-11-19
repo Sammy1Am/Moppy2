@@ -2,6 +2,7 @@ package com.moppy.core.events.mapper;
 
 import com.moppy.core.comms.MoppyMessage;
 import com.moppy.core.comms.MoppyMessageFactory;
+import com.moppy.core.status.StatusUpdate;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
 
@@ -26,6 +27,10 @@ public abstract class MIDIEventMapper implements EventMapper<MidiMessage> {
                     ShortMessage midiMessage = (ShortMessage) event;
                     switch (midiMessage.getCommand()) {
                         case ShortMessage.NOTE_ON:
+                            if (midiMessage.getData2() == 0) {
+                                // For zero-velocity notes, turn the note off
+                                return MoppyMessageFactory.deviceStopNote(targetAddress, (byte)(midiMessage.getChannel()+1), (byte)midiMessage.getData1());
+                            }
                             return MoppyMessageFactory.devicePlayNote(targetAddress, (byte)(midiMessage.getChannel()+1), (byte)midiMessage.getData1());
                         case ShortMessage.NOTE_OFF:
                             return MoppyMessageFactory.deviceStopNote(targetAddress, (byte)(midiMessage.getChannel()+1), (byte)midiMessage.getData1());
