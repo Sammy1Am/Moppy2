@@ -1,9 +1,6 @@
 package com.moppy.core.comms;
 
-import static com.moppy.core.comms.MoppyMessage.CommandByte.DEV_PLAYNOTE;
-import static com.moppy.core.comms.MoppyMessage.CommandByte.DEV_RESET;
-import static com.moppy.core.comms.MoppyMessage.CommandByte.DEV_STOPNOTE;
-import static com.moppy.core.comms.MoppyMessage.CommandByte.SYS_PONG;
+import static com.moppy.core.comms.MoppyMessage.CommandByte.*;
 import static com.moppy.core.comms.MoppyMessage.START_BYTE;
 import static com.moppy.core.comms.MoppyMessage.SYSTEM_ADDRESS;
 
@@ -11,10 +8,12 @@ import static com.moppy.core.comms.MoppyMessage.SYSTEM_ADDRESS;
  * Class for building common MoppyMessages.
  */
 public class MoppyMessageFactory {
+    // System messages
     public static MoppyMessage systemPong(byte deviceAddress, byte minSubAddress, byte maxSubAddress) {
-        return new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x03, SYS_PONG, deviceAddress, minSubAddress, maxSubAddress});
+        return new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x04, SYS_PONG, deviceAddress, minSubAddress, maxSubAddress});
     }
     
+    // Device messages
     public static MoppyMessage deviceReset(byte deviceAddress) {
         return new MoppyMessage(new byte[]{START_BYTE, deviceAddress, 0x00, 0x01, DEV_RESET});
     }

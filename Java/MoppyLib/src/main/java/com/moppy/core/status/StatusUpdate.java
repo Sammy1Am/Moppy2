@@ -9,18 +9,6 @@ import javax.sound.midi.Sequence;
  */
 public class StatusUpdate {
     
-    public enum StatusType {
-        // Sequencer statuses
-        SEQUENCE_LOAD,
-        SEQUENCE_START,
-        SEQUENCE_PAUSE,
-        SEQUENCE_END,
-        SEQUENCE_TEMPO_CHANGE,
-        
-        // Network statuses
-        NET_PONG_RECEIVED
-    }
-    
     private final StatusType type;
     private final Optional<Object> data;
     
@@ -40,8 +28,8 @@ public class StatusUpdate {
     // Sequencer statuses
     
     public static StatusUpdate SEQUENCE_START = new StatusUpdate(StatusType.SEQUENCE_START, Optional.empty());
-    public static StatusUpdate SEQUENCE_PAUSE = new StatusUpdate(StatusType.SEQUENCE_START, Optional.empty());
-    public static StatusUpdate SEQUENCE_END = new StatusUpdate(StatusType.SEQUENCE_START, Optional.empty());
+    public static StatusUpdate SEQUENCE_PAUSE = new StatusUpdate(StatusType.SEQUENCE_PAUSE, Optional.empty());
+    public static StatusUpdate SEQUENCE_END = new StatusUpdate(StatusType.SEQUENCE_END, Optional.empty());
     
     public static StatusUpdate tempoChange(float tempo) {
         return new StatusUpdate(StatusType.SEQUENCE_TEMPO_CHANGE, Optional.of(tempo));

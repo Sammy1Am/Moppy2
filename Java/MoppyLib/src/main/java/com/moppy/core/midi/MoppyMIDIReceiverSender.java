@@ -2,6 +2,7 @@ package com.moppy.core.midi;
 
 import com.moppy.core.comms.MoppyMessage;
 import com.moppy.core.comms.bridge.NetworkBridge;
+import com.moppy.core.status.StatusSender;
 import com.moppy.core.events.mapper.MapperCollection;
 import java.io.IOException;
 import java.util.Set;
@@ -13,14 +14,13 @@ import javax.sound.midi.Receiver;
 /**
  * Connects a MIDI Transmitter to a Moppy NetworkBridge
  */
-public class MoppyMIDIReceiverBridge implements Receiver {
+public class MoppyMIDIReceiverSender extends StatusSender implements Receiver {
 
     private final MapperCollection<MidiMessage> mappers;
-    private final NetworkBridge netBridge;
     
-    public MoppyMIDIReceiverBridge(MapperCollection<MidiMessage> mapperCollection, NetworkBridge netBridge) throws IOException {
+    public MoppyMIDIReceiverSender(MapperCollection<MidiMessage> mapperCollection, NetworkBridge netBridge) throws IOException {
+        super(netBridge);
         this.mappers = mapperCollection;
-        this.netBridge = netBridge;
     }
     
     @Override
@@ -29,9 +29,9 @@ public class MoppyMIDIReceiverBridge implements Receiver {
 
         messagesToSend.forEach((messageToSend) -> {
             try {
-                netBridge.sendMessage(messageToSend);
+                networkBridge.sendMessage(messageToSend);
             } catch (IOException ex) {
-                Logger.getLogger(MoppyMIDIReceiverBridge.class.getName()).log(Level.WARNING, null, ex);
+                Logger.getLogger(MoppyMIDIReceiverSender.class.getName()).log(Level.WARNING, null, ex);
             }
         });
     }
