@@ -6,6 +6,7 @@
 package com.moppy.core.comms.bridge;
 
 import com.moppy.core.comms.MoppyMessage;
+import com.moppy.core.comms.NetworkReceivedMessage;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashSet;
@@ -18,24 +19,24 @@ import java.util.function.Consumer;
  */
 public abstract class NetworkBridge implements Closeable {
     
-    private final Set<Consumer<MoppyMessage>> receivers = new HashSet<>();
+    private final Set<Consumer<NetworkReceivedMessage>> receivers = new HashSet<>();
     
     public abstract void connect() throws IOException;
     
     public abstract void sendMessage(MoppyMessage messageToSend) throws IOException;
     
-    public void registerMessageReceiver(Consumer<MoppyMessage> messageConsumer) {
+    public void registerMessageReceiver(Consumer<NetworkReceivedMessage> messageConsumer) {
         receivers.add(messageConsumer);
     }
     
-    public void deregisterMessageReceiver(Consumer<MoppyMessage> messageConsumer) {
+    public void deregisterMessageReceiver(Consumer<NetworkReceivedMessage> messageConsumer) {
         receivers.remove(messageConsumer);
     }
     
     /**
      * Called by the implementing class to pass a received message on to registered receivers. 
      */
-    protected void messageToReceivers(MoppyMessage messageReceived) {
+    protected void messageToReceivers(NetworkReceivedMessage messageReceived) {
         receivers.forEach(c -> c.accept(messageReceived));
     }
 }

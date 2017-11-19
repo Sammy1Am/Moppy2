@@ -1,0 +1,108 @@
+package com.moppy.core.midi;
+
+import com.moppy.core.status.StatusConsumer;
+import com.moppy.core.status.StatusUpdate;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MetaEventListener;
+import javax.sound.midi.MetaMessage;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Receiver;
+import javax.sound.midi.Sequence;
+import javax.sound.midi.Sequencer;
+
+/**
+ * Wrapper around the Java MIDI sequencer for playing MIDI files.
+ * 
+ * Additionally provides feedback to listeners about the current state of the sequencer.
+ */
+public class MoppyMIDISequencer implements MetaEventListener, Closeable {
+    private static final Logger LOG = Logger.getLogger(MoppyMIDISequencer.class.getName());
+    private final Sequencer seq;
+    private final StatusConsumer statusConsumer;
+
+    public MoppyMIDISequencer(Receiver midiReceiver, StatusConsumer statusConsumer) throws MidiUnavailableException {
+        this.statusConsumer = statusConsumer;
+        seq = MidiSystem.getSequencer(false);
+        seq.open();
+        seq.getTransmitter().setReceiver(midiReceiver);
+        seq.addMetaEventListener(this);
+    }
+
+    @Override
+    public void close() throws IOException {
+        seq.close();
+    }
+
+    @Override
+    public void meta(MetaMessage meta) {
+        if (meta.getType() == 81){
+            int uSecondsPerQN = 0;
+            uSecondsPerQN |= meta.getData()[0] & 0xFF;
+            uSecondsPerQN <<= 8;
+            uSecondsPerQN |= meta.getData()[1] & 0xFF;
+            uSecondsPerQN <<= 8;
+            uSecondsPerQN |= meta.getData()[2] & 0xFF;
+            
+            int newTempo = 60000000/uSecondsPerQN;
+            
+            setTempo(newTempo);
+        }
+        else if (meta.getType() == 47) {
+            //MrSolidSnake745: Exposing end of sequence event to status consumers
+            statusConsumer.receiveUpdate(StatusUpdate.SEQUENCE_END);
+        }
+    }
+    
+    public void play() {
+        seq.start();
+        statusConsumer.receiveUpdate(StatusUpdate.SEQUENCE_START);
+    }
+    
+    public void pause() {
+        seq.stop();
+        statusConsumer.receiveUpdate(StatusUpdate.SEQUENCE_PAUSE);
+    }
+    
+    public void stop() {
+        seq.stop();
+        seq.setTickPosition(0);
+        statusConsumer.receiveUpdate(StatusUpdate.SEQUENCE_END);
+    }
+    
+    public void loadSequence(String filePath) throws IOException, InvalidMidiDataException {
+        File sequenceFile = new File(filePath);
+        if (!sequenceFile.isFile()) {
+            throw new IOException(String.format("File '%s' not found, or isn't a file", filePath));
+        }
+        Sequence sequenceToLoad = MidiSystem.getSequence(sequenceFile);
+        
+        seq.setSequence(sequenceToLoad);
+        statusConsumer.receiveUpdate(StatusUpdate.sequenceLoaded(sequenceToLoad));
+        
+        LOG.info(String.format("Loaded sequence with %s tracks", sequenceToLoad.getTracks().length-1)); // -1 for system track?
+    }
+    
+    public long getSecondsLength(){
+        return TimeUnit.SECONDS.convert(seq.getMicrosecondLength(), TimeUnit.MICROSECONDS);
+    }
+    
+    public long getSecondsPosition(){
+        return TimeUnit.SECONDS.convert(seq.getMicrosecondPosition(), TimeUnit.MICROSECONDS);
+    }
+    
+    public void setSecondsPosition(long seconds){
+        seq.setMicrosecondPosition(TimeUnit.SECONDS.toMicros(seconds));
+    }
+    
+    public void setTempo(float newTempo){
+        seq.setTempoInBPM(newTempo);
+        statusConsumer.receiveUpdate(StatusUpdate.tempoChange(newTempo));
+        LOG.info(String.format("Tempo changed to %s", newTempo));
+    }
+}

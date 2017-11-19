@@ -7,6 +7,7 @@ package com.moppy.core.comms.bridge;
 
 import com.moppy.core.comms.MoppyMessage;
 import com.moppy.core.comms.MoppyMessageFactory;
+import com.moppy.core.comms.NetworkReceivedMessage;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -77,10 +78,10 @@ public class BridgeUDP extends NetworkBridge {
     
     private class UDPListener implements Runnable {
 
-        private final Consumer<MoppyMessage> messageConsumer;
+        private final Consumer<NetworkReceivedMessage> messageConsumer;
         private final MulticastSocket socket;
         
-        public UDPListener(MulticastSocket socket, Consumer<MoppyMessage> messageConsumer) {
+        public UDPListener(MulticastSocket socket, Consumer<NetworkReceivedMessage> messageConsumer) {
             this.socket = socket;
             this.messageConsumer = messageConsumer;
         }
@@ -99,9 +100,15 @@ public class BridgeUDP extends NetworkBridge {
                     packetData = bufferPacket.getData();
                     
                     if (packetData.length > 0 && packetData[0] == MoppyMessage.START_BYTE) {
-                        MoppyMessage receivedMessage = MoppyMessageFactory.fromBytes(packetData);
+                        NetworkReceivedMessage receivedMessage = MoppyMessageFactory.networkReceivedFromBytes(
+                                packetData,
+                                BridgeUDP.class.getName(),
+                                socket.getInetAddress().getHostAddress(),
+                                bufferPacket.getAddress().getHostAddress());
                         messageConsumer.accept(receivedMessage);
                     }
+                    
+                    //TODO: send status update with DeviceDescriptor for pong??
                     
                 } catch (IOException ex) {
                     Logger.getLogger(BridgeUDP.class.getName()).log(Level.WARNING, null, ex);
