@@ -1,7 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'application'
 
-mainClassName = 'com.moppy.device.gui.MoppyDeviceGUI'
+mainClassName = 'com.moppy.control.MoppyControlGUI'
 
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
@@ -14,17 +14,16 @@ sourceCompatibility = '1.8'
 // prefer. In this case NetBeans will not add these tasks but you may rely on
 // your own implementation.
 if (!hasProperty('mainClass')) {
-    ext.mainClass = ''
+    ext.mainClass = 'com.moppy.control.MoppyControlGUI'
 }
 
 repositories {
-    maven {
-        url 'https://clojars.org/repo/'
-    }
     mavenCentral()
+    // You may define additional repositories, or even remove "mavenCentral()".
+    // Read more about repositories here:
+    //   http://www.gradle.org/docs/current/userguide/dependency_management.html#sec:repositories
 }
 
 dependencies {
     compile project(':MoppyLib')
-    compile 'com.jsyn:jsyn:+' // For sound synthesizing
 }
