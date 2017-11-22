@@ -1,7 +1,6 @@
 package com.moppy.core.midi;
 
 import com.moppy.core.status.StatusBus;
-import com.moppy.core.status.StatusConsumer;
 import com.moppy.core.status.StatusUpdate;
 import java.io.Closeable;
 import java.io.File;
@@ -76,10 +75,13 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
         statusBus.receiveUpdate(StatusUpdate.SEQUENCE_END);
     }
     
-    public void loadSequence(String filePath) throws IOException, InvalidMidiDataException {
-        File sequenceFile = new File(filePath);
+    public boolean isPlaying() {
+        return seq.isRunning();
+    }
+    
+    public void loadSequence(File sequenceFile) throws IOException, InvalidMidiDataException {
         if (!sequenceFile.isFile()) {
-            throw new IOException(String.format("File '%s' not found, or isn't a file", filePath));
+            throw new IOException(String.format("File '%s' not found, or isn't a file", sequenceFile.getAbsolutePath()));
         }
         Sequence sequenceToLoad = MidiSystem.getSequence(sequenceFile);
         

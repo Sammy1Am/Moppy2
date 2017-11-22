@@ -8,8 +8,8 @@ package com.moppy.core.comms.bridge;
 import com.moppy.core.comms.MoppyMessage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 public class MultiBridge extends NetworkBridge {
 
-    private Set<NetworkBridge> bridges;
+    private Set<NetworkBridge> bridges = new HashSet<>();
     
     /**
      * Adds a network bridge that will send/receive messages as part of the MultiBridge group.

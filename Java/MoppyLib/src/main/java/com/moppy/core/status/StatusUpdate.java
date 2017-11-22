@@ -35,7 +35,7 @@ public class StatusUpdate {
         return new StatusUpdate(StatusType.SEQUENCE_TEMPO_CHANGE, Optional.of(tempo));
     }
     public static StatusUpdate sequenceLoaded(Sequence sequence) {
-        return new StatusUpdate(StatusType.SEQUENCE_TEMPO_CHANGE, Optional.of(sequence));
+        return new StatusUpdate(StatusType.SEQUENCE_LOAD, Optional.of(sequence));
     }
     
     // Network statuses
