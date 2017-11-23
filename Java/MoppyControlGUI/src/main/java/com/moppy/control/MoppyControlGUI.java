@@ -1,7 +1,6 @@
 package com.moppy.control;
 
 import com.moppy.control.gui.MainWindow;
-import com.moppy.core.comms.bridge.BridgeSerial;
 import com.moppy.core.comms.bridge.MultiBridge;
 import com.moppy.core.events.mapper.MIDIEventMapper;
 import com.moppy.core.events.mapper.MapperCollection;
@@ -57,10 +56,6 @@ public class MoppyControlGUI {
         //// Load Settings / Defaults
         //
         
-        BridgeSerial serialBridge = new BridgeSerial("COM5");
-        networkBridge.addBridge(serialBridge);
-        networkBridge.connect();
-        
         mappers.addMapper(MIDIEventMapper.defaultMapper((byte)0x01));
         
         //
@@ -76,7 +71,7 @@ public class MoppyControlGUI {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new MainWindow(statusBus, midiSequencer).setVisible(true);
+                new MainWindow(statusBus, midiSequencer, networkBridge).setVisible(true);
             }
         });
     }

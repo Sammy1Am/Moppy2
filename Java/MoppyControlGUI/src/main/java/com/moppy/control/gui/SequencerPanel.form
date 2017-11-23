@@ -198,7 +198,6 @@
               </FontInfo>
             </Property>
             <Property name="text" type="java.lang.String" value="&#x23f5;"/>
-            <Property name="toolTipText" type="java.lang.String" value=""/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[49, 23]"/>
             </Property>

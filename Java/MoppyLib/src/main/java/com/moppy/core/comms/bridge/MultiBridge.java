@@ -83,5 +83,10 @@ public class MultiBridge extends NetworkBridge {
             }
         });
     }
-    
+
+    @Override
+    public String getNetworkIdentifier() {
+        throw new UnsupportedOperationException("MultiBridge doesn't have a network ID");
+    }
+ 
 }
