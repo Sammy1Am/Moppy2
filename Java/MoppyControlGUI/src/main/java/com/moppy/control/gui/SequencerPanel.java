@@ -259,7 +259,7 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                 break;
             case SEQUENCE_END:
                 sequenceSlider.setValue(0);
-                sequenceTotalTimeLabel.setText(String.format(TIME_CODE_FORMAT, 0, 0));
+                sequenceCurrentTimeLabel.setText(String.format(TIME_CODE_FORMAT, 0, 0));
             case SEQUENCE_PAUSE:
                 playButton.setText(BTN_PLAY);
                 sequenceProgressUpdateTimer.stop();
