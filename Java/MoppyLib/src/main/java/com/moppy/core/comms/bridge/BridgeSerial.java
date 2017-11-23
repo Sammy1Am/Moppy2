@@ -12,9 +12,11 @@ import com.moppy.core.comms.NetworkReceivedMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * A Serial connection for Moppy devices.
@@ -27,6 +29,12 @@ public class BridgeSerial extends NetworkBridge {
     public BridgeSerial(String serialPortName) {
         serialPort = SerialPort.getCommPort(serialPortName);
         serialPort.setBaudRate(57600);
+    }
+    
+    public static List<String> getAvailableSerials() {
+        return Arrays.stream(SerialPort.getCommPorts())
+                .map(SerialPort::getSystemPortName)
+                .collect(Collectors.toList());
     }
     
     @Override
@@ -50,12 +58,21 @@ public class BridgeSerial extends NetworkBridge {
 
     @Override
     public void close() throws IOException {
-        serialPort.closePort();
-        // Stop and cleanup listener thread
-        listenerThread.interrupt();
-        listenerThread = null;
+        try {
+            sendMessage(MoppyMessage.SYS_STOP); // Send a stop message before closing to prevent sticking
+        } finally {
+            serialPort.closePort();
+            // Stop and cleanup listener thread
+            listenerThread.interrupt();
+            listenerThread = null;
+        }
     }
-    
+
+    @Override
+    public String getNetworkIdentifier() {
+        return serialPort.getSystemPortName();
+    }
+
     /**
      * Listens to the serial port for MoppyMessages.  Because *all* this 
      * thread does is listen for messages, it's fine to block on serial.read().

@@ -65,7 +65,8 @@ public class BridgeUDP extends NetworkBridge {
     @Override
     public void close() throws IOException {
         try {
-        socket.leaveGroup(groupAddress);
+            sendMessage(MoppyMessage.SYS_STOP); // Send a stop message before closing to prevent sticking
+            socket.leaveGroup(groupAddress);
         } finally {
             // Close socket
             socket.close();
@@ -75,7 +76,12 @@ public class BridgeUDP extends NetworkBridge {
             listenerThread = null;
         }
     }
-    
+
+    @Override
+    public String getNetworkIdentifier() {
+        return String.format("%s:%s", groupAddress.getHostAddress(), MOPPY_PORT);
+    }
+
     private class UDPListener implements Runnable {
 
         private final Consumer<NetworkReceivedMessage> messageConsumer;

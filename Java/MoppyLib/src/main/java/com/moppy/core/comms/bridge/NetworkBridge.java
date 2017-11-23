@@ -25,6 +25,8 @@ public abstract class NetworkBridge implements Closeable {
     
     public abstract void sendMessage(MoppyMessage messageToSend) throws IOException;
     
+    public abstract String getNetworkIdentifier();
+    
     public void registerMessageReceiver(Consumer<NetworkReceivedMessage> messageConsumer) {
         receivers.add(messageConsumer);
     }
