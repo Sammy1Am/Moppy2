@@ -1,4 +1,4 @@
-package com.moppy.control.gui;
+package com.moppy.control.gui.netpanel;
 
 import com.moppy.core.comms.bridge.BridgeUDP;
 import com.moppy.core.comms.bridge.MultiBridge;

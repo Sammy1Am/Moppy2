@@ -2,7 +2,7 @@ package com.moppy.control;
 
 import com.moppy.control.gui.MainWindow;
 import com.moppy.core.comms.bridge.MultiBridge;
-import com.moppy.core.events.mapper.MIDIEventMapper;
+import com.moppy.core.events.mapper.MIDIScriptMapper;
 import com.moppy.core.events.mapper.MapperCollection;
 import com.moppy.core.midi.MoppyMIDIReceiverSender;
 import com.moppy.core.midi.MoppyMIDISequencer;
@@ -22,7 +22,7 @@ public class MoppyControlGUI {
      * @throws javax.sound.midi.MidiUnavailableException
      */
     public static void main(String[] args) throws IOException, MidiUnavailableException {
-        
+
         //
         //// Initialize Moppy System components
         //
@@ -33,7 +33,7 @@ public class MoppyControlGUI {
         final MapperCollection mappers = new MapperCollection();
         final MoppyMIDIReceiverSender receiverSender = new MoppyMIDIReceiverSender(mappers, networkBridge);
         final MoppyMIDISequencer midiSequencer = new MoppyMIDISequencer(statusBus, receiverSender);
-        
+
         // Setup shutdown hook to properly close everything down.
         Runtime.getRuntime().addShutdownHook(new Thread(){
             @Override
@@ -51,17 +51,17 @@ public class MoppyControlGUI {
                 }
             }
         });
-        
+
         //
         //// Load Settings / Defaults
         //
-        
-        mappers.addMapper(MIDIEventMapper.defaultMapper((byte)0x01));
-        
+
+        mappers.addMapper(new MIDIScriptMapper());
+
         //
         //// Initialize and start the UI
         //
-        
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
@@ -71,10 +71,10 @@ public class MoppyControlGUI {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new MainWindow(statusBus, midiSequencer, networkBridge).setVisible(true);
+                new MainWindow(statusBus, midiSequencer, networkBridge, mappers).setVisible(true);
             }
         });
     }
 
-    
+
 }

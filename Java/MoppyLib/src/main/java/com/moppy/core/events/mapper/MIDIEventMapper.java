@@ -2,7 +2,6 @@ package com.moppy.core.events.mapper;
 
 import com.moppy.core.comms.MoppyMessage;
 import com.moppy.core.comms.MoppyMessageFactory;
-import com.moppy.core.status.StatusUpdate;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
 
