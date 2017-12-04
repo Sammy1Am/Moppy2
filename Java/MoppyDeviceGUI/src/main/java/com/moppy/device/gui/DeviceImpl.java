@@ -19,27 +19,27 @@ import java.util.logging.Logger;
  * Sample device implementation.
  */
 public class DeviceImpl extends MoppyDevice implements Closeable {
-    
-    private final byte deviceAddress = 0x01;
+
+    private final byte deviceAddress = 0x02;
     private final byte numberOfDevices = 0x08;
-    
+
     NetworkBridge network;
-    
+
     private final SimFloppyDrive[] simDrives = new SimFloppyDrive[8];
     Synthesizer synth = JSyn.createSynthesizer();
     LineOut lout = new LineOut();
-    
+
     public DeviceImpl() throws UnknownHostException {
         network = new BridgeUDP();
         network.registerMessageReceiver(this::handleMessage);
-        
+
         synth.add(lout);
-        
+
         Pan pan = new Pan();
         pan.pan.set(0.0);
         pan.output.connect(0,lout.input,0);
         pan.output.connect(1,lout.input,1);
-        
+
         for (int d=0;d<8;d++){
             SimFloppyDrive sd = new SimFloppyDrive();
             simDrives[d] = sd;
@@ -47,25 +47,25 @@ public class DeviceImpl extends MoppyDevice implements Closeable {
             sd.so.output.connect(pan.input);
         }
     }
-    
+
     public void connect() throws IOException {
         network.connect();
         synth.start();
         lout.start();
     }
-    
+
     @Override
     public void close() throws IOException {
         network.close();
         lout.stop();
         synth.stop();
     }
-    
+
     @Override
     public boolean matchesAddress(byte deviceAddress, byte subAddress) {
         return deviceAddress == this.deviceAddress && subAddress <= this.numberOfDevices;
     }
-    
+
     // System handlers
 
     @Override
@@ -76,19 +76,19 @@ public class DeviceImpl extends MoppyDevice implements Closeable {
             Logger.getLogger(DeviceImpl.class.getName()).log(Level.WARNING, null, ex);
         }
     }
-    
+
     @Override
     public void systemReset() {
         resetDrives();
     }
 
     // Device handlers
-    
+
     @Override
     public void devicePlayNote(byte deviceAddress, byte subAddress, byte noteNumber) {
         simDrives[subAddress - 1].playFrequency(Notes.FREQUENCIES[noteNumber]);
     }
-    
+
     @Override
     public void deviceStopNote(byte deviceAddress, byte subAddress, byte noteNumber) {
         simDrives[subAddress - 1].stopFrequency();
@@ -98,7 +98,7 @@ public class DeviceImpl extends MoppyDevice implements Closeable {
     public void deviceReset(byte deviceAddress, byte subAddress) {
         resetDrives();
     }
-    
+
     private void resetDrives() {
         for (int d=0;d<8;d++){
             simDrives[d].resetDrive();
