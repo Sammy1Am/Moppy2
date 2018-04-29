@@ -1,10 +1,18 @@
 package com.moppy.control.gui.mapperpanel;
 
+import com.moppy.control.config.MoppyConfig.MIDIScriptMapperConfig;
 import com.moppy.core.events.mapper.MIDIScriptMapper;
+import com.moppy.core.events.mapper.scripts.ConditionScripts;
+import com.moppy.core.events.mapper.scripts.DeviceAddressScripts;
+import com.moppy.core.events.mapper.scripts.NoteScripts;
+import com.moppy.core.events.mapper.scripts.SubAddressScripts;
 import java.awt.Color;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptException;
+import javax.swing.DefaultComboBoxModel;
 
 /**
  *
@@ -14,12 +22,37 @@ public class MapperPanel extends javax.swing.JPanel {
     private final MIDIScriptMapper mapper;
     private final MapperCollectionPanel mapperPanel;
 
+    private static final Map<String, String> CONDITION_MAP = new HashMap<>();
+    private static final Map<String, String> DEVICEADDRESS_MAP = new HashMap<>();
+    private static final Map<String, String> SUBADDRESS_MAP = new HashMap<>();
+    private static final Map<String, String> NOTE_MAP = new HashMap<>();
+
+    static {
+        CONDITION_MAP.put("All Events", ConditionScripts.ALL_EVENTS.toString());
+        CONDITION_MAP.put("Channels 1-4", ConditionScripts.ALL_EVENTS.toString());
+        CONDITION_MAP.put("Only Supported Notes", ConditionScripts.ALL_EVENTS.toString());
+
+        DEVICEADDRESS_MAP.put("Device 1", DeviceAddressScripts.DEVICE_ONE.toString());
+        DEVICEADDRESS_MAP.put("One Device per Channel", DeviceAddressScripts.ONE_DEVICE_PER_CHANNEL.toString());
+
+        SUBADDRESS_MAP.put("Sub Address per Channel", SubAddressScripts.SUB_ADDRESS_PER_CHANNEL.toString());
+
+        NOTE_MAP.put("Force Into Range", NoteScripts.FORCE_INTO_RANGE.toString());
+        NOTE_MAP.put("Ignore out of Range", NoteScripts.IGNORE_OUT_OF_RANGE.toString());
+        NOTE_MAP.put("Straight Through", NoteScripts.STRAIGHT_THROUGH.toString());
+    }
+
     /**
      * Creates new form MapperPanel
      */
-    public MapperPanel(MIDIScriptMapper mapper, MapperCollectionPanel mapperPanel) {
+    public MapperPanel(MIDIScriptMapper mapper, MIDIScriptMapperConfig config, MapperCollectionPanel mapperPanel) {
         this.mapper = mapper;
         this.mapperPanel = mapperPanel;
+
+        CONDITION_MAP.put("Custom", config.getConditionCustomScript());
+        DEVICEADDRESS_MAP.put("Custom", config.getDeviceAddressCustomScript());
+        SUBADDRESS_MAP.put("Custom", config.getSubAddressCustomScript());
+        NOTE_MAP.put("Custom", config.getNoteCustomScript());
 
         initComponents();
         this.setSize(995, 250);
@@ -51,18 +84,22 @@ public class MapperPanel extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         conditionTextArea = new javax.swing.JTextArea();
+        conditionComboBox = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         deviceAddressTextArea = new javax.swing.JTextArea();
+        deviceAddressComboBox = new javax.swing.JComboBox<>();
         jPanel3 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jScrollPane4 = new javax.swing.JScrollPane();
         subAddressTextArea = new javax.swing.JTextArea();
+        subAddressComboBox = new javax.swing.JComboBox<>();
         jPanel4 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         jScrollPane5 = new javax.swing.JScrollPane();
         noteTextArea = new javax.swing.JTextArea();
+        noteComboBox = new javax.swing.JComboBox<>();
 
         setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(102, 102, 102)));
         setMaximumSize(new java.awt.Dimension(32767, 165));
@@ -119,6 +156,13 @@ public class MapperPanel extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(conditionTextArea);
 
+        conditionComboBox.setModel(new DefaultComboBoxModel(CONDITION_MAP.keySet().toArray()));
+        conditionComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                conditionComboBoxActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -126,17 +170,20 @@ public class MapperPanel extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(conditionComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(0, 0, 0)
-                .addComponent(jLabel1)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(conditionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1)
                 .addContainerGap())
@@ -161,6 +208,8 @@ public class MapperPanel extends javax.swing.JPanel {
         });
         jScrollPane3.setViewportView(deviceAddressTextArea);
 
+        deviceAddressComboBox.setModel(new DefaultComboBoxModel(DEVICEADDRESS_MAP.keySet().toArray()));
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -168,17 +217,20 @@ public class MapperPanel extends javax.swing.JPanel {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane3)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel2)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(deviceAddressComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(0, 0, 0)
-                .addComponent(jLabel2)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(deviceAddressComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane3)
                 .addContainerGap())
@@ -203,6 +255,8 @@ public class MapperPanel extends javax.swing.JPanel {
         });
         jScrollPane4.setViewportView(subAddressTextArea);
 
+        subAddressComboBox.setModel(new DefaultComboBoxModel(SUBADDRESS_MAP.keySet().toArray()));
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -210,17 +264,20 @@ public class MapperPanel extends javax.swing.JPanel {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane4)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel3)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(subAddressComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(0, 0, 0)
-                .addComponent(jLabel3)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(subAddressComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane4)
                 .addContainerGap())
@@ -245,6 +302,8 @@ public class MapperPanel extends javax.swing.JPanel {
         });
         jScrollPane5.setViewportView(noteTextArea);
 
+        noteComboBox.setModel(new DefaultComboBoxModel(NOTE_MAP.keySet().toArray()));
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -252,19 +311,21 @@ public class MapperPanel extends javax.swing.JPanel {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(jScrollPane5)
-                        .addContainerGap())
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel4)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(noteComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGap(0, 0, 0)
-                .addComponent(jLabel4)
-                .addGap(7, 7, 7)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(noteComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(4, 4, 4)
                 .addComponent(jScrollPane5)
                 .addContainerGap())
         );
@@ -321,10 +382,16 @@ public class MapperPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_noteTextAreaFocusLost
 
+    private void conditionComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_conditionComboBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_conditionComboBoxActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> conditionComboBox;
     private javax.swing.JTextArea conditionTextArea;
     private javax.swing.JButton deleteMapperButton;
+    private javax.swing.JComboBox<String> deviceAddressComboBox;
     private javax.swing.JTextArea deviceAddressTextArea;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -339,7 +406,9 @@ public class MapperPanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JComboBox<String> noteComboBox;
     private javax.swing.JTextArea noteTextArea;
+    private javax.swing.JComboBox<String> subAddressComboBox;
     private javax.swing.JTextArea subAddressTextArea;
     // End of variables declaration//GEN-END:variables
 }
