@@ -1,9 +1,9 @@
-#include "MoppySerial.h"
-#include <TimerOne.h>
-
-// Uncomment the appropriate networking class for your setup
-MoppySerial network = MoppySerial(&sysMessage, &devMessage);
-// MoppyUDP network = TODO...
+/*
+ * FloppyDrives.cpp
+ *
+ * Output for controlling floppy drives.  The _original_ Moppy instrument!
+ */
+#include "../MoppyInstruments/FloppyDrives.h"
 
 // First drive being used for floppies, and the last drive.  Used for calculating
 // step and direction pins.
@@ -35,11 +35,11 @@ unsigned int notePeriods[128] = {
  * version of Moppy, we *will* be doing math to calculate which drive maps to which pin,
  * so there are as many values as drives (plus the extra zero-index)
  */
- 
+
  /*An array of maximum track positions for each floppy drive.  3.5" Floppies have
  80 tracks, 5.25" have 50.  These should be doubled, because each tick is now
  half a position (use 158 and 98).
- NOTE: Index zero of this array controls the "resetAll" function, and should be the 
+ NOTE: Index zero of this array controls the "resetAll" function, and should be the
  same as the largest value in this array
  */
 unsigned int MAX_POSITION[] = {158,158,158,158,158,158,158,158,158,158};
@@ -61,14 +61,14 @@ unsigned int currentTick[] = {0,0,0,0,0,0,0,0,0,0};
 
 //unsigned int microsToTicks(unsigned int m) { return m/(RESOLUTION*2); } // RESOLUTION * 2 because we need two ticks for one step
 
-void setup() {
+void FloppyDrives::setup() {
   // Create a noteTicks array that contains the resolved tick-ammount based on resolution and
   // microsecond periods
   //transform(MICRO_PERIODS, MICRO_PERIODS+128, noteTicks, microsToTicks);
   for (int i=0;i<128;i++){
     notePeriods[i] = notePeriods[i]/(RESOLUTION*2); // RESOLUTION * 2 because we need two ticks for one step
   }
-  
+
   // Prepare pins (0 and 1 are reserved for Serial communications)
   pinMode(2, OUTPUT); // Step control 1
   pinMode(3, OUTPUT); // Direction 1
@@ -97,51 +97,44 @@ void setup() {
   Timer1.initialize(RESOLUTION); // Set up a timer at the defined resolution
   Timer1.attachInterrupt(tick); // Attach the tick function
 
-  // Start receiving messages
-  network.begin();
-}
 
-void loop() {
-  network.readMessages();
 }
 
 //
 //// Message Handlers
 //
 
-void sysMessage(uint8_t command, uint8_t payload[]) {
+void FloppyDrives::systemMessage(uint8_t command, uint8_t payload[]) {
   switch(command) {
-    case 0x80: // Ping request
-      network.sendPong();
-      break;
-    case 0x82: // System reset
+      // NETBYTE_SYS_PING is handled by the network adapter directly
+    case NETBYTE_SYS_RESET: // System reset
       resetAll();
       break;
-    case 0x83: // Sequence start
+    case NETBYTE_SYS_START: // Sequence start
       // Nothing to do here yet
       break;
-    case 0x84: // Sequence stop
+    case NETBYTE_SYS_STOP: // Sequence stop
       haltAllDrives();
       break;
   }
 }
 
-void devMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
+void FloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
   switch(command) {
-    case 0x00: // Reset
+    case NETBYTE_DEV_RESET: // Reset
       if (subAddress == 0x00) {
         resetAll();
       } else {
         reset(subAddress);
       }
       break;
-    case 0x01: // Note On
+    case NETBYTE_DEV_NOTEON: // Note On
       currentPeriod[subAddress] = notePeriods[payload[0]];
       break;
-    case 0x02: // Note Off
+    case NETBYTE_DEV_NOTEOFF: // Note Off
       currentPeriod[subAddress] = 0;
       break;
-    case 0x03: //Pitch bend
+    case NETBYTE_DEV_BENDPITCH: //Pitch bend
       // TODO
       break;
   }
@@ -155,9 +148,9 @@ void devMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
 Called by the timer interrupt at the specified resolution.  Because this is called extremely often,
 it's crucial that any computations here be kept to a minimum!
  */
-void tick()
+void FloppyDrives::tick()
 {
-  /* 
+  /*
    If there is a period set for control pin 2, count the number of
    ticks that pass, and toggle the pin if the current period is reached.
    */
@@ -226,13 +219,13 @@ void tick()
   }
 }
 
-void togglePin(byte driveNum, byte pin, byte direction_pin) {
+void FloppyDrives::togglePin(byte driveNum, byte pin, byte direction_pin) {
 
   //Switch directions if end has been reached
   if (currentPosition[driveNum] >= MAX_POSITION[driveNum]) {
     currentState[direction_pin] = HIGH;
     digitalWrite(direction_pin,HIGH);
-  } 
+  }
   else if (currentPosition[driveNum] <= 0) {
     currentState[direction_pin] = LOW;
     digitalWrite(direction_pin,LOW);
@@ -241,7 +234,7 @@ void togglePin(byte driveNum, byte pin, byte direction_pin) {
   //Update currentPosition
   if (currentState[direction_pin] == HIGH){
     currentPosition[driveNum]--;
-  } 
+  }
   else {
     currentPosition[driveNum]++;
   }
@@ -257,24 +250,24 @@ void togglePin(byte driveNum, byte pin, byte direction_pin) {
 //
 
 //Not used now, but good for debugging...
-void blinkLED(){
+void FloppyDrives::blinkLED(){
   digitalWrite(13, HIGH); // set the LED on
   delay(250);              // wait for a second
-  digitalWrite(13, LOW); 
+  digitalWrite(13, LOW);
 }
 
 // Immediately stops all drives
-void haltAllDrives() {
+void FloppyDrives::haltAllDrives() {
   for (byte d=FIRST_DRIVE;d<=LAST_DRIVE;d++) {
     currentPeriod[d] = 0;
   }
 }
 
 //For a given floppy number, runs the read-head all the way back to 0
-void reset(byte driveNum)
+void FloppyDrives::reset(byte driveNum)
 {
   currentPeriod[driveNum] = 0; // Stop note
-  
+
   byte stepPin = driveNum * 2;
   digitalWrite(stepPin+1,HIGH); // Go in reverse
   for (unsigned int s=0;s<MAX_POSITION[driveNum];s+=2){ //Half max because we're stepping directly (no toggle)
@@ -289,14 +282,14 @@ void reset(byte driveNum)
 }
 
 // Resets all the drives simultaneously
-void resetAll()
+void FloppyDrives::resetAll()
 {
 
   // Stop all drives and set to reverse
   for (byte d=FIRST_DRIVE;d<=LAST_DRIVE;d++) {
     byte stepPin = d * 2;
     currentPeriod[d] = 0;
-    digitalWrite(stepPin+1,HIGH); 
+    digitalWrite(stepPin+1,HIGH);
   }
 
   // Reset all drives together
@@ -318,4 +311,3 @@ void resetAll()
     currentState[stepPin+1] = LOW; // Ready to go forward.
   }
 }
-
