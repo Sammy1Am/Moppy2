@@ -1,4 +1,4 @@
-#include "MoppySerial.h"
+#include "../MoppyNetworks/MoppySerial.h"
 
 /*
  * Serial communications implementation for Arduino.  Handler
@@ -18,7 +18,7 @@ void MoppySerial::begin(long baud) {
 /* MoppyMessages contain the following bytes:
  *  0    - START_BYTE (always 0x4d)
  *  1    - Device address (0x00 for system-wide messages)
- *  2    - Sub address (Only for non-system messages)
+ *  2    - Sub address (Ignored for system-wide messages)
  *  3    - Size of message body (number of bytes following this one)
  *  4    - Command byte
  *  5... - Optional payload
@@ -76,7 +76,11 @@ void MoppySerial::readMessages() {
 
         // Call appropriate handler
         if (messageBuffer[1] == SYSTEM_ADDRESS) {
-          systemHandler(messageBuffer[4], &messageBuffer[5]);
+          if (messageBuffer[4] == NETBYTE_SYS_PING) {
+        	  sendPong(); // Respond with pong if requested
+          } else {
+        	  systemHandler(messageBuffer[4], &messageBuffer[5]);
+          }
         } else {
           deviceHandler(messageBuffer[2], messageBuffer[4], &messageBuffer[5]);
         }
