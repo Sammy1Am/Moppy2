@@ -25,24 +25,24 @@ public class BridgeSerial extends NetworkBridge {
 
     private final SerialPort serialPort;
     private Thread listenerThread = null;
-    
+
     public BridgeSerial(String serialPortName) {
         serialPort = SerialPort.getCommPort(serialPortName);
         serialPort.setBaudRate(57600);
     }
-    
+
     public static List<String> getAvailableSerials() {
         return Arrays.stream(SerialPort.getCommPorts())
                 .map(SerialPort::getSystemPortName)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public void connect() throws IOException {
         if (!serialPort.openPort()) {
             throw new IOException("Failed to open serialPort!");
         }
-        
+
         // Create and start listener thread
         SerialListener listener = new SerialListener(serialPort, this::messageToReceivers);
         listenerThread = new Thread(listener);
@@ -74,43 +74,38 @@ public class BridgeSerial extends NetworkBridge {
     }
 
     /**
-     * Listens to the serial port for MoppyMessages.  Because *all* this 
+     * Listens to the serial port for MoppyMessages.  Because *all* this
      * thread does is listen for messages, it's fine to block on serial.read().
      */
     private class SerialListener implements Runnable {
 
         private final SerialPort serialPort;
         private final Consumer<NetworkReceivedMessage> messageConsumer;
-        
+
         public SerialListener(SerialPort serialPort, Consumer<NetworkReceivedMessage> messageConsumer) {
             this.serialPort = serialPort;
             this.messageConsumer = messageConsumer;
         }
-        
+
         @Override
         public void run() {
-            
+
             // MoppyMessages can't be longer than 259 bytes (SOM, DEVADDR, SUBADDR, LEN, [0-255 body bytes])
             // Longer messages will be truncated, but we don't care about them anyway
             byte[] buffer = new byte[259];
             buffer[0] = MoppyMessage.START_BYTE; // We'll be eating the start byte below, so make sure it's here
             int totalMessageLength = 1;
-            
+
             try (InputStream serialIn = serialPort.getInputStream()) {
                 while (serialPort.isOpen() && !Thread.interrupted()) {
                     // Keep reading until we get a START_BYTE
                     if (serialIn.read() == MoppyMessage.START_BYTE) {
-                        buffer[1] = (byte)serialIn.read();
-                        if (buffer[1] == MoppyMessage.SYSTEM_ADDRESS) {
-                            buffer[2] = (byte)serialIn.read(); // Get body size
-                            serialIn.read(buffer, 3, buffer[2]); // Read body into buffer
-                            totalMessageLength = 3 + buffer[2];
-                        } else {
-                            buffer[2] = (byte)serialIn.read(); // Get Sub-Address
-                            buffer[3] = (byte)serialIn.read(); // Get body size
-                            serialIn.read(buffer, 4, buffer[3]); // Read body into buffer
-                            totalMessageLength = 4 + buffer[3];
-                        }
+                        buffer[1] = (byte)serialIn.read(); // Get Address
+                        buffer[2] = (byte)serialIn.read(); // Get Sub-Address
+                        buffer[3] = (byte)serialIn.read(); // Get body size
+                        serialIn.read(buffer, 4, buffer[3]); // Read body into buffer
+                        totalMessageLength = 4 + buffer[3];
+
                         messageConsumer.accept(MoppyMessageFactory.networkReceivedFromBytes(
                                 Arrays.copyOf(buffer, totalMessageLength),
                                 BridgeSerial.class.getName(),
@@ -122,6 +117,6 @@ public class BridgeSerial extends NetworkBridge {
                 Logger.getLogger(BridgeSerial.class.getName()).log(Level.WARNING, null, ex);
             }
         }
-        
+
     }
 }

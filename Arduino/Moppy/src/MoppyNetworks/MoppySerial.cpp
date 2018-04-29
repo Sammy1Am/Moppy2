@@ -41,9 +41,9 @@ void MoppySerial::readMessages() {
         break;
       case 1:
         messageBuffer[1] = Serial.read(); // Read device address
-        
+
         if (messageBuffer[1] == SYSTEM_ADDRESS) {
-          messagePos = 3; // System messages have no subAddress, skip to body size
+          messagePos = 2; // System messages are for everyone, move to subAddress
           break;
         }
 
