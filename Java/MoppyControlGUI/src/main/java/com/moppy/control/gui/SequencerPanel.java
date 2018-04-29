@@ -64,7 +64,7 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
         stopButton = new javax.swing.JButton();
         playButton = new javax.swing.JButton();
 
-        sequenceFileChooser.setCurrentDirectory(new File(MoppyPreferences.getString(MoppyPreferences.LOAD_FILE_DIR, ".")));
+        sequenceFileChooser.setCurrentDirectory(new File(MoppyPreferences.getConfiguration().getFileLoadDirectory()));
         sequenceFileChooser.setDialogTitle("Select MIDI File");
         sequenceFileChooser.setFileFilter(new FileNameExtensionFilter("MIDI Files", "mid"));
 
@@ -191,7 +191,8 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                 File selectedFile = sequenceFileChooser.getSelectedFile();
                 midiSequencer.loadSequence(selectedFile);
                 fileNameLabel.setText(selectedFile.getName());
-                MoppyPreferences.setString(MoppyPreferences.LOAD_FILE_DIR, selectedFile.getParentFile().getAbsolutePath());
+                MoppyPreferences.getConfiguration().setFileLoadDirectory(selectedFile.getParentFile().getAbsolutePath());
+                MoppyPreferences.saveConfiguration();
             } catch (IOException | InvalidMidiDataException ex) {
                 Logger.getLogger(SequencerPanel.class.getName()).log(Level.WARNING, null, ex);
             }

@@ -1,10 +1,12 @@
 package com.moppy.control.gui.mapperpanel;
 
+import com.moppy.control.config.MoppyConfig.MIDIScriptMapperConfig;
 import com.moppy.core.events.mapper.MIDIScriptMapper;
 import com.moppy.core.events.mapper.MapperCollection;
 import com.moppy.core.status.StatusConsumer;
 import com.moppy.core.status.StatusUpdate;
 import java.util.Arrays;
+import java.util.List;
 import javax.sound.midi.MidiMessage;
 
 /**
@@ -23,17 +25,32 @@ public class MapperCollectionPanel extends javax.swing.JPanel implements StatusC
 
     public void initMapperCollectionPanel(MapperCollection<MidiMessage> mappers) {
         this.mappers = mappers;
-        mappers.getMappers().stream().forEach(mapper -> {
-            if (mapper instanceof MIDIScriptMapper) {
-                this.add(new MapperPanel((MIDIScriptMapper)mapper, this));
-            }
+//        mappers.getMappers().stream().forEach(mapper -> {
+//            if (mapper instanceof MIDIScriptMapper) {
+//                this.add(new MapperPanel((MIDIScriptMapper)mapper, this));
+//            }
+//        });
+    }
+
+    /*
+    * Loads mappers as defined in config file, overwriting any existing mappers.
+    */
+    public void loadMappersFromConfig(List<MIDIScriptMapperConfig> configList) {
+        mappers.clearMappers();
+
+        configList.stream().forEach(config -> {
+            MIDIScriptMapper newMapper = new MIDIScriptMapper();
+            MapperPanel newPanel = new MapperPanel(newMapper, config, this);
+            this.add(newPanel);
         });
+        this.revalidate();
+        this.repaint();
     }
 
     private void addNewMapper() {
         MIDIScriptMapper newMapper = new MIDIScriptMapper();
         mappers.addMapper(newMapper);
-        this.add(new MapperPanel(newMapper, this));
+        this.add(new MapperPanel(newMapper, new MIDIScriptMapperConfig(), this));
         this.revalidate();
         this.repaint();
     }

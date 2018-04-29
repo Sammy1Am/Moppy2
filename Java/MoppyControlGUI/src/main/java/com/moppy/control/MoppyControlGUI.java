@@ -2,7 +2,6 @@ package com.moppy.control;
 
 import com.moppy.control.gui.MainWindow;
 import com.moppy.core.comms.bridge.MultiBridge;
-import com.moppy.core.events.mapper.MIDIScriptMapper;
 import com.moppy.core.events.mapper.MapperCollection;
 import com.moppy.core.midi.MoppyMIDIReceiverSender;
 import com.moppy.core.midi.MoppyMIDISequencer;
@@ -56,7 +55,7 @@ public class MoppyControlGUI {
         //// Load Settings / Defaults
         //
 
-        mappers.addMapper(new MIDIScriptMapper());
+        //mappers.addMapper(new MIDIScriptMapper());
 
         //
         //// Initialize and start the UI

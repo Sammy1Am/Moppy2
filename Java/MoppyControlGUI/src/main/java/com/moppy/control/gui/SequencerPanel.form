@@ -5,7 +5,7 @@
     <Component class="javax.swing.JFileChooser" name="sequenceFileChooser">
       <Properties>
         <Property name="currentDirectory" type="java.io.File" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="new File(MoppyPreferences.getString(MoppyPreferences.LOAD_FILE_DIR, &quot;.&quot;))" type="code"/>
+          <Connection code="new File(MoppyPreferences.getConfiguration().getFileLoadDirectory())" type="code"/>
         </Property>
         <Property name="dialogTitle" type="java.lang.String" value="Select MIDI File"/>
         <Property name="fileFilter" type="javax.swing.filechooser.FileFilter" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
