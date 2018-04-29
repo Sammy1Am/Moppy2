@@ -14,17 +14,18 @@ public class MoppyMessage {
     public static final byte SYSTEM_ADDRESS = (byte)0x00;
 
     public static final MoppyMessage SYS_PING = new MoppyMessage(new byte[]{
-        START_BYTE,           // Start byte
-        SYSTEM_ADDRESS,           // System address
-        0x01,           // Message body size
-        CommandByte.SYS_PING});   // Ping command
-    public static final MoppyMessage SYS_RESET = new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x01, CommandByte.SYS_RESET});
-    public static final MoppyMessage SYS_START = new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x01, CommandByte.SYS_START});
-    public static final MoppyMessage SYS_STOP = new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x01, CommandByte.SYS_STOP});
+        START_BYTE,             // Start byte
+        SYSTEM_ADDRESS,         // System address
+        0x00,                   // Ignored device address
+        0x01,                   // Message body size
+        CommandByte.SYS_PING}); // Ping command
+    public static final MoppyMessage SYS_RESET = new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x00, 0x01, CommandByte.SYS_RESET});
+    public static final MoppyMessage SYS_START = new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x00, 0x01, CommandByte.SYS_START});
+    public static final MoppyMessage SYS_STOP = new MoppyMessage(new byte[]{START_BYTE, SYSTEM_ADDRESS, 0x00, 0x01, CommandByte.SYS_STOP});
 
 
     protected MoppyMessage(byte[] messageBytes) {
-        if (messageBytes.length < 4) {
+        if (messageBytes.length < 5) {
             throw new IllegalArgumentException("Not enough bytes for a MoppyMessage!");
         }
 
@@ -65,9 +66,8 @@ public class MoppyMessage {
     }
 
     public byte[] getMessageBody() {
-        int bodyLength = isSystemMessage() ? messageBytes[2] : messageBytes[3];
-        int bodyStart = isSystemMessage() ? 3 : 4;
-        return Arrays.copyOfRange(messageBytes, bodyStart, bodyStart + bodyLength);
+        int bodyLength = messageBytes[3];
+        return Arrays.copyOfRange(messageBytes, 4, 4 + bodyLength);
     }
 
     public byte getMessageCommandByte() {
