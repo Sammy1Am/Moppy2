@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptException;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JTextArea;
 
 /**
  *
@@ -21,6 +22,7 @@ public class MapperPanel extends javax.swing.JPanel {
 
     private final MIDIScriptMapper mapper;
     private final MapperCollectionPanel mapperPanel;
+    private final MIDIScriptMapperConfig mapperConfig;
 
     private static final Map<String, String> CONDITION_MAP = new HashMap<>();
     private static final Map<String, String> DEVICEADDRESS_MAP = new HashMap<>();
@@ -29,44 +31,73 @@ public class MapperPanel extends javax.swing.JPanel {
 
     static {
         CONDITION_MAP.put("All Events", ConditionScripts.ALL_EVENTS.toString());
-        CONDITION_MAP.put("Channels 1-4", ConditionScripts.ALL_EVENTS.toString());
-        CONDITION_MAP.put("Only Supported Notes", ConditionScripts.ALL_EVENTS.toString());
+        CONDITION_MAP.put("Channels 1-4", ConditionScripts.CHANNELS_ONE_TO_FOUR.toString());
+        CONDITION_MAP.put("Only Supported Notes", ConditionScripts.ONLY_SUPPORTED_NOTES.toString());
+        CONDITION_MAP.put("Custom", "");
 
         DEVICEADDRESS_MAP.put("Device 1", DeviceAddressScripts.DEVICE_ONE.toString());
         DEVICEADDRESS_MAP.put("One Device per Channel", DeviceAddressScripts.ONE_DEVICE_PER_CHANNEL.toString());
+        DEVICEADDRESS_MAP.put("Custom", "");
 
         SUBADDRESS_MAP.put("Sub Address per Channel", SubAddressScripts.SUB_ADDRESS_PER_CHANNEL.toString());
+        SUBADDRESS_MAP.put("Custom", "");
 
         NOTE_MAP.put("Force Into Range", NoteScripts.FORCE_INTO_RANGE.toString());
         NOTE_MAP.put("Ignore out of Range", NoteScripts.IGNORE_OUT_OF_RANGE.toString());
         NOTE_MAP.put("Straight Through", NoteScripts.STRAIGHT_THROUGH.toString());
+        NOTE_MAP.put("Custom", "");
     }
 
     /**
      * Creates new form MapperPanel
      */
     public MapperPanel(MIDIScriptMapper mapper, MIDIScriptMapperConfig config, MapperCollectionPanel mapperPanel) {
+        this.mapperConfig = config;
         this.mapper = mapper;
         this.mapperPanel = mapperPanel;
 
-        CONDITION_MAP.put("Custom", config.getConditionCustomScript());
-        DEVICEADDRESS_MAP.put("Custom", config.getDeviceAddressCustomScript());
-        SUBADDRESS_MAP.put("Custom", config.getSubAddressCustomScript());
-        NOTE_MAP.put("Custom", config.getNoteCustomScript());
-
         initComponents();
         this.setSize(995, 250);
+
+        conditionComboBox.setSelectedItem(mapperConfig.getConditionChoice());
+        deviceAddressComboBox.setSelectedItem(mapperConfig.getDeviceAddressChoice());
+        subAddressComboBox.setSelectedItem(mapperConfig.getSubAddressChoice());
+        noteComboBox.setSelectedItem(mapperConfig.getNoteChoice());
     }
 
     public MIDIScriptMapper getMapper() {
         return mapper;
     }
 
+    public MIDIScriptMapperConfig getMapperConfig() {
+        return mapperConfig;
+    }
+
+    private void saveToConfig() {
+        mapperConfig.setConditionChoice(conditionComboBox.getSelectedItem().toString());
+        mapperConfig.setConditionCustomScript(conditionTextArea.getText());
+        mapperConfig.setDeviceAddressChoice(deviceAddressComboBox.getSelectedItem().toString());
+        mapperConfig.setDeviceAddressCustomScript(deviceAddressTextArea.getText());
+        mapperConfig.setSubAddressChoice(subAddressComboBox.getSelectedItem().toString());
+        mapperConfig.setSubAddressCustomScript(subAddressTextArea.getText());
+        mapperConfig.setNoteChoice(noteComboBox.getSelectedItem().toString());
+        mapperConfig.setNoteCustomScript(noteTextArea.getText());
+        mapperPanel.saveMappersToConfig();
+    }
+
     public void enableEditing(boolean enable) {
         conditionTextArea.setEditable(enable);
+        conditionComboBox.setEnabled(enable);
+
         deviceAddressTextArea.setEditable(enable);
+        deviceAddressComboBox.setEnabled(enable);
+
         subAddressTextArea.setEditable(enable);
+        subAddressComboBox.setEnabled(enable);
+
         noteTextArea.setEditable(enable);
+        noteComboBox.setEnabled(enable);
+
         deleteMapperButton.setEnabled(enable);
     }
 
@@ -209,6 +240,11 @@ public class MapperPanel extends javax.swing.JPanel {
         jScrollPane3.setViewportView(deviceAddressTextArea);
 
         deviceAddressComboBox.setModel(new DefaultComboBoxModel(DEVICEADDRESS_MAP.keySet().toArray()));
+        deviceAddressComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deviceAddressComboBoxActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -256,6 +292,11 @@ public class MapperPanel extends javax.swing.JPanel {
         jScrollPane4.setViewportView(subAddressTextArea);
 
         subAddressComboBox.setModel(new DefaultComboBoxModel(SUBADDRESS_MAP.keySet().toArray()));
+        subAddressComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                subAddressComboBoxActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -303,6 +344,11 @@ public class MapperPanel extends javax.swing.JPanel {
         jScrollPane5.setViewportView(noteTextArea);
 
         noteComboBox.setModel(new DefaultComboBoxModel(NOTE_MAP.keySet().toArray()));
+        noteComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                noteComboBoxActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -345,6 +391,7 @@ public class MapperPanel extends javax.swing.JPanel {
     private void conditionTextAreaFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_conditionTextAreaFocusLost
         try {
             mapper.setConditionScript(conditionTextArea.getText());
+            saveToConfig();
             conditionTextArea.setForeground(Color.BLACK);
         } catch (ScriptException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
@@ -355,6 +402,7 @@ public class MapperPanel extends javax.swing.JPanel {
     private void deviceAddressTextAreaFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_deviceAddressTextAreaFocusLost
         try {
             mapper.setDeviceAddressScript(deviceAddressTextArea.getText());
+            saveToConfig();
             deviceAddressTextArea.setForeground(Color.BLACK);
         } catch (ScriptException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
@@ -365,6 +413,7 @@ public class MapperPanel extends javax.swing.JPanel {
     private void subAddressTextAreaFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_subAddressTextAreaFocusLost
         try {
             mapper.setSubAddressScript(subAddressTextArea.getText());
+            saveToConfig();
             subAddressTextArea.setForeground(Color.BLACK);
         } catch (ScriptException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
@@ -375,6 +424,7 @@ public class MapperPanel extends javax.swing.JPanel {
     private void noteTextAreaFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_noteTextAreaFocusLost
         try {
             mapper.setNoteScript(noteTextArea.getText());
+            saveToConfig();
             noteTextArea.setForeground(Color.BLACK);
         } catch (ScriptException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
@@ -382,9 +432,74 @@ public class MapperPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_noteTextAreaFocusLost
 
+    private void setTextAreaEditable(JTextArea textArea, boolean enabled) {
+        textArea.setEditable(enabled);
+        textArea.setBackground(enabled ? Color.WHITE : Color.LIGHT_GRAY);
+    }
+
     private void conditionComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_conditionComboBoxActionPerformed
-        // TODO add your handling code here:
+        if (conditionComboBox.getSelectedItem().equals("Custom")) {
+            conditionTextArea.setText(mapperConfig.getConditionCustomScript());
+            setTextAreaEditable(conditionTextArea, true);
+        } else {
+            setTextAreaEditable(conditionTextArea, false);
+            conditionTextArea.setText(CONDITION_MAP.get(conditionComboBox.getSelectedItem().toString()));
+        }
+        try {
+            mapper.setConditionScript(conditionTextArea.getText());
+        } catch (ScriptException ex) {
+            Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
+            noteTextArea.setForeground(Color.RED);
+        }
     }//GEN-LAST:event_conditionComboBoxActionPerformed
+
+    private void deviceAddressComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deviceAddressComboBoxActionPerformed
+        if (deviceAddressComboBox.getSelectedItem().equals("Custom")) {
+            deviceAddressTextArea.setText(mapperConfig.getDeviceAddressCustomScript());
+            setTextAreaEditable(deviceAddressTextArea, true);
+        } else {
+            setTextAreaEditable(deviceAddressTextArea, false);
+            deviceAddressTextArea.setText(DEVICEADDRESS_MAP.get(deviceAddressComboBox.getSelectedItem().toString()));
+        }
+        try {
+            mapper.setDeviceAddressScript(deviceAddressTextArea.getText());
+        } catch (ScriptException ex) {
+            Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
+            noteTextArea.setForeground(Color.RED);
+        }
+    }//GEN-LAST:event_deviceAddressComboBoxActionPerformed
+
+    private void subAddressComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_subAddressComboBoxActionPerformed
+        if (subAddressComboBox.getSelectedItem().equals("Custom")) {
+            subAddressTextArea.setText(mapperConfig.getSubAddressCustomScript());
+            setTextAreaEditable(subAddressTextArea, true);
+        } else {
+            setTextAreaEditable(subAddressTextArea, false);
+            subAddressTextArea.setText(SUBADDRESS_MAP.get(subAddressComboBox.getSelectedItem().toString()));
+        }
+        try {
+            mapper.setSubAddressScript(subAddressTextArea.getText());
+        } catch (ScriptException ex) {
+            Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
+            noteTextArea.setForeground(Color.RED);
+        }
+    }//GEN-LAST:event_subAddressComboBoxActionPerformed
+
+    private void noteComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_noteComboBoxActionPerformed
+        if (noteComboBox.getSelectedItem().equals("Custom")) {
+            noteTextArea.setText(mapperConfig.getNoteCustomScript());
+            setTextAreaEditable(noteTextArea, true);
+        } else {
+            setTextAreaEditable(noteTextArea, false);
+            noteTextArea.setText(NOTE_MAP.get(noteComboBox.getSelectedItem().toString()));
+        }
+        try {
+            mapper.setNoteScript(noteTextArea.getText());
+        } catch (ScriptException ex) {
+            Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
+            noteTextArea.setForeground(Color.RED);
+        }
+    }//GEN-LAST:event_noteComboBoxActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

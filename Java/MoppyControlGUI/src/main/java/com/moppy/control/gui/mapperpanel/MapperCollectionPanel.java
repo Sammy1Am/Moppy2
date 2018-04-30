@@ -1,5 +1,6 @@
 package com.moppy.control.gui.mapperpanel;
 
+import com.moppy.control.MoppyPreferences;
 import com.moppy.control.config.MoppyConfig.MIDIScriptMapperConfig;
 import com.moppy.core.events.mapper.MIDIScriptMapper;
 import com.moppy.core.events.mapper.MapperCollection;
@@ -7,6 +8,8 @@ import com.moppy.core.status.StatusConsumer;
 import com.moppy.core.status.StatusUpdate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.sound.midi.MidiMessage;
 
 /**
@@ -25,11 +28,7 @@ public class MapperCollectionPanel extends javax.swing.JPanel implements StatusC
 
     public void initMapperCollectionPanel(MapperCollection<MidiMessage> mappers) {
         this.mappers = mappers;
-//        mappers.getMappers().stream().forEach(mapper -> {
-//            if (mapper instanceof MIDIScriptMapper) {
-//                this.add(new MapperPanel((MIDIScriptMapper)mapper, this));
-//            }
-//        });
+        loadMappersFromConfig(MoppyPreferences.getConfiguration().getMapperConfigs());
     }
 
     /*
@@ -39,20 +38,30 @@ public class MapperCollectionPanel extends javax.swing.JPanel implements StatusC
         mappers.clearMappers();
 
         configList.stream().forEach(config -> {
-            MIDIScriptMapper newMapper = new MIDIScriptMapper();
-            MapperPanel newPanel = new MapperPanel(newMapper, config, this);
-            this.add(newPanel);
+            addNewMapper(config);
         });
+    }
+
+    public void saveMappersToConfig() {
+        List<MIDIScriptMapperConfig> configList = Stream.of(this.getComponents())
+                .filter(c -> c instanceof MapperPanel)
+                .map(mp -> {return ((MapperPanel)mp).getMapperConfig();})
+                .collect(Collectors.toList());
+
+        MoppyPreferences.getConfiguration().setMapperConfigs(configList);
+        MoppyPreferences.saveConfiguration();
+    }
+
+    private void addNewMapper(MIDIScriptMapperConfig mapperConfig) {
+        MIDIScriptMapper newMapper = new MIDIScriptMapper();
+        mappers.addMapper(newMapper);
+        this.add(new MapperPanel(newMapper, mapperConfig, this));
         this.revalidate();
         this.repaint();
     }
 
     private void addNewMapper() {
-        MIDIScriptMapper newMapper = new MIDIScriptMapper();
-        mappers.addMapper(newMapper);
-        this.add(new MapperPanel(newMapper, new MIDIScriptMapperConfig(), this));
-        this.revalidate();
-        this.repaint();
+        addNewMapper(new MIDIScriptMapperConfig());
     }
 
     protected void removeMapper(MapperPanel panelBeingRemoved) {
@@ -101,6 +110,7 @@ public class MapperCollectionPanel extends javax.swing.JPanel implements StatusC
         switch (update.getType()) {
             case SEQUENCE_START:
                 enableMapperEditing(false);
+                saveMappersToConfig(); // TODO: This might be a slightly awkward place to save configs, but it'll do for now.
                 break;
             case SEQUENCE_END:
             case SEQUENCE_PAUSE:
