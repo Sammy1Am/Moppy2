@@ -30,21 +30,21 @@ public class MapperPanel extends javax.swing.JPanel {
     private static final Map<String, String> NOTE_MAP = new HashMap<>();
 
     static {
-        CONDITION_MAP.put("All Events", ConditionScripts.ALL_EVENTS.toString());
-        CONDITION_MAP.put("Channels 1-4", ConditionScripts.CHANNELS_ONE_TO_FOUR.toString());
-        CONDITION_MAP.put("Only Supported Notes", ConditionScripts.ONLY_SUPPORTED_NOTES.toString());
+        CONDITION_MAP.put(ConditionScripts.ALL_EVENTS.displayName(), ConditionScripts.ALL_EVENTS.toString());
+        CONDITION_MAP.put(ConditionScripts.CHANNELS_ONE_TO_FOUR.displayName(), ConditionScripts.CHANNELS_ONE_TO_FOUR.toString());
+        CONDITION_MAP.put(ConditionScripts.ONLY_SUPPORTED_NOTES.displayName(), ConditionScripts.ONLY_SUPPORTED_NOTES.toString());
         CONDITION_MAP.put("Custom", "");
 
-        DEVICEADDRESS_MAP.put("Device 1", DeviceAddressScripts.DEVICE_ONE.toString());
-        DEVICEADDRESS_MAP.put("One Device per Channel", DeviceAddressScripts.ONE_DEVICE_PER_CHANNEL.toString());
+        DEVICEADDRESS_MAP.put(DeviceAddressScripts.DEVICE_ONE.displayName(), DeviceAddressScripts.DEVICE_ONE.toString());
+        DEVICEADDRESS_MAP.put(DeviceAddressScripts.ONE_DEVICE_PER_CHANNEL.displayName(), DeviceAddressScripts.ONE_DEVICE_PER_CHANNEL.toString());
         DEVICEADDRESS_MAP.put("Custom", "");
 
-        SUBADDRESS_MAP.put("Sub Address per Channel", SubAddressScripts.SUB_ADDRESS_PER_CHANNEL.toString());
+        SUBADDRESS_MAP.put(SubAddressScripts.SUB_ADDRESS_PER_CHANNEL.displayName(), SubAddressScripts.SUB_ADDRESS_PER_CHANNEL.toString());
         SUBADDRESS_MAP.put("Custom", "");
 
-        NOTE_MAP.put("Force Into Range", NoteScripts.FORCE_INTO_RANGE.toString());
-        NOTE_MAP.put("Ignore out of Range", NoteScripts.IGNORE_OUT_OF_RANGE.toString());
-        NOTE_MAP.put("Straight Through", NoteScripts.STRAIGHT_THROUGH.toString());
+        NOTE_MAP.put(NoteScripts.FORCE_INTO_RANGE.displayName(), NoteScripts.FORCE_INTO_RANGE.toString());
+        NOTE_MAP.put(NoteScripts.IGNORE_OUT_OF_RANGE.displayName(), NoteScripts.IGNORE_OUT_OF_RANGE.toString());
+        NOTE_MAP.put(NoteScripts.STRAIGHT_THROUGH.displayName(), NoteScripts.STRAIGHT_THROUGH.toString());
         NOTE_MAP.put("Custom", "");
     }
 
