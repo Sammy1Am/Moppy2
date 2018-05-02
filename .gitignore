@@ -3,6 +3,7 @@
 
 # Log file
 *.log
+*.log.*
 
 # BlueJ files
 *.ctxt
@@ -23,6 +24,8 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+#NetBeans Temp Files
 /Java/MoppyLib/.nb-gradle/
 /Java/MoppyLib/build/
 /Java/MoppyDeviceGUI/.nb-gradle/

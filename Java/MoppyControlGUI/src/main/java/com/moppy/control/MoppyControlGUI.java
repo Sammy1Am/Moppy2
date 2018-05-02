@@ -7,8 +7,11 @@ import com.moppy.core.midi.MoppyMIDIReceiverSender;
 import com.moppy.core.midi.MoppyMIDISequencer;
 import com.moppy.core.status.StatusBus;
 import java.io.IOException;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -21,6 +24,14 @@ public class MoppyControlGUI {
      * @throws javax.sound.midi.MidiUnavailableException
      */
     public static void main(String[] args) throws IOException, MidiUnavailableException {
+
+        //
+        //// Initialize Logger
+        //
+
+        FileHandler logFileHandler = new FileHandler("moppy_control_gui.log", 5000000, 3, true);
+        logFileHandler.setFormatter(new SimpleFormatter());
+        LogManager.getLogManager().getLogger("").addHandler(logFileHandler);
 
         //
         //// Initialize Moppy System components
