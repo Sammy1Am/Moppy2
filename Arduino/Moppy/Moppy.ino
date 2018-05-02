@@ -1,7 +1,3 @@
-// Do not remove the include below
-#include "Moppy.h"
-
-
 // Uncomment the appropriate instrument class for your setup
 #include "MoppyInstruments/FloppyDrives.h"
 FloppyDrives instrument = FloppyDrives();
@@ -25,4 +21,3 @@ void loop()
 {
     network.readMessages();
 }
-
