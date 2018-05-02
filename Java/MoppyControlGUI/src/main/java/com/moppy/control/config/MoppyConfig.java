@@ -18,13 +18,13 @@ public class MoppyConfig {
 
     @Data
     public static class MIDIScriptMapperConfig {
-        private String conditionChoice = "Custom";
+        private String conditionChoice = ConditionScripts.ALL_EVENTS.displayName();
         private String conditionCustomScript = ConditionScripts.ALL_EVENTS.toString();
-        private String deviceAddressChoice = "Custom";
+        private String deviceAddressChoice = DeviceAddressScripts.DEVICE_ONE.displayName();
         private String deviceAddressCustomScript = DeviceAddressScripts.DEVICE_ONE.toString();
-        private String subAddressChoice = "Custom";
+        private String subAddressChoice = SubAddressScripts.SUB_ADDRESS_PER_CHANNEL.displayName();
         private String subAddressCustomScript = SubAddressScripts.SUB_ADDRESS_PER_CHANNEL.toString();
-        private String noteChoice = "Custom";
+        private String noteChoice = NoteScripts.STRAIGHT_THROUGH.displayName();
         private String noteCustomScript = NoteScripts.STRAIGHT_THROUGH.toString();
     }
 }
