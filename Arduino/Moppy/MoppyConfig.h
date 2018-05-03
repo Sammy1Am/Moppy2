@@ -8,8 +8,16 @@
 #ifndef SRC_MOPPYCONFIG_H_
 #define SRC_MOPPYCONFIG_H_
 
-// Moppy Device configuration
+//
+//// Moppy Device configuration
+//
 
+// Play a startup sound when the Arduino is initialized.  Helpful
+// for debugging purposes, but can be turned off once everything
+// is working
+#define PLAY_STARTUP_SOUND true
+
+// Device address information
 #define DEVICE_ADDRESS 0x02
 #define MIN_SUB_ADDRESS 1
 #define MAX_SUB_ADDRESS 8

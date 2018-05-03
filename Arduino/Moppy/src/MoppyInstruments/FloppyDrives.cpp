@@ -3,7 +3,7 @@
  *
  * Output for controlling floppy drives.  The _original_ Moppy instrument!
  */
-#include "../MoppyInstruments/FloppyDrives.h"
+#include "FloppyDrives.h"
 
 // First drive being used for floppies, and the last drive.  Used for calculating
 // step and direction pins.
@@ -89,15 +89,41 @@ void FloppyDrives::setup() {
   pinMode(18, OUTPUT); // Direction 9
   pinMode(19, OUTPUT); // Step control 9
 
+
+
   // With all pins setup, let's do a first run reset
   resetAll();
-  delay(1000); // Wait a second for safety
+  delay(500); // Wait a half second for safety
 
   // Setup timer to handle interrupts for floppy driving
   Timer1.initialize(RESOLUTION); // Set up a timer at the defined resolution
   Timer1.attachInterrupt(tick); // Attach the tick function
 
+  //
+  if (PLAY_STARTUP_SOUND) {
+	  startupSound(FIRST_DRIVE);
+	  delay(500);
+  	  resetAll();
+  }
+}
 
+// Play startup sound to confirm drive functionality
+void FloppyDrives::startupSound(byte driveNum) {
+	unsigned int chargeNotes[] = {
+			notePeriods[31],
+			notePeriods[36],
+			notePeriods[38],
+			notePeriods[43],
+			0
+	};
+	byte i = 0;
+	unsigned long lastRun = 0;
+	while(i < 5) {
+		if (millis() - 200 > lastRun) {
+			lastRun = millis();
+			currentPeriod[driveNum] = chargeNotes[i++];
+		}
+	}
 }
 
 //

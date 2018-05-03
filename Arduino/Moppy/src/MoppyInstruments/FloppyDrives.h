@@ -8,7 +8,7 @@
 
 #include <Arduino.h>
 #include <TimerOne.h>
-#include "../MoppyConfig.h"
+#include "../../MoppyConfig.h"
 #include "../MoppyNetworks/MoppyNetwork.h"
 
 class FloppyDrives {
@@ -23,6 +23,7 @@ protected:
     static void reset(byte driveNum);
     static void tick();
     static void blinkLED();
+    static void startupSound(byte driveNum);
 };
 
 
