@@ -18,7 +18,7 @@
 #define PLAY_STARTUP_SOUND true
 
 // Device address information
-#define DEVICE_ADDRESS 0x02
+#define DEVICE_ADDRESS 0x01
 #define MIN_SUB_ADDRESS 1
 #define MAX_SUB_ADDRESS 8
 

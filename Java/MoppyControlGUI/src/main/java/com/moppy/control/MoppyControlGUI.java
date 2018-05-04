@@ -63,12 +63,6 @@ public class MoppyControlGUI {
         });
 
         //
-        //// Load Settings / Defaults
-        //
-
-        //mappers.addMapper(new MIDIScriptMapper());
-
-        //
         //// Initialize and start the UI
         //
 

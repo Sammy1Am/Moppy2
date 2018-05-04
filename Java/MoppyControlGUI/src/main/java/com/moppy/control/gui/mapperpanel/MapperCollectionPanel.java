@@ -45,7 +45,9 @@ public class MapperCollectionPanel extends javax.swing.JPanel implements StatusC
     public void saveMappersToConfig() {
         List<MIDIScriptMapperConfig> configList = Stream.of(this.getComponents())
                 .filter(c -> c instanceof MapperPanel)
-                .map(mp -> {return ((MapperPanel)mp).getMapperConfig();})
+                .map(mp -> {
+                    MapperPanel panel = (MapperPanel)mp;
+                    return ((MapperPanel)mp).getMapperConfig();})
                 .collect(Collectors.toList());
 
         MoppyPreferences.getConfiguration().setMapperConfigs(configList);
@@ -110,7 +112,7 @@ public class MapperCollectionPanel extends javax.swing.JPanel implements StatusC
         switch (update.getType()) {
             case SEQUENCE_START:
                 enableMapperEditing(false);
-                saveMappersToConfig(); // TODO: This might be a slightly awkward place to save configs, but it'll do for now.
+                saveMappersToConfig(); // Go ahead and proactively save the mappers when we start playing
                 break;
             case SEQUENCE_END:
             case SEQUENCE_PAUSE:

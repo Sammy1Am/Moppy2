@@ -70,19 +70,14 @@ public class MapperPanel extends javax.swing.JPanel {
     }
 
     public MIDIScriptMapperConfig getMapperConfig() {
-        return mapperConfig;
-    }
-
-    private void saveToConfig() {
+        // First update the config with the currently selected items (don't do this
+        // in real-time so that programatic menu-selections don't overwrite user choices
         mapperConfig.setConditionChoice(conditionComboBox.getSelectedItem().toString());
-        mapperConfig.setConditionCustomScript(conditionTextArea.getText());
         mapperConfig.setDeviceAddressChoice(deviceAddressComboBox.getSelectedItem().toString());
-        mapperConfig.setDeviceAddressCustomScript(deviceAddressTextArea.getText());
         mapperConfig.setSubAddressChoice(subAddressComboBox.getSelectedItem().toString());
-        mapperConfig.setSubAddressCustomScript(subAddressTextArea.getText());
         mapperConfig.setNoteChoice(noteComboBox.getSelectedItem().toString());
-        mapperConfig.setNoteCustomScript(noteTextArea.getText());
-        mapperPanel.saveMappersToConfig();
+
+        return mapperConfig;
     }
 
     public void enableEditing(boolean enable) {
@@ -391,7 +386,7 @@ public class MapperPanel extends javax.swing.JPanel {
     private void conditionTextAreaFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_conditionTextAreaFocusLost
         try {
             mapper.setConditionScript(conditionTextArea.getText());
-            saveToConfig();
+            mapperConfig.setConditionCustomScript(conditionTextArea.getText());
             conditionTextArea.setForeground(Color.BLACK);
         } catch (ScriptException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
@@ -402,7 +397,7 @@ public class MapperPanel extends javax.swing.JPanel {
     private void deviceAddressTextAreaFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_deviceAddressTextAreaFocusLost
         try {
             mapper.setDeviceAddressScript(deviceAddressTextArea.getText());
-            saveToConfig();
+            mapperConfig.setDeviceAddressCustomScript(deviceAddressTextArea.getText());
             deviceAddressTextArea.setForeground(Color.BLACK);
         } catch (ScriptException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
@@ -413,7 +408,7 @@ public class MapperPanel extends javax.swing.JPanel {
     private void subAddressTextAreaFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_subAddressTextAreaFocusLost
         try {
             mapper.setSubAddressScript(subAddressTextArea.getText());
-            saveToConfig();
+            mapperConfig.setSubAddressCustomScript(subAddressTextArea.getText());
             subAddressTextArea.setForeground(Color.BLACK);
         } catch (ScriptException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
@@ -424,7 +419,7 @@ public class MapperPanel extends javax.swing.JPanel {
     private void noteTextAreaFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_noteTextAreaFocusLost
         try {
             mapper.setNoteScript(noteTextArea.getText());
-            saveToConfig();
+            mapperConfig.setNoteCustomScript(noteTextArea.getText());
             noteTextArea.setForeground(Color.BLACK);
         } catch (ScriptException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
