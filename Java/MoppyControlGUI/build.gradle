@@ -2,6 +2,14 @@ apply plugin: 'java'
 apply plugin: 'application'
 
 mainClassName = 'com.moppy.control.MoppyControlGUI'
+version = '2.0.0'
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName,
+                   'Implementation-Version': version
+    }
+}
 
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
