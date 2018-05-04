@@ -16,6 +16,11 @@ public class MoppyConfig {
     private String fileLoadDirectory = ".";
     private List<MIDIScriptMapperConfig> mapperConfigs = new ArrayList<>();
 
+    public MoppyConfig() {
+        // Add a new default mapper (will be overridden if the user loads preferences)
+        mapperConfigs.add(new MIDIScriptMapperConfig());
+    }
+
     @Data
     public static class MIDIScriptMapperConfig {
         private String conditionChoice = ConditionScripts.ALL_EVENTS.displayName();

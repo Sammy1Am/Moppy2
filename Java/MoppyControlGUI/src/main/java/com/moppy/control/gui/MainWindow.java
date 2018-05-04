@@ -51,6 +51,11 @@ public class MainWindow extends javax.swing.JFrame {
         setTitle("Moppy Control");
         setMinimumSize(new java.awt.Dimension(1024, 600));
         setSize(new java.awt.Dimension(800, 600));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         sequencerPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -91,6 +96,11 @@ public class MainWindow extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // Save our mappers before closing
+        mapperCollectionPanel.saveMappersToConfig();
+    }//GEN-LAST:event_formWindowClosing
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
