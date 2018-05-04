@@ -1,5 +1,13 @@
 apply plugin: 'java'
 
+version = '2.0.0'
+
+jar {
+    manifest {
+        attributes 'Implementation-Version': version
+    }
+}
+
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
