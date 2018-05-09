@@ -11,6 +11,14 @@ jar {
     }
 }
 
+distributions {
+    main {
+        contents {
+            from ( 'samplesongs' ) { into 'samplesongs' }
+        }
+    }
+}
+
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
