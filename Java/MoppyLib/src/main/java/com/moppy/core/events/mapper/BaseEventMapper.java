@@ -12,8 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Maps StatusUpdates to network events.  (Intended to be extended by a implementation-specific event
- * mapper (e.g. MIDI)
+ * Maps StatusUpdates to network events.
  */
 public class BaseEventMapper {
     public static List<MoppyMessage> mapStatusUpdate(StatusUpdate statusUpdate) {
