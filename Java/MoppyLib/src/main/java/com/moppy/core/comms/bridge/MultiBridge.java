@@ -89,4 +89,9 @@ public class MultiBridge extends NetworkBridge {
         throw new UnsupportedOperationException("MultiBridge doesn't have a network ID");
     }
 
+    @Override
+    public boolean isConnected() {
+        throw new UnsupportedOperationException("MultiBridge cannot report connected-ness");
+    }
+
 }

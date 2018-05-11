@@ -23,6 +23,8 @@ public abstract class NetworkBridge implements Closeable, NetworkMessageConsumer
 
     public abstract void connect() throws IOException;
 
+    public abstract boolean isConnected();
+
     public abstract void sendMessage(MoppyMessage messageToSend) throws IOException;
 
     public abstract String getNetworkIdentifier();

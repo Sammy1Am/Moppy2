@@ -82,6 +82,11 @@ public class BridgeUDP extends NetworkBridge {
         return String.format("%s:%s", groupAddress.getHostAddress(), MOPPY_PORT);
     }
 
+    @Override
+    public boolean isConnected() {
+        return socket != null && !socket.isClosed();
+    }
+
     private class UDPListener implements Runnable {
 
         private final NetworkMessageConsumer messageConsumer;

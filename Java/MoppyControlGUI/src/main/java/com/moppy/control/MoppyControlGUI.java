@@ -1,7 +1,6 @@
 package com.moppy.control;
 
 import com.moppy.control.gui.MainWindow;
-import com.moppy.core.comms.bridge.MultiBridge;
 import com.moppy.core.events.mapper.MapperCollection;
 import com.moppy.core.midi.MoppyMIDIReceiverSender;
 import com.moppy.core.midi.MoppyMIDISequencer;
@@ -38,10 +37,11 @@ public class MoppyControlGUI {
         //
 
         // Create components
-        final StatusBus statusBus = new StatusBus();
-        final MultiBridge networkBridge = new MultiBridge();
+        final StatusBus statusBus = new StatusBus(); // Create StatusBus for local status updates
+        final NetworkManager netManager = new NetworkManager(statusBus); // Create NetworkManager for network connections
+        netManager.start();
         final MapperCollection mappers = new MapperCollection();
-        final MoppyMIDIReceiverSender receiverSender = new MoppyMIDIReceiverSender(mappers, networkBridge);
+        final MoppyMIDIReceiverSender receiverSender = new MoppyMIDIReceiverSender(mappers, netManager.getPrimaryBridge());
         final MoppyMIDISequencer midiSequencer = new MoppyMIDISequencer(statusBus, receiverSender);
 
         // Setup shutdown hook to properly close everything down.
@@ -55,7 +55,7 @@ public class MoppyControlGUI {
                 }
                 receiverSender.close();
                 try {
-                    networkBridge.close();
+                    netManager.getPrimaryBridge().close();
                 } catch (IOException ex) {
                     Logger.getLogger(MoppyControlGUI.class.getName()).log(Level.WARNING, null, ex);
                 }
@@ -75,7 +75,7 @@ public class MoppyControlGUI {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new MainWindow(statusBus, midiSequencer, networkBridge, mappers).setVisible(true);
+                new MainWindow(statusBus, midiSequencer, netManager, mappers).setVisible(true);
             }
         });
     }

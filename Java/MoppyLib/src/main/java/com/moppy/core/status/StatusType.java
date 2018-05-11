@@ -7,7 +7,8 @@ public enum StatusType {
         SEQUENCE_PAUSE,
         SEQUENCE_END,
         SEQUENCE_TEMPO_CHANGE,
-        
+
         // Network statuses
-        NET_PONG_RECEIVED
+        NET_STATUS_CHANGED, // A NetworkBridge has either connected or disconnected
+        NET_DEVICES_CHANGED // A device has either become available or unavailable on the network
     }

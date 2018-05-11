@@ -46,8 +46,6 @@ public class BridgeSerial extends NetworkBridge {
         SerialListener listener = new SerialListener(serialPort, this);
         listenerThread = new Thread(listener);
         listenerThread.start();
-
-        sendMessage(MoppyMessage.SYS_PING);
     }
 
     @Override
@@ -72,6 +70,11 @@ public class BridgeSerial extends NetworkBridge {
     @Override
     public String getNetworkIdentifier() {
         return serialPort.getSystemPortName();
+    }
+
+    @Override
+    public boolean isConnected() {
+        return serialPort.isOpen();
     }
 
     /**
