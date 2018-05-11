@@ -13,11 +13,11 @@ import java.util.Set;
  */
 public class StatusBus implements StatusConsumer {
     private final Set<StatusConsumer> consumers = new HashSet<>();
-    
+
     public void registerConsumer(StatusConsumer consumer) {
         consumers.add(consumer);
     }
-    
+
     public void deregisterConsumer(StatusConsumer consumer) {
         consumers.remove(consumer);
     }
@@ -26,6 +26,4 @@ public class StatusBus implements StatusConsumer {
     public void receiveUpdate(StatusUpdate update) {
         consumers.forEach(consumer -> consumer.receiveUpdate(update));
     }
-    
-    
 }

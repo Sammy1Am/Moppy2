@@ -1,6 +1,6 @@
 package com.moppy.control.gui;
 
-import com.moppy.core.comms.bridge.MultiBridge;
+import com.moppy.control.NetworkManager;
 import com.moppy.core.events.mapper.MapperCollection;
 import com.moppy.core.midi.MoppyMIDISequencer;
 import com.moppy.core.status.StatusBus;
@@ -13,17 +13,17 @@ public class MainWindow extends javax.swing.JFrame {
 
     private final StatusBus statusBus;
     private final MoppyMIDISequencer midiSequencer;
-    private final MultiBridge networkBridge;
+    private final NetworkManager netManager;
     private final MapperCollection<MidiMessage> mappers;
 
 
     /**
      * Creates new form MainWindow
      */
-    public MainWindow(StatusBus statusBus, MoppyMIDISequencer midiSequencer, MultiBridge networkBridge, MapperCollection<MidiMessage> mappers) {
+    public MainWindow(StatusBus statusBus, MoppyMIDISequencer midiSequencer, NetworkManager netManager, MapperCollection<MidiMessage> mappers) {
         this.statusBus = statusBus;
         this.midiSequencer = midiSequencer;
-        this.networkBridge = networkBridge;
+        this.netManager = netManager;
         this.mappers = mappers;
 
         initComponents();
@@ -39,13 +39,13 @@ public class MainWindow extends javax.swing.JFrame {
         sequencerPanel = new com.moppy.control.gui.SequencerPanel();
         sequencerPanel.setMidiSequencer(midiSequencer);
         statusBus.registerConsumer(sequencerPanel);
-        jScrollPane1 = new javax.swing.JScrollPane();
-        networkSelectorPanel = new com.moppy.control.gui.netpanel.NetworkSelectorPanel();
-        networkSelectorPanel.initNetworkPanel(networkBridge);
         jScrollPane2 = new javax.swing.JScrollPane();
         mapperCollectionPanel = new com.moppy.control.gui.mapperpanel.MapperCollectionPanel();
         mapperCollectionPanel.initMapperCollectionPanel(mappers);
         statusBus.registerConsumer(mapperCollectionPanel);
+        networkPanel = new com.moppy.control.gui.netpanel.NetworkPanel();
+        networkPanel.setNetworkManager(netManager);
+        statusBus.registerConsumer(networkPanel);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Moppy Control");
@@ -59,13 +59,11 @@ public class MainWindow extends javax.swing.JFrame {
 
         sequencerPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        jScrollPane1.setViewportView(networkSelectorPanel);
-
         jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         jScrollPane2.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         jScrollPane2.setViewportView(mapperCollectionPanel);
+
+        networkPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -78,19 +76,18 @@ public class MainWindow extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(sequencerPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 394, Short.MAX_VALUE)))
+                        .addComponent(networkPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1)
-                    .addComponent(sequencerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(sequencerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(networkPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -104,10 +101,9 @@ public class MainWindow extends javax.swing.JFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private com.moppy.control.gui.mapperpanel.MapperCollectionPanel mapperCollectionPanel;
-    private com.moppy.control.gui.netpanel.NetworkSelectorPanel networkSelectorPanel;
+    private com.moppy.control.gui.netpanel.NetworkPanel networkPanel;
     private com.moppy.control.gui.SequencerPanel sequencerPanel;
     // End of variables declaration//GEN-END:variables
 }

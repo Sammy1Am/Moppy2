@@ -1,8 +1,13 @@
 package com.moppy.core.device;
 
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+
 /**
  * Class to provide meta information for a device on the network.
  */
+@EqualsAndHashCode
+@Builder
 public class DeviceDescriptor {
     private String networkAddress;
     private byte deviceAddress;
@@ -40,7 +45,7 @@ public class DeviceDescriptor {
     public void setMaxSubAddress(byte maxSubAddress) {
         this.maxSubAddress = maxSubAddress;
     }
-    
-    
+
+
 
 }

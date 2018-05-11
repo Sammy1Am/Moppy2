@@ -45,10 +45,16 @@ public class MoppyMessage {
         public static byte DEV_BENDPITCH = 0x0e;
     }
 
+    /**
+     * Returns raw bytes that make up the message
+     */
     public byte[] getMessageBytes(){
         return messageBytes;
     }
 
+    /**
+     * Returns target device address from the message
+     */
     public byte getDeviceAddress() {
         return messageBytes[1];
     }
@@ -65,6 +71,9 @@ public class MoppyMessage {
         }
     }
 
+    /**
+     * Returns the body of the message which includes the command byte and any additional bytes of command payload
+     */
     public byte[] getMessageBody() {
         int bodyLength = messageBytes[3];
         return Arrays.copyOfRange(messageBytes, 4, 4 + bodyLength);
@@ -74,6 +83,9 @@ public class MoppyMessage {
         return getMessageBody()[0];
     }
 
+    /**
+     * Returns just the variable command payload at the end of the message (may be zero-length!)
+     */
     public byte[] getMessageCommandPayload() {
         return Arrays.copyOfRange(getMessageBody(), 1, getMessageBody().length);
     }
