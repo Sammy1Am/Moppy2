@@ -7,13 +7,13 @@ package com.moppy.core.comms.bridge;
 
 import com.moppy.core.comms.MoppyMessage;
 import com.moppy.core.comms.MoppyMessageFactory;
+import com.moppy.core.comms.NetworkMessageConsumer;
 import com.moppy.core.comms.NetworkReceivedMessage;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,7 +43,7 @@ public class BridgeUDP extends NetworkBridge {
         socket.joinGroup(groupAddress);
 
         // Create and start listener thread
-        UDPListener listener = new UDPListener(socket, this::messageToReceivers);
+        UDPListener listener = new UDPListener(socket, this);
         listenerThread = new Thread(listener);
         listenerThread.start();
     }
@@ -84,10 +84,10 @@ public class BridgeUDP extends NetworkBridge {
 
     private class UDPListener implements Runnable {
 
-        private final Consumer<NetworkReceivedMessage> messageConsumer;
+        private final NetworkMessageConsumer messageConsumer;
         private final MulticastSocket socket;
 
-        public UDPListener(MulticastSocket socket, Consumer<NetworkReceivedMessage> messageConsumer) {
+        public UDPListener(MulticastSocket socket, NetworkMessageConsumer messageConsumer) {
             this.socket = socket;
             this.messageConsumer = messageConsumer;
         }
@@ -111,7 +111,7 @@ public class BridgeUDP extends NetworkBridge {
                                 BridgeUDP.class.getName(),
                                 getNetworkIdentifier(),
                                 bufferPacket.getAddress().getHostAddress());
-                        messageConsumer.accept(receivedMessage);
+                        messageConsumer.acceptNetworkMessage(receivedMessage);
                     }
 
                     //TODO: send status update with DeviceDescriptor for pong??

@@ -8,12 +8,11 @@ package com.moppy.core.comms.bridge;
 import com.fazecast.jSerialComm.SerialPort;
 import com.moppy.core.comms.MoppyMessage;
 import com.moppy.core.comms.MoppyMessageFactory;
-import com.moppy.core.comms.NetworkReceivedMessage;
+import com.moppy.core.comms.NetworkMessageConsumer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -44,9 +43,11 @@ public class BridgeSerial extends NetworkBridge {
         }
 
         // Create and start listener thread
-        SerialListener listener = new SerialListener(serialPort, this::messageToReceivers);
+        SerialListener listener = new SerialListener(serialPort, this);
         listenerThread = new Thread(listener);
         listenerThread.start();
+
+        sendMessage(MoppyMessage.SYS_PING);
     }
 
     @Override
@@ -77,12 +78,12 @@ public class BridgeSerial extends NetworkBridge {
      * Listens to the serial port for MoppyMessages.  Because *all* this
      * thread does is listen for messages, it's fine to block on serial.read().
      */
-    private class SerialListener implements Runnable {
+    private static class SerialListener implements Runnable {
 
         private final SerialPort serialPort;
-        private final Consumer<NetworkReceivedMessage> messageConsumer;
+        private final NetworkMessageConsumer messageConsumer;
 
-        public SerialListener(SerialPort serialPort, Consumer<NetworkReceivedMessage> messageConsumer) {
+        public SerialListener(SerialPort serialPort, NetworkMessageConsumer messageConsumer) {
             this.serialPort = serialPort;
             this.messageConsumer = messageConsumer;
         }
@@ -106,7 +107,7 @@ public class BridgeSerial extends NetworkBridge {
                         serialIn.read(buffer, 4, buffer[3]); // Read body into buffer
                         totalMessageLength = 4 + buffer[3];
 
-                        messageConsumer.accept(MoppyMessageFactory.networkReceivedFromBytes(
+                        messageConsumer.acceptNetworkMessage(MoppyMessageFactory.networkReceivedFromBytes(
                                 Arrays.copyOf(buffer, totalMessageLength),
                                 BridgeSerial.class.getName(),
                                 serialPort.getDescriptivePortName(),

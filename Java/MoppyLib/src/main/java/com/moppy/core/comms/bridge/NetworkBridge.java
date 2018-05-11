@@ -11,34 +11,38 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Consumer;
+import com.moppy.core.comms.NetworkMessageConsumer;
 
 /**
  * Interface for a particular form of the Moppy network; used for sending
  * and receiving MoppyMessages.
  */
-public abstract class NetworkBridge implements Closeable {
-    
-    private final Set<Consumer<NetworkReceivedMessage>> receivers = new HashSet<>();
-    
+public abstract class NetworkBridge implements Closeable, NetworkMessageConsumer {
+
+    private final Set<NetworkMessageConsumer> receivers = new HashSet<>();
+
     public abstract void connect() throws IOException;
-    
+
     public abstract void sendMessage(MoppyMessage messageToSend) throws IOException;
-    
+
     public abstract String getNetworkIdentifier();
-    
-    public void registerMessageReceiver(Consumer<NetworkReceivedMessage> messageConsumer) {
+
+    public void registerMessageReceiver(NetworkMessageConsumer messageConsumer) {
         receivers.add(messageConsumer);
     }
-    
-    public void deregisterMessageReceiver(Consumer<NetworkReceivedMessage> messageConsumer) {
+
+    public void deregisterMessageReceiver(NetworkMessageConsumer messageConsumer) {
         receivers.remove(messageConsumer);
     }
-    
+
     /**
-     * Called by the implementing class to pass a received message on to registered receivers. 
+     * Called by network leaves to pass messages from the network.  Because
+     * any class extending NetworkBridge automatically inherits this method as well as the
+     * NetworkMessageConsumer interface, messages will pass through bridge classes to the first
+     * non-NetworkBridge NetworkMessageConsumer.
      */
-    protected void messageToReceivers(NetworkReceivedMessage messageReceived) {
-        receivers.forEach(c -> c.accept(messageReceived));
+    @Override
+    public void acceptNetworkMessage(NetworkReceivedMessage messageReceived) {
+        receivers.forEach(c -> c.acceptNetworkMessage(messageReceived));
     }
 }
