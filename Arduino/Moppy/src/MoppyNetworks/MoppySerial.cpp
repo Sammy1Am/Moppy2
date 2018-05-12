@@ -91,6 +91,6 @@ void MoppySerial::readMessages() {
 }
 
 void MoppySerial::sendPong() {
-  Serial.write(pongBytes, 7);
+  Serial.write(pongBytes, sizeof(pongBytes));
 }
 

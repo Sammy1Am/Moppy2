@@ -40,6 +40,7 @@ public class NetworkPanel extends javax.swing.JPanel implements StatusConsumer {
         });
 
         netBridgesPanel.revalidate();
+        netBridgesPanel.repaint();
     }
 
     private void updateDevicesList() {
@@ -53,6 +54,7 @@ public class NetworkPanel extends javax.swing.JPanel implements StatusConsumer {
         });
 
         netDevicesPanel.revalidate();
+        netDevicesPanel.repaint();
     }
 
         @Override
