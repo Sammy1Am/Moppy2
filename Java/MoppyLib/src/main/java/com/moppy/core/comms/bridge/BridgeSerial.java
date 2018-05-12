@@ -113,8 +113,8 @@ public class BridgeSerial extends NetworkBridge {
                         messageConsumer.acceptNetworkMessage(MoppyMessageFactory.networkReceivedFromBytes(
                                 Arrays.copyOf(buffer, totalMessageLength),
                                 BridgeSerial.class.getName(),
-                                serialPort.getDescriptivePortName(),
-                                null));
+                                serialPort.getSystemPortName(),
+                                "Serial Device")); // Serial ports don't really have a remote address
                     }
                 }
             } catch (IOException ex) {
