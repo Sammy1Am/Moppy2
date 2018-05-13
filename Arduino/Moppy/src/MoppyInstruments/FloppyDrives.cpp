@@ -142,7 +142,13 @@ void FloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t pa
       currentPeriod[subAddress] = originalPeriod[subAddress] = 0;
       break;
     case NETBYTE_DEV_BENDPITCH: //Pitch bend
-      // TODO
+      // A value from -8192 to 8191 representing the pitch deflection
+      int16_t bendDeflection = payload[0] << 8 | payload[1];
+
+      // A whole octave of bend would double the frequency (halve the the period) of notes
+      // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
+      //currentPeriod[subAddress] = originalPeriod[subAddress] / 1.4;
+      currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES*(bendDeflection/(float)8192));
       break;
   }
 }
