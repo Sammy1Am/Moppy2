@@ -6,6 +6,8 @@
 #ifndef SRC_MOPPYNETWORKS_MOPPYNETWORK_H_
 #define SRC_MOPPYNETWORKS_MOPPYNETWORK_H_
 
+// Definitions for command byte values
+
 #define START_BYTE 0x4d
 #define SYSTEM_ADDRESS 0x00
 
