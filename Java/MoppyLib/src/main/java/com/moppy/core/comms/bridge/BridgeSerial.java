@@ -42,6 +42,11 @@ public class BridgeSerial extends NetworkBridge {
             throw new IOException("Failed to open serialPort!");
         }
 
+        // Set to semiblocking mode (will wait for up to 100 milliseconds before returning nothing from a read)
+        // On a very slow connection this could maaaybe cause some messages to be dropped / corrupted, but for
+        // serial connections it should be a minor risk
+        serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 100, 0);
+
         // Create and start listener thread
         SerialListener listener = new SerialListener(serialPort, this);
         listenerThread = new Thread(listener);
@@ -98,7 +103,7 @@ public class BridgeSerial extends NetworkBridge {
             // Longer messages will be truncated, but we don't care about them anyway
             byte[] buffer = new byte[259];
             buffer[0] = MoppyMessage.START_BYTE; // We'll be eating the start byte below, so make sure it's here
-            int totalMessageLength = 1;
+            int totalMessageLength;
 
             try (InputStream serialIn = serialPort.getInputStream()) {
                 while (serialPort.isOpen() && !Thread.interrupted()) {
@@ -110,11 +115,15 @@ public class BridgeSerial extends NetworkBridge {
                         serialIn.read(buffer, 4, buffer[3]); // Read body into buffer
                         totalMessageLength = 4 + buffer[3];
 
-                        messageConsumer.acceptNetworkMessage(MoppyMessageFactory.networkReceivedFromBytes(
+                        try {
+                            messageConsumer.acceptNetworkMessage(MoppyMessageFactory.networkReceivedFromBytes(
                                 Arrays.copyOf(buffer, totalMessageLength),
                                 BridgeSerial.class.getName(),
                                 serialPort.getSystemPortName(),
                                 "Serial Device")); // Serial ports don't really have a remote address
+                        } catch (IllegalArgumentException ex) {
+                            Logger.getLogger(BridgeSerial.class.getName()).log(Level.WARNING, "Exception reading network message", ex);
+                        }
                     }
                 }
             } catch (IOException ex) {
