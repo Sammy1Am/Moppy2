@@ -27,7 +27,7 @@ public class MoppyMessageFactory {
     }
 
     public static MoppyMessage devicePitchBend(byte deviceAddress, byte subAddress, short bendAmount) {
-        return new MoppyMessage(new byte[]{START_BYTE, deviceAddress, subAddress, 0x03, DEV_STOPNOTE,
+        return new MoppyMessage(new byte[]{START_BYTE, deviceAddress, subAddress, 0x03, DEV_BENDPITCH,
             (byte)((bendAmount >> 8) & 0xff), (byte)(bendAmount & 0xff)});
     }
 

@@ -66,7 +66,7 @@ public class MIDIScriptMapper extends MIDIEventMapper {
                         into a single value, and then subtracts 8192 (the "no bend" number).  The result is a signed
                         short where 0 = no bend, and with a range of -8192 to 8191
                         */
-                        short pitchBend = (short)((((midiMessage.getData2() & 0xff) << 7) + midiMessage.getData1() & 0xff) - 8192);
+                        short pitchBend = (short)(((midiMessage.getData2() << 7) + midiMessage.getData1()) - 8192);
                         return MoppyMessageFactory.devicePitchBend(resolveDeviceId(eventBindings), resolveSubAddress(eventBindings), pitchBend);
                 }
             } catch (ScriptException | ClassCastException ex) {

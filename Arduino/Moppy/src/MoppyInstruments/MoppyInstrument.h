@@ -6,6 +6,10 @@
 #ifndef MOPPY_SRC_MOPPYINSTRUMENTS_MOPPYINSTRUMENT_H_
 #define MOPPY_SRC_MOPPYINSTRUMENTS_MOPPYINSTRUMENT_H_
 
+// Number of octaves to bend notes by at full-deflection (MIDI pitch bending is weird).
+// Described as cents/cents-in-an-octave
+#define BEND_OCTAVES 200/(float)1200
+
 /*
  * Number of microseconds in a timer-tick for setting timer resolution
  * and calculating noteTicks.  Smaller values here will trigger interrupts more often,
