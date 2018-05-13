@@ -3,32 +3,14 @@
  *
  * Output for controlling floppy drives.  The _original_ Moppy instrument!
  */
+#include "MoppyInstrument.h"
 #include "FloppyDrives.h"
+
 
 // First drive being used for floppies, and the last drive.  Used for calculating
 // step and direction pins.
 const byte FIRST_DRIVE = 1;
 const byte LAST_DRIVE = 8;  // This sketch can handle only up to 9 drives (the max for Arduino Uno)
-
-#define RESOLUTION 40 //Microsecond resolution for notes
-
-// TODO: These periods and noteTicks should probably be moved out into their own library
-
-// notePeriods stores the period of notes in microseconds, this will be converted to
-// ticks by dividing by RESOLUTION
-unsigned int notePeriods[128] = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        30578, 28861, 27242, 25713, 24270, 22909, 21622, 20409, 19263, 18182, 17161, 16198, //C1 - B1
-        15289, 14436, 13621, 12856, 12135, 11454, 10811, 10205, 9632, 9091, 8581, 8099, //C2 - B2
-        7645, 7218, 6811, 6428, 6068, 5727, 5406, 5103, 4816, 4546, 4291, 4050, //C3 - B3
-        3823, 3609, 3406, 3214, 3034, 2864, 2703, 2552, 2408, 2273, 2146, 2025, //C4 - B4
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0
-    };
 
 /*NOTE: The arrays below contain unused zero-indexes to avoid having to do extra
  * math to shift the 1-based subAddresses to 0-based indexes here.  Unlike the previous
@@ -52,22 +34,17 @@ unsigned int currentPosition[] = {0,0,0,0,0,0,0,0,0,0};
  */
 int currentState[] = {0,0,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW};
 
-//Current period assigned to each drive.  0 = off.  Each period is of the length specified by the RESOLUTION
-//variable above.  i.e. A period of 10 is (RESOLUTION x 10) microseconds long.
+// Current period assigned to each drive.  0 = off.  Each period is two-ticks (as defined by
+// TIMER_RESOLUTION in MoppyInstrument.h) long.
 unsigned int currentPeriod[] = {0,0,0,0,0,0,0,0,0,0};
 
-//Current tick
+// Tracks the current tick-count for each drive (see FloppyDrives::tick() below)
 unsigned int currentTick[] = {0,0,0,0,0,0,0,0,0,0};
 
-//unsigned int microsToTicks(unsigned int m) { return m/(RESOLUTION*2); } // RESOLUTION * 2 because we need two ticks for one step
+// The period originally set by incoming messages (prior to any modifications from pitch-bending)
+unsigned int originalPeriod[] = {0,0,0,0,0,0,0,0,0,0};
 
 void FloppyDrives::setup() {
-  // Create a noteTicks array that contains the resolved tick-ammount based on resolution and
-  // microsecond periods
-  //transform(MICRO_PERIODS, MICRO_PERIODS+128, noteTicks, microsToTicks);
-  for (int i=0;i<128;i++){
-    notePeriods[i] = notePeriods[i]/(RESOLUTION*2); // RESOLUTION * 2 because we need two ticks for one step
-  }
 
   // Prepare pins (0 and 1 are reserved for Serial communications)
   pinMode(2, OUTPUT); // Step control 1
@@ -90,46 +67,47 @@ void FloppyDrives::setup() {
   pinMode(19, OUTPUT); // Step control 9
 
 
-
   // With all pins setup, let's do a first run reset
   resetAll();
   delay(500); // Wait a half second for safety
 
   // Setup timer to handle interrupts for floppy driving
-  Timer1.initialize(RESOLUTION); // Set up a timer at the defined resolution
+  Timer1.initialize(TIMER_RESOLUTION); // Set up a timer at the resolution defined in MoppyInstrument.h
   Timer1.attachInterrupt(tick); // Attach the tick function
 
-  //
+  // If MoppyConfig wants a startup sound, play the startupSound on the
+  // first drive.
   if (PLAY_STARTUP_SOUND) {
-	  startupSound(FIRST_DRIVE);
-	  delay(500);
-  	  resetAll();
+    startupSound(FIRST_DRIVE);
+    delay(500);
+    resetAll();
   }
 }
 
 // Play startup sound to confirm drive functionality
 void FloppyDrives::startupSound(byte driveNum) {
-	unsigned int chargeNotes[] = {
-			notePeriods[31],
-			notePeriods[36],
-			notePeriods[38],
-			notePeriods[43],
-			0
-	};
-	byte i = 0;
-	unsigned long lastRun = 0;
-	while(i < 5) {
-		if (millis() - 200 > lastRun) {
-			lastRun = millis();
-			currentPeriod[driveNum] = chargeNotes[i++];
-		}
-	}
+  unsigned int chargeNotes[] = {
+      noteDoubleTicks[31],
+      noteDoubleTicks[36],
+      noteDoubleTicks[38],
+      noteDoubleTicks[43],
+      0
+  };
+  byte i = 0;
+  unsigned long lastRun = 0;
+  while(i < 5) {
+    if (millis() - 200 > lastRun) {
+      lastRun = millis();
+      currentPeriod[driveNum] = chargeNotes[i++];
+    }
+  }
 }
 
 //
 //// Message Handlers
 //
 
+// Handles system messages (e.g. sequence start and stop)
 void FloppyDrives::systemMessage(uint8_t command, uint8_t payload[]) {
   switch(command) {
       // NETBYTE_SYS_PING is handled by the network adapter directly
@@ -145,6 +123,7 @@ void FloppyDrives::systemMessage(uint8_t command, uint8_t payload[]) {
   }
 }
 
+// Handles device-specific messages (e.g. playing notes)
 void FloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
   switch(command) {
     case NETBYTE_DEV_RESET: // Reset
@@ -155,10 +134,12 @@ void FloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t pa
       }
       break;
     case NETBYTE_DEV_NOTEON: // Note On
-      currentPeriod[subAddress] = notePeriods[payload[0]];
+      // Set the current period to the new value to play it immediately
+    	// Also set the originalPeriod in-case we pitch-bend
+      currentPeriod[subAddress] = originalPeriod[subAddress] = noteDoubleTicks[payload[0]];
       break;
     case NETBYTE_DEV_NOTEOFF: // Note Off
-      currentPeriod[subAddress] = 0;
+      currentPeriod[subAddress] = originalPeriod[subAddress] = 0;
       break;
     case NETBYTE_DEV_BENDPITCH: //Pitch bend
       // TODO

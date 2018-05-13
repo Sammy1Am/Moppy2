@@ -13,17 +13,17 @@
 
 class FloppyDrives {
 public:
-    static void setup();
-    static void systemMessage(uint8_t command, uint8_t payload[]);
-    static void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
+  static void setup();
+  static void systemMessage(uint8_t command, uint8_t payload[]);
+  static void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
 protected:
-    static void resetAll();
-    static void togglePin(byte driveNum, byte pin, byte direction_pin);
-    static void haltAllDrives();
-    static void reset(byte driveNum);
-    static void tick();
-    static void blinkLED();
-    static void startupSound(byte driveNum);
+  static void resetAll();
+  static void togglePin(byte driveNum, byte pin, byte direction_pin);
+  static void haltAllDrives();
+  static void reset(byte driveNum);
+  static void tick();
+  static void blinkLED();
+  static void startupSound(byte driveNum);
 };
 
 
