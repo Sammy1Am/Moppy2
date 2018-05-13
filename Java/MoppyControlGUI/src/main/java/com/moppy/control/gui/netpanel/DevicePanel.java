@@ -47,15 +47,15 @@ public class DevicePanel extends javax.swing.JPanel {
         jLabel1.setText("Device Address:");
 
         deviceAddressBox.setEditable(false);
-        deviceAddressBox.setText(String.format("0x%02x", deviceDescriptor.getDeviceAddress()));
+        deviceAddressBox.setText(String.valueOf(deviceDescriptor.getDeviceAddress() & 0xff));
 
         jLabel2.setText("Sub-Addresses:");
 
         minSubAddressBox.setEditable(false);
-        minSubAddressBox.setText(String.format("0x%02x", deviceDescriptor.getMinSubAddress()));
+        minSubAddressBox.setText(String.valueOf(deviceDescriptor.getMinSubAddress() & 0xff));
 
         maxSubAddressBox.setEditable(false);
-        maxSubAddressBox.setText(String.format("0x%02x", deviceDescriptor.getMaxSubAddress()));
+        maxSubAddressBox.setText(String.valueOf(deviceDescriptor.getMaxSubAddress() & 0xff));
 
         jLabel3.setText("to");
 
