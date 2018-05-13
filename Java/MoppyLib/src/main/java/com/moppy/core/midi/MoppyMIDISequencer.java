@@ -17,7 +17,7 @@ import javax.sound.midi.Sequencer;
 
 /**
  * Wrapper around the Java MIDI sequencer for playing MIDI files.
- * 
+ *
  * Additionally provides feedback to listeners about the current state of the sequencer.
  */
 public class MoppyMIDISequencer implements MetaEventListener, Closeable {
@@ -41,6 +41,7 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
 
     @Override
     public void meta(MetaMessage meta) {
+        // Handle tempo changes
         if (meta.getType() == 81){
             int uSecondsPerQN = 0;
             uSecondsPerQN |= meta.getData()[0] & 0xFF;
@@ -48,61 +49,63 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
             uSecondsPerQN |= meta.getData()[1] & 0xFF;
             uSecondsPerQN <<= 8;
             uSecondsPerQN |= meta.getData()[2] & 0xFF;
-            
+
             int newTempo = 60000000/uSecondsPerQN;
-            
+
             setTempo(newTempo);
         }
+        // Handle end-of-track events
         else if (meta.getType() == 47) {
+            seq.setTickPosition(0); // Reset sequencer so we can press "play" again right away
             //MrSolidSnake745: Exposing end of sequence event to status consumers
             statusBus.receiveUpdate(StatusUpdate.SEQUENCE_END);
         }
     }
-    
+
     public void play() {
         seq.start();
         statusBus.receiveUpdate(StatusUpdate.SEQUENCE_START);
     }
-    
+
     public void pause() {
         seq.stop();
         statusBus.receiveUpdate(StatusUpdate.SEQUENCE_PAUSE);
     }
-    
+
     public void stop() {
         seq.stop();
         seq.setTickPosition(0);
         statusBus.receiveUpdate(StatusUpdate.SEQUENCE_END);
     }
-    
+
     public boolean isPlaying() {
         return seq.isRunning();
     }
-    
+
     public void loadSequence(File sequenceFile) throws IOException, InvalidMidiDataException {
         if (!sequenceFile.isFile()) {
             throw new IOException(String.format("File '%s' not found, or isn't a file", sequenceFile.getAbsolutePath()));
         }
         Sequence sequenceToLoad = MidiSystem.getSequence(sequenceFile);
-        
+
         seq.setSequence(sequenceToLoad);
         statusBus.receiveUpdate(StatusUpdate.sequenceLoaded(sequenceToLoad));
-        
+
         LOG.info(String.format("Loaded sequence with %s tracks", sequenceToLoad.getTracks().length-1)); // -1 for system track?
     }
-    
+
     public long getSecondsLength(){
         return TimeUnit.SECONDS.convert(seq.getMicrosecondLength(), TimeUnit.MICROSECONDS);
     }
-    
+
     public long getSecondsPosition(){
         return TimeUnit.SECONDS.convert(seq.getMicrosecondPosition(), TimeUnit.MICROSECONDS);
     }
-    
+
     public void setSecondsPosition(long seconds){
         seq.setMicrosecondPosition(TimeUnit.SECONDS.toMicros(seconds));
     }
-    
+
     public void setTempo(float newTempo){
         seq.setTempoInBPM(newTempo);
         statusBus.receiveUpdate(StatusUpdate.tempoChange(newTempo));

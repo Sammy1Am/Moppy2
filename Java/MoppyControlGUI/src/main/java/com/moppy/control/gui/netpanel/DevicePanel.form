@@ -74,7 +74,7 @@
     <Component class="javax.swing.JLabel" name="netAddress">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="String.format(&quot;%02x&quot;, deviceDescriptor.getNetworkAddress())" type="code"/>
+          <Connection code="deviceDescriptor.getNetworkAddress()" type="code"/>
         </Property>
       </Properties>
     </Component>
@@ -87,7 +87,7 @@
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="String.format(&quot;%02x&quot;, deviceDescriptor.getDeviceAddress())" type="code"/>
+          <Connection code="String.valueOf(deviceDescriptor.getDeviceAddress() &amp; 0xff)" type="code"/>
         </Property>
       </Properties>
     </Component>
@@ -100,7 +100,7 @@
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="String.format(&quot;%02x&quot;, deviceDescriptor.getMinSubAddress())" type="code"/>
+          <Connection code="String.valueOf(deviceDescriptor.getMinSubAddress() &amp; 0xff)" type="code"/>
         </Property>
       </Properties>
     </Component>
@@ -108,7 +108,7 @@
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="String.format(&quot;%02x&quot;, deviceDescriptor.getMaxSubAddress())" type="code"/>
+          <Connection code="String.valueOf(deviceDescriptor.getMaxSubAddress() &amp; 0xff)" type="code"/>
         </Property>
       </Properties>
     </Component>
