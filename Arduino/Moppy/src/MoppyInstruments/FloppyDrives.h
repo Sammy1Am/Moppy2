@@ -17,6 +17,13 @@ public:
   static void systemMessage(uint8_t command, uint8_t payload[]);
   static void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
 protected:
+  static unsigned int MAX_POSITION[];
+  static unsigned int currentPosition[];
+  static int currentState[];
+  static unsigned int currentPeriod[];
+  static unsigned int currentTick[];
+  static unsigned int originalPeriod[];
+
   static void resetAll();
   static void togglePin(byte driveNum, byte pin, byte direction_pin);
   static void haltAllDrives();
