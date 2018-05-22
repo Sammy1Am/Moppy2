@@ -13,6 +13,11 @@
 FloppyDrives instrument = FloppyDrives();
 
 
+//Uncomment the 2 next lines and comment the 2 lines above this comment to switch to L298N mode
+//#include "src/MoppyInstruments/L298N.h"
+//L298N instrument = L298N();
+
+
 /**********
  * MoppyNetwork classes receive messages sent by the Controller application,
  * parse them, and use the data to call the appropriate handler as implemented
