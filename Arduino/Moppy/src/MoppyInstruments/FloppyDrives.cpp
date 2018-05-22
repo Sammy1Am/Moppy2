@@ -24,25 +24,25 @@ const byte LAST_DRIVE = 8;  // This sketch can handle only up to 9 drives (the m
  NOTE: Index zero of this array controls the "resetAll" function, and should be the
  same as the largest value in this array
  */
-unsigned int MAX_POSITION[] = {158,158,158,158,158,158,158,158,158,158};
+unsigned int FloppyDrives::MAX_POSITION[] = {158,158,158,158,158,158,158,158,158,158};
 
 //Array to track the current position of each floppy head.
-unsigned int currentPosition[] = {0,0,0,0,0,0,0,0,0,0};
+unsigned int FloppyDrives::currentPosition[] = {0,0,0,0,0,0,0,0,0,0};
 
 /*Array to keep track of state of each pin.  Even indexes track the control-pins for toggle purposes.  Odd indexes
  track direction-pins.  LOW = forward, HIGH=reverse
  */
-int currentState[] = {0,0,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW};
+int FloppyDrives::currentState[] = {0,0,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW};
 
 // Current period assigned to each drive.  0 = off.  Each period is two-ticks (as defined by
 // TIMER_RESOLUTION in MoppyInstrument.h) long.
-unsigned int currentPeriod[] = {0,0,0,0,0,0,0,0,0,0};
+unsigned int FloppyDrives::currentPeriod[] = {0,0,0,0,0,0,0,0,0,0};
 
 // Tracks the current tick-count for each drive (see FloppyDrives::tick() below)
-unsigned int currentTick[] = {0,0,0,0,0,0,0,0,0,0};
+unsigned int FloppyDrives::currentTick[] = {0,0,0,0,0,0,0,0,0,0};
 
 // The period originally set by incoming messages (prior to any modifications from pitch-bending)
-unsigned int originalPeriod[] = {0,0,0,0,0,0,0,0,0,0};
+unsigned int FloppyDrives::originalPeriod[] = {0,0,0,0,0,0,0,0,0,0};
 
 void FloppyDrives::setup() {
 
