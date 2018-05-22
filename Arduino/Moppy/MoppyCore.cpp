@@ -15,7 +15,7 @@ FloppyDrives instrument = FloppyDrives();
 
 //Uncomment the 2 next lines and comment the 2 lines above this comment to switch to L298N mode
 //#include "src/MoppyInstruments/L298N.h"
-//L298N instrument = L298N();
+//L298N instrument = L298N(); // please see src/MoppyInstruments/L298N.h for pinout and additionnal info
 
 
 /**********

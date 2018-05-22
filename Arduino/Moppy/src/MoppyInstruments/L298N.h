@@ -1,6 +1,22 @@
 /*
  * L298N.h
- *
+ * Pinout info:
+pin 2, IN1 for bridge 1
+pin 3, IN2 for bridge 1
+pin 4, IN3 for bridge 1
+pin 5, IN4 for bridge 1
+pin 6, IN1 for bridge 2
+pin 7, IN2 for bridge 2
+pin 8, IN3 for bridge 2
+pin 9, IN4 for bridge 2
+pin 10, IN1 for bridge 3
+pin 11, IN2 for bridge 3
+pin 12, IN3 for bridge 3
+pin 13, IN4 for bridge 3
+pin 14 (A0), IN1 for bridge 4
+pin 15 (A1), IN2 for bridge 4
+pin 16 (A2), IN3 for bridge 4
+pin 17 (A3), IN4 for bridge 4
  */
 
 #ifndef SRC_MOPPYINSTRUMENTS_L298N_H_
