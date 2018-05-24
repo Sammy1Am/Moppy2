@@ -12,6 +12,10 @@
 const byte FIRST_DRIVE = 1;
 const byte LAST_DRIVE = 8;  // This sketch can handle only up to 9 drives (the max for Arduino Uno)
 
+// Maximum note number to attempt to play on floppy drives.  It's possible higher notes may work,
+// but they may also cause instability.
+const byte MAX_FLOPPY_NOTE = 71;
+
 /*NOTE: The arrays below contain unused zero-indexes to avoid having to do extra
  * math to shift the 1-based subAddresses to 0-based indexes here.  Unlike the previous
  * version of Moppy, we *will* be doing math to calculate which drive maps to which pin,
@@ -136,7 +140,9 @@ void FloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t pa
     case NETBYTE_DEV_NOTEON: // Note On
       // Set the current period to the new value to play it immediately
     	// Also set the originalPeriod in-case we pitch-bend
-      currentPeriod[subAddress] = originalPeriod[subAddress] = noteDoubleTicks[payload[0]];
+      if (payload[0] <= MAX_FLOPPY_NOTE) {
+        currentPeriod[subAddress] = originalPeriod[subAddress] = noteDoubleTicks[payload[0]];
+      }
       break;
     case NETBYTE_DEV_NOTEOFF: // Note Off
       currentPeriod[subAddress] = originalPeriod[subAddress] = 0;
