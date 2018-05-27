@@ -18,8 +18,8 @@
 // First and last supported notes (any notes outside this range will be ignored, first note will be
 // indexed as zero for shifting
 #define NUM_NOTES 24
-const uint8_t FIRST_NOTE = 48;
-const uint8_t LAST_NOTE = FIRST_NOTE + NUM_NOTES;
+const uint8_t FIRST_NOTE = 79;
+const uint8_t LAST_NOTE = FIRST_NOTE + (NUM_NOTES-1);
 
 #define SHIFT_TIMER_RESOLUTION 1000 //Microsecond resolution for starting and ending notes
 
