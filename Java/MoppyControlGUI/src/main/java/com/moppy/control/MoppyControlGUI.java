@@ -41,7 +41,8 @@ public class MoppyControlGUI {
         final NetworkManager netManager = new NetworkManager(statusBus); // Create NetworkManager for network connections
         netManager.start();
         final MapperCollection mappers = new MapperCollection();
-        final MoppyMIDIReceiverSender receiverSender = new MoppyMIDIReceiverSender(mappers, netManager.getPrimaryBridge());
+        final GUIControlledPostProcessor postProcessor = new GUIControlledPostProcessor();
+        final MoppyMIDIReceiverSender receiverSender = new MoppyMIDIReceiverSender(mappers, postProcessor, netManager.getPrimaryBridge());
         final MoppyMIDISequencer midiSequencer = new MoppyMIDISequencer(statusBus, receiverSender);
 
         // Setup shutdown hook to properly close everything down.
@@ -75,7 +76,7 @@ public class MoppyControlGUI {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new MainWindow(statusBus, midiSequencer, netManager, mappers).setVisible(true);
+                new MainWindow(statusBus, midiSequencer, netManager, mappers, postProcessor).setVisible(true);
             }
         });
     }

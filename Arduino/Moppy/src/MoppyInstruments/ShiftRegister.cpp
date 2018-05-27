@@ -22,7 +22,10 @@ const uint8_t FIRST_NOTE = 48;
 const uint8_t LAST_NOTE = FIRST_NOTE + NUM_NOTES;
 
 #define SHIFT_TIMER_RESOLUTION 1000 //Microsecond resolution for starting and ending notes
-#define PULSE_TICKS 50 // Length of "on" pulse for each bit in ticks (e.g. RESOLUTION * PULSE_TICKS microseconds)
+
+// The velocity of the incoming notes will adjust the pulse length from MIN_PULSE_TICKS to MIN_PULSE_TICKS + PULSE_TICKS_RANGE
+#define MIN_PULSE_TICKS 10 // Minimum length of "on" pulse for each bit in ticks (e.g. RESOLUTION * PULSE_TICKS microseconds)
+#define PULSE_TICKS_RANGE 60 // Maximum number of ticks to add to MIN_PULSE_TICKS for maximum velocity
 
 #define SHIFT_DATA_BYTES 3
 uint8_t ShiftRegister::shiftData[SHIFT_DATA_BYTES]; // 8*3 = 24
@@ -83,7 +86,7 @@ void ShiftRegister::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t p
     case NETBYTE_DEV_NOTEON: // Note On
       if (payload[0] >= FIRST_NOTE && payload[0] <= LAST_NOTE) {
         outputOn(payload[0] - FIRST_NOTE);
-        activeTicksLeft[payload[0] - FIRST_NOTE] = PULSE_TICKS;
+        activeTicksLeft[payload[0] - FIRST_NOTE] = MIN_PULSE_TICKS + ((payload[1] * PULSE_TICKS_RANGE)/127);
         shouldShift = true;
       }
       break;

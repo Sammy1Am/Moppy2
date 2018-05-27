@@ -18,8 +18,8 @@ public class MoppyMessageFactory {
         return new MoppyMessage(new byte[]{START_BYTE, deviceAddress, 0x00, 0x01, DEV_RESET});
     }
 
-    public static MoppyMessage devicePlayNote(byte deviceAddress, byte subAddress, byte noteNumber) {
-        return new MoppyMessage(new byte[]{START_BYTE, deviceAddress, subAddress, 0x02, DEV_PLAYNOTE, noteNumber});
+    public static MoppyMessage devicePlayNote(byte deviceAddress, byte subAddress, byte noteNumber, byte noteVelocity) {
+        return new MoppyMessage(new byte[]{START_BYTE, deviceAddress, subAddress, 0x03, DEV_PLAYNOTE, noteNumber, noteVelocity});
     }
 
     public static MoppyMessage deviceStopNote(byte deviceAddress, byte subAddress, byte noteNumber) {

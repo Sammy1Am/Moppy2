@@ -32,6 +32,7 @@ public class MIDIScriptMapper extends MIDIEventMapper {
         TEST_BINDINGS = SCRIPT_ENGINE.createBindings();
         TEST_BINDINGS.put("c", 0);
         TEST_BINDINGS.put("n", 60);
+        TEST_BINDINGS.put("v", 127);
     }
 
     @Override
@@ -44,6 +45,7 @@ public class MIDIScriptMapper extends MIDIEventMapper {
             eventBindings.put("c", midiMessage.getChannel());
             if (midiMessage.getCommand() == ShortMessage.NOTE_ON || midiMessage.getCommand() == ShortMessage.NOTE_OFF) {
                 eventBindings.put("n", midiMessage.getData1());
+                eventBindings.put("v", midiMessage.getData2());
             }
             try {
 
@@ -57,7 +59,7 @@ public class MIDIScriptMapper extends MIDIEventMapper {
                             // For zero-velocity notes, turn the note off
                             return MoppyMessageFactory.deviceStopNote(resolveDeviceId(eventBindings), resolveSubAddress(eventBindings), resolveNote(eventBindings));
                         }
-                        return MoppyMessageFactory.devicePlayNote(resolveDeviceId(eventBindings), resolveSubAddress(eventBindings), resolveNote(eventBindings));
+                        return MoppyMessageFactory.devicePlayNote(resolveDeviceId(eventBindings), resolveSubAddress(eventBindings), resolveNote(eventBindings), (byte)midiMessage.getData2());
                     case ShortMessage.NOTE_OFF:
                         return MoppyMessageFactory.deviceStopNote(resolveDeviceId(eventBindings), resolveSubAddress(eventBindings), resolveNote(eventBindings));
                     case ShortMessage.PITCH_BEND:
