@@ -9,8 +9,8 @@
  */
 
 // Floppy drives directly connected to the Arduino's digital pins
-//#include "src/MoppyInstruments/FloppyDrives.h"
-//FloppyDrives instrument = FloppyDrives();
+#include "src/MoppyInstruments/FloppyDrives.h"
+FloppyDrives instrument = FloppyDrives();
 
 
 //Uncomment the 2 next lines and comment the 2 lines above this comment to switch to L298N mode
@@ -19,8 +19,8 @@
 
 
 // A single device (e.g. xylophone, drums, etc.) connected to shift registers
-#include "src/MoppyInstruments/ShiftRegister.h"
-ShiftRegister instrument = ShiftRegister();
+//#include "src/MoppyInstruments/ShiftRegister.h"
+//ShiftRegister instrument = ShiftRegister();
 
 /**********
  * MoppyNetwork classes receive messages sent by the Controller application,
