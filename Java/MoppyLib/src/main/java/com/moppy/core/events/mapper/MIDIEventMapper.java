@@ -30,7 +30,7 @@ public abstract class MIDIEventMapper implements EventMapper<MidiMessage> {
                                 // For zero-velocity notes, turn the note off
                                 return MoppyMessageFactory.deviceStopNote(targetAddress, (byte)(midiMessage.getChannel()+1), (byte)midiMessage.getData1());
                             }
-                            return MoppyMessageFactory.devicePlayNote(targetAddress, (byte)(midiMessage.getChannel()+1), (byte)midiMessage.getData1());
+                            return MoppyMessageFactory.devicePlayNote(targetAddress, (byte)(midiMessage.getChannel()+1), (byte)midiMessage.getData1(), (byte)midiMessage.getData2());
                         case ShortMessage.NOTE_OFF:
                             return MoppyMessageFactory.deviceStopNote(targetAddress, (byte)(midiMessage.getChannel()+1), (byte)midiMessage.getData1());
                         case ShortMessage.PITCH_BEND:

@@ -72,7 +72,7 @@
         </Property>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="sequencerPanel.setMidiSequencer(midiSequencer);&#xd;&#xa;statusBus.registerConsumer(sequencerPanel);"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="sequencerPanel.setMidiSequencer(midiSequencer);&#xd;&#xa;sequencerPanel.setPostProcessor(postProc);&#xd;&#xa;statusBus.registerConsumer(sequencerPanel);"/>
         <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="MainWindow_sequencerPanel"/>
       </AuxValues>
     </Component>

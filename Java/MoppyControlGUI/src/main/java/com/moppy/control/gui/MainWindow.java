@@ -1,5 +1,6 @@
 package com.moppy.control.gui;
 
+import com.moppy.control.GUIControlledPostProcessor;
 import com.moppy.control.NetworkManager;
 import com.moppy.core.events.mapper.MapperCollection;
 import com.moppy.core.midi.MoppyMIDISequencer;
@@ -15,16 +16,18 @@ public class MainWindow extends javax.swing.JFrame {
     private final MoppyMIDISequencer midiSequencer;
     private final NetworkManager netManager;
     private final MapperCollection<MidiMessage> mappers;
+    private final GUIControlledPostProcessor postProc;
 
 
     /**
      * Creates new form MainWindow
      */
-    public MainWindow(StatusBus statusBus, MoppyMIDISequencer midiSequencer, NetworkManager netManager, MapperCollection<MidiMessage> mappers) {
+    public MainWindow(StatusBus statusBus, MoppyMIDISequencer midiSequencer, NetworkManager netManager, MapperCollection<MidiMessage> mappers, GUIControlledPostProcessor postProc) {
         this.statusBus = statusBus;
         this.midiSequencer = midiSequencer;
         this.netManager = netManager;
         this.mappers = mappers;
+        this.postProc = postProc;
 
         initComponents();
     }
@@ -38,6 +41,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         sequencerPanel = new com.moppy.control.gui.SequencerPanel();
         sequencerPanel.setMidiSequencer(midiSequencer);
+        sequencerPanel.setPostProcessor(postProc);
         statusBus.registerConsumer(sequencerPanel);
         jScrollPane2 = new javax.swing.JScrollPane();
         mapperCollectionPanel = new com.moppy.control.gui.mapperpanel.MapperCollectionPanel();
