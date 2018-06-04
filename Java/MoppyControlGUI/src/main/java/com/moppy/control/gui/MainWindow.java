@@ -3,6 +3,7 @@ package com.moppy.control.gui;
 import com.moppy.control.GUIControlledPostProcessor;
 import com.moppy.control.NetworkManager;
 import com.moppy.core.events.mapper.MapperCollection;
+import com.moppy.core.midi.MoppyMIDIReceiverSender;
 import com.moppy.core.midi.MoppyMIDISequencer;
 import com.moppy.core.status.StatusBus;
 import javax.sound.midi.MidiMessage;
@@ -13,6 +14,7 @@ import javax.sound.midi.MidiMessage;
 public class MainWindow extends javax.swing.JFrame {
 
     private final StatusBus statusBus;
+    private final MoppyMIDIReceiverSender receiverSender;
     private final MoppyMIDISequencer midiSequencer;
     private final NetworkManager netManager;
     private final MapperCollection<MidiMessage> mappers;
@@ -22,8 +24,9 @@ public class MainWindow extends javax.swing.JFrame {
     /**
      * Creates new form MainWindow
      */
-    public MainWindow(StatusBus statusBus, MoppyMIDISequencer midiSequencer, NetworkManager netManager, MapperCollection<MidiMessage> mappers, GUIControlledPostProcessor postProc) {
+    public MainWindow(StatusBus statusBus, MoppyMIDIReceiverSender receiverSender, MoppyMIDISequencer midiSequencer, NetworkManager netManager, MapperCollection<MidiMessage> mappers, GUIControlledPostProcessor postProc) {
         this.statusBus = statusBus;
+        this.receiverSender = receiverSender;
         this.midiSequencer = midiSequencer;
         this.netManager = netManager;
         this.mappers = mappers;
@@ -40,6 +43,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void initComponents() {
 
         sequencerPanel = new com.moppy.control.gui.SequencerPanel();
+        sequencerPanel.setReceiverSender(receiverSender);
         sequencerPanel.setMidiSequencer(midiSequencer);
         sequencerPanel.setPostProcessor(postProc);
         statusBus.registerConsumer(sequencerPanel);
