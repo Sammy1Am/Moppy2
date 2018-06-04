@@ -2,6 +2,7 @@ package com.moppy.control.gui;
 
 import com.moppy.control.GUIControlledPostProcessor;
 import com.moppy.control.MoppyPreferences;
+import com.moppy.core.midi.MoppyMIDIReceiverSender;
 import com.moppy.core.midi.MoppyMIDISequencer;
 import com.moppy.core.status.StatusConsumer;
 import com.moppy.core.status.StatusUpdate;
@@ -11,9 +12,14 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -29,9 +35,15 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
     private static final String BTN_PLAY = "⏵";
     private static final String BTN_PAUSE = "⏸";
 
+    private MoppyMIDIReceiverSender receiverSender;
     private MoppyMIDISequencer midiSequencer;
     private GUIControlledPostProcessor postProc;
     private final Timer sequenceProgressUpdateTimer;
+
+    private Map<String, MidiDevice.Info> midiInDevices = new HashMap<>();
+    private Map<String, MidiDevice.Info> midiOutDevices = new HashMap<>();
+    private MidiDevice currentMidiInDevice = null;
+    private MidiDevice currentMidiOutDevice = null;
 
     /**
      * Creates new form SequencerPanel
@@ -43,6 +55,11 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
 
         initComponents();
         setControlsEnabled(false); // Leave these disabled until we've loaded a sequence
+        refreshMidiDevices();
+    }
+
+     public void setReceiverSender(MoppyMIDIReceiverSender receiverSender) {
+        this.receiverSender = receiverSender;
     }
 
     public void setMidiSequencer(MoppyMIDISequencer midiSequencer) {
@@ -51,6 +68,33 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
 
     public void setPostProcessor(GUIControlledPostProcessor postProc) {
         this.postProc = postProc;
+    }
+
+    private void refreshMidiDevices() {
+        try{
+            // Get all MIDI devices and add them to the devices maps based on capabilities
+            for (MidiDevice.Info mdi : MidiSystem.getMidiDeviceInfo()) {
+                if (MidiSystem.getMidiDevice(mdi).getMaxTransmitters() != 0) {
+                    midiInDevices.put(mdi.getName(), mdi);
+                }
+
+                if (MidiSystem.getMidiDevice(mdi).getMaxReceivers() != 0){
+                    midiOutDevices.put(mdi.getName(), mdi);
+                }
+            }
+        }
+        catch (Exception ex) {
+            Logger.getLogger(SequencerPanel.class.getName()).log(Level.WARNING, "Exception getting list of MIDI devices-- MIDI In/Out will be unavailable", ex);
+        }
+
+        midiInCB.removeAllItems();
+        midiOutCB.removeAllItems();
+
+        midiInCB.addItem("None");
+        midiOutCB.addItem("None");
+
+        midiInDevices.keySet().forEach((key) -> midiInCB.addItem(key));
+        midiOutDevices.keySet().forEach((key) -> midiOutCB.addItem(key));
     }
 
     /**
@@ -72,6 +116,10 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
         volumeSlider = new javax.swing.JSlider();
         volumeSliderLabel = new javax.swing.JLabel();
         volumeOverrideCB = new javax.swing.JCheckBox();
+        midiInLabel = new javax.swing.JLabel();
+        midiInCB = new javax.swing.JComboBox<>();
+        midiOutLabel = new javax.swing.JLabel();
+        midiOutCB = new javax.swing.JComboBox<>();
 
         sequenceFileChooser.setCurrentDirectory(new File(MoppyPreferences.getConfiguration().getFileLoadDirectory()));
         sequenceFileChooser.setDialogTitle("Select MIDI File");
@@ -89,6 +137,8 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                 loadFileButtonActionPerformed(evt);
             }
         });
+
+        controlsPane.setMinimumSize(new java.awt.Dimension(400, 149));
 
         sequenceCurrentTimeLabel.setText("00:00");
 
@@ -147,6 +197,26 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
             }
         });
 
+        midiInLabel.setText("MIDI In:");
+        midiInLabel.setToolTipText("MIDI device to receive events from");
+
+        midiInCB.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        midiInCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                midiInCBActionPerformed(evt);
+            }
+        });
+
+        midiOutLabel.setText("MIDI Out:");
+        midiOutLabel.setToolTipText("MIDI device to send all raw MIDI events to.");
+
+        midiOutCB.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        midiOutCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                midiOutCBActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout controlsPaneLayout = new javax.swing.GroupLayout(controlsPane);
         controlsPane.setLayout(controlsPaneLayout);
         controlsPaneLayout.setHorizontalGroup(
@@ -158,24 +228,34 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                         .addComponent(sequenceCurrentTimeLabel)
                         .addGap(175, 362, Short.MAX_VALUE))
                     .addGroup(controlsPaneLayout.createSequentialGroup()
-                        .addComponent(stopButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, controlsPaneLayout.createSequentialGroup()
-                                .addComponent(sequenceSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(controlsPaneLayout.createSequentialGroup()
+                                .addComponent(stopButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(sequenceTotalTimeLabel))
+                                .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, controlsPaneLayout.createSequentialGroup()
+                                        .addComponent(sequenceSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(sequenceTotalTimeLabel))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, controlsPaneLayout.createSequentialGroup()
+                                        .addComponent(playButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(volumeSliderLabel)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(volumeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, controlsPaneLayout.createSequentialGroup()
-                                .addComponent(playButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(volumeSliderLabel)
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(volumeOverrideCB))
+                            .addGroup(controlsPaneLayout.createSequentialGroup()
+                                .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(midiInLabel)
+                                    .addComponent(midiOutLabel))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(volumeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(midiOutCB, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(midiInCB, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addContainerGap())))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, controlsPaneLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(volumeOverrideCB)
-                .addContainerGap())
         );
         controlsPaneLayout.setVerticalGroup(
             controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -197,7 +277,15 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                         .addComponent(volumeSliderLabel)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(volumeOverrideCB)
-                .addContainerGap(64, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(midiInLabel)
+                    .addComponent(midiInCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(midiOutLabel)
+                    .addComponent(midiOutCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -275,11 +363,62 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
         postProc.setOverrideVelocity(volumeOverrideCB.isSelected());
     }//GEN-LAST:event_volumeOverrideCBActionPerformed
 
+    private void midiOutCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_midiOutCBActionPerformed
+        if (receiverSender == null) {
+            return; // We can't do anything if the receiverSender hasn't been initialized / set yet.
+        }
+
+        String selectedName = midiOutCB.getSelectedItem().toString();
+
+        if (midiOutDevices.containsKey(selectedName)) {
+            try {
+                currentMidiOutDevice = MidiSystem.getMidiDevice(midiOutDevices.get(selectedName));
+                currentMidiOutDevice.open();
+                receiverSender.setMidiThru(MidiSystem.getMidiDevice(midiOutDevices.get(selectedName)).getReceiver());
+            } catch (MidiUnavailableException ex) {
+                Logger.getLogger(SequencerPanel.class.getName()).log(Level.SEVERE, null, ex);
+                midiOutCB.setSelectedIndex(0); // On exception, set menu back to "None"
+            }
+        } else {
+            receiverSender.setMidiThru(null); // Disable thru sending
+        }
+    }//GEN-LAST:event_midiOutCBActionPerformed
+
+    private void midiInCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_midiInCBActionPerformed
+        // If we'd previously selected a MIDI In device, remove us as a receiver so we're not getting
+        // events from it.
+        if (currentMidiInDevice != null) {
+            currentMidiInDevice.close();
+        }
+
+        if (receiverSender == null) {
+            return; // We can't do anything if the receiverSender hasn't been initialized / set yet.
+        }
+
+        String selectedName = midiInCB.getSelectedItem().toString();
+
+        if (midiInDevices.containsKey(selectedName)) {
+            try {
+                // Set currentMidiInDevice so we can remove ourselves as its receiver later
+                currentMidiInDevice = MidiSystem.getMidiDevice(midiInDevices.get(selectedName));
+                currentMidiInDevice.open();
+                currentMidiInDevice.getTransmitter().setReceiver(receiverSender);
+            } catch (MidiUnavailableException ex) {
+                Logger.getLogger(SequencerPanel.class.getName()).log(Level.SEVERE, null, ex);
+                midiInCB.setSelectedIndex(0); // On exception, set menu back to "None"
+            }
+        }
+    }//GEN-LAST:event_midiInCBActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel controlsPane;
     private javax.swing.JLabel fileNameLabel;
     private javax.swing.JButton loadFileButton;
+    private javax.swing.JComboBox<String> midiInCB;
+    private javax.swing.JLabel midiInLabel;
+    private javax.swing.JComboBox<String> midiOutCB;
+    private javax.swing.JLabel midiOutLabel;
     private javax.swing.JButton playButton;
     private javax.swing.JLabel sequenceCurrentTimeLabel;
     private javax.swing.JFileChooser sequenceFileChooser;

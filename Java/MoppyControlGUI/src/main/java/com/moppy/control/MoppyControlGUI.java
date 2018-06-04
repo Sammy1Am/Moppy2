@@ -76,7 +76,7 @@ public class MoppyControlGUI {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new MainWindow(statusBus, midiSequencer, netManager, mappers, postProcessor).setVisible(true);
+                new MainWindow(statusBus, receiverSender, midiSequencer, netManager, mappers, postProcessor).setVisible(true);
             }
         });
     }
