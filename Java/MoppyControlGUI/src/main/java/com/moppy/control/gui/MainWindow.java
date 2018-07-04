@@ -1,6 +1,7 @@
 package com.moppy.control.gui;
 
 import com.moppy.control.GUIControlledPostProcessor;
+import com.moppy.control.MoppyPreferences;
 import com.moppy.control.NetworkManager;
 import com.moppy.core.events.mapper.MapperCollection;
 import com.moppy.core.midi.MoppyMIDIReceiverSender;
@@ -58,7 +59,13 @@ public class MainWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Moppy Control");
         setMinimumSize(new java.awt.Dimension(1024, 600));
-        setSize(new java.awt.Dimension(800, 600));
+        setPreferredSize(MoppyPreferences.getConfiguration().getMainWindowSize());
+        setSize(MoppyPreferences.getConfiguration().getMainWindowSize());
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                formComponentResized(evt);
+            }
+        });
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -106,6 +113,10 @@ public class MainWindow extends javax.swing.JFrame {
         // Save our mappers before closing
         mapperCollectionPanel.saveMappersToConfig();
     }//GEN-LAST:event_formWindowClosing
+
+    private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
+        MoppyPreferences.getConfiguration().setMainWindowSize(this.getSize());
+    }//GEN-LAST:event_formComponentResized
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

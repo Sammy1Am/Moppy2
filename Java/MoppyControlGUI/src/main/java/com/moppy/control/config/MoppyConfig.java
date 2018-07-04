@@ -4,6 +4,7 @@ import com.moppy.core.events.mapper.scripts.ConditionScripts;
 import com.moppy.core.events.mapper.scripts.DeviceAddressScripts;
 import com.moppy.core.events.mapper.scripts.NoteScripts;
 import com.moppy.core.events.mapper.scripts.SubAddressScripts;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
@@ -16,6 +17,7 @@ public class MoppyConfig {
     // Sequencer
     private String fileLoadDirectory = ".";
     private boolean autoReset = false;
+    private Dimension mainWindowSize = new Dimension(1024, 600);
 
     // Mappers
     private List<MIDIScriptMapperConfig> mapperConfigs = new ArrayList<>();
