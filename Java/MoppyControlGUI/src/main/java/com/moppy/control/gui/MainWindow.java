@@ -8,6 +8,7 @@ import com.moppy.core.midi.MoppyMIDIReceiverSender;
 import com.moppy.core.midi.MoppyMIDISequencer;
 import com.moppy.core.status.StatusBus;
 import javax.sound.midi.MidiMessage;
+import javax.swing.JSplitPane;
 
 /**
  *
@@ -43,18 +44,20 @@ public class MainWindow extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jSplitPane1 = new javax.swing.JSplitPane();
+        topPanel = new javax.swing.JPanel();
         sequencerPanel = new com.moppy.control.gui.SequencerPanel();
         sequencerPanel.setReceiverSender(receiverSender);
         sequencerPanel.setMidiSequencer(midiSequencer);
         sequencerPanel.setPostProcessor(postProc);
         statusBus.registerConsumer(sequencerPanel);
-        jScrollPane2 = new javax.swing.JScrollPane();
-        mapperCollectionPanel = new com.moppy.control.gui.mapperpanel.MapperCollectionPanel();
-        mapperCollectionPanel.initMapperCollectionPanel(mappers);
-        statusBus.registerConsumer(mapperCollectionPanel);
         networkPanel = new com.moppy.control.gui.netpanel.NetworkPanel();
         networkPanel.setNetworkManager(netManager);
         statusBus.registerConsumer(networkPanel);
+        bottomPanel = new javax.swing.JScrollPane();
+        mapperCollectionPanel = new com.moppy.control.gui.mapperpanel.MapperCollectionPanel();
+        mapperCollectionPanel.initMapperCollectionPanel(mappers);
+        statusBus.registerConsumer(mapperCollectionPanel);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Moppy Control");
@@ -72,38 +75,41 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
 
-        sequencerPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jSplitPane1.setDividerLocation(MoppyPreferences.getConfiguration().getMainWindowDividerPosition());
+        jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        jSplitPane1.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                jSplitPane1PropertyChange(evt);
+            }
+        });
 
-        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        jScrollPane2.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        jScrollPane2.setViewportView(mapperCollectionPanel);
+        topPanel.setLayout(new javax.swing.BoxLayout(topPanel, javax.swing.BoxLayout.LINE_AXIS));
+
+        sequencerPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        sequencerPanel.setMinimumSize(new java.awt.Dimension(400, 230));
+        topPanel.add(sequencerPanel);
 
         networkPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        topPanel.add(networkPanel);
+
+        jSplitPane1.setTopComponent(topPanel);
+
+        bottomPanel.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        bottomPanel.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        bottomPanel.setMinimumSize(new java.awt.Dimension(23, 180));
+        bottomPanel.setViewportView(mapperCollectionPanel);
+
+        jSplitPane1.setBottomComponent(bottomPanel);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(sequencerPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(networkPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
+            .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1021, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sequencerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(networkPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(jSplitPane1)
         );
 
         pack();
@@ -118,11 +124,19 @@ public class MainWindow extends javax.swing.JFrame {
         MoppyPreferences.getConfiguration().setMainWindowSize(this.getSize());
     }//GEN-LAST:event_formComponentResized
 
+    private void jSplitPane1PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jSplitPane1PropertyChange
+        if (evt.getPropertyName().equals(JSplitPane.DIVIDER_LOCATION_PROPERTY)) {
+            MoppyPreferences.getConfiguration().setMainWindowDividerPosition(jSplitPane1.getDividerLocation());
+        }
+    }//GEN-LAST:event_jSplitPane1PropertyChange
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane bottomPanel;
+    private javax.swing.JSplitPane jSplitPane1;
     private com.moppy.control.gui.mapperpanel.MapperCollectionPanel mapperCollectionPanel;
     private com.moppy.control.gui.netpanel.NetworkPanel networkPanel;
     private com.moppy.control.gui.SequencerPanel sequencerPanel;
+    private javax.swing.JPanel topPanel;
     // End of variables declaration//GEN-END:variables
 }
