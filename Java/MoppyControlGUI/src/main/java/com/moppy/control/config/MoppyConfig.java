@@ -18,6 +18,7 @@ public class MoppyConfig {
     private String fileLoadDirectory = ".";
     private boolean autoReset = false;
     private Dimension mainWindowSize = new Dimension(1024, 600);
+    private int mainWindowDividerPosition = 300;
 
     // Mappers
     private List<MIDIScriptMapperConfig> mapperConfigs = new ArrayList<>();
