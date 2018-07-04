@@ -40,6 +40,7 @@ public class MapperPanel extends javax.swing.JPanel {
         DEVICEADDRESS_MAP.put("Custom", "");
 
         SUBADDRESS_MAP.put(SubAddressScripts.SUB_ADDRESS_PER_CHANNEL.displayName(), SubAddressScripts.SUB_ADDRESS_PER_CHANNEL.toString());
+        SUBADDRESS_MAP.put(SubAddressScripts.ROUND_ROBIN.displayName(), SubAddressScripts.ROUND_ROBIN.toString());
         SUBADDRESS_MAP.put("Custom", "");
 
         NOTE_MAP.put(NoteScripts.FORCE_INTO_RANGE.displayName(), NoteScripts.FORCE_INTO_RANGE.toString());
