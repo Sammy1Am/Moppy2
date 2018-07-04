@@ -64,6 +64,7 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
 
     public void setMidiSequencer(MoppyMIDISequencer midiSequencer) {
         this.midiSequencer = midiSequencer;
+        midiSequencer.setAutoReset(autoResetCB.isSelected());
     }
 
     public void setPostProcessor(GUIControlledPostProcessor postProc) {
@@ -120,6 +121,8 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
         midiInCB = new javax.swing.JComboBox<>();
         midiOutLabel = new javax.swing.JLabel();
         midiOutCB = new javax.swing.JComboBox<>();
+        autoResetCB = new javax.swing.JCheckBox();
+        autoResetCB.setSelected(MoppyPreferences.getConfiguration().isAutoReset());
 
         sequenceFileChooser.setCurrentDirectory(new File(MoppyPreferences.getConfiguration().getFileLoadDirectory()));
         sequenceFileChooser.setDialogTitle("Select MIDI File");
@@ -165,6 +168,7 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
         sequenceTotalTimeLabel.setText("00:00");
 
         stopButton.setText("⏹");
+        stopButton.setToolTipText("Stop / Reset instruments");
         stopButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 stopButtonActionPerformed(evt);
@@ -173,6 +177,7 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
 
         playButton.setFont(playButton.getFont().deriveFont(playButton.getFont().getSize()+6f));
         playButton.setText("⏵");
+        playButton.setToolTipText("Play / Pause sequence playback");
         playButton.setMargin(new java.awt.Insets(2, 14, 5, 14));
         playButton.setMaximumSize(new java.awt.Dimension(49, 23));
         playButton.addActionListener(new java.awt.event.ActionListener() {
@@ -217,6 +222,14 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
             }
         });
 
+        autoResetCB.setText("Auto Reset");
+        autoResetCB.setToolTipText("Resets the instruments when a sequence ends (when unchecked, use the Stop button to reset)");
+        autoResetCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                autoResetCBActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout controlsPaneLayout = new javax.swing.GroupLayout(controlsPane);
         controlsPane.setLayout(controlsPaneLayout);
         controlsPaneLayout.setHorizontalGroup(
@@ -255,7 +268,10 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                                     .addComponent(midiOutCB, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(midiInCB, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(0, 0, Short.MAX_VALUE)))
-                        .addContainerGap())))
+                        .addContainerGap())
+                    .addGroup(controlsPaneLayout.createSequentialGroup()
+                        .addComponent(autoResetCB)
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         controlsPaneLayout.setVerticalGroup(
             controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -285,7 +301,9 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                 .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(midiOutLabel)
                     .addComponent(midiOutCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(autoResetCB)
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -410,8 +428,16 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
         }
     }//GEN-LAST:event_midiInCBActionPerformed
 
+    private void autoResetCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_autoResetCBActionPerformed
+        if (midiSequencer != null) {
+            midiSequencer.setAutoReset(autoResetCB.isSelected());
+        }
+        MoppyPreferences.getConfiguration().setAutoReset(autoResetCB.isSelected());
+    }//GEN-LAST:event_autoResetCBActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox autoResetCB;
     private javax.swing.JPanel controlsPane;
     private javax.swing.JLabel fileNameLabel;
     private javax.swing.JButton loadFileButton;

@@ -28,8 +28,10 @@ public class StatusUpdate {
 
     public static StatusUpdate SEQUENCE_START = new StatusUpdate(StatusType.SEQUENCE_START, Optional.empty());
     public static StatusUpdate SEQUENCE_PAUSE = new StatusUpdate(StatusType.SEQUENCE_PAUSE, Optional.empty());
-    public static StatusUpdate SEQUENCE_END = new StatusUpdate(StatusType.SEQUENCE_END, Optional.empty());
 
+    public static StatusUpdate sequenceEnd(boolean doReset) {
+        return new StatusUpdate(StatusType.SEQUENCE_END, Optional.of(doReset));
+    }
     public static StatusUpdate tempoChange(float tempo) {
         return new StatusUpdate(StatusType.SEQUENCE_TEMPO_CHANGE, Optional.of(tempo));
     }

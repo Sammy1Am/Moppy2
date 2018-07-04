@@ -14,6 +14,7 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
+import lombok.Setter;
 
 /**
  * Wrapper around the Java MIDI sequencer for playing MIDI files.
@@ -24,6 +25,8 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
     private static final Logger LOG = Logger.getLogger(MoppyMIDISequencer.class.getName());
     private final Sequencer seq;
     private final StatusBus statusBus;
+    @Setter
+    private boolean autoReset = false;
 
     public MoppyMIDISequencer(StatusBus statusBus, MoppyMIDIReceiverSender receiverSender) throws MidiUnavailableException {
         this.statusBus = statusBus;
@@ -58,7 +61,7 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
         else if (meta.getType() == 47) {
             seq.setTickPosition(0); // Reset sequencer so we can press "play" again right away
             //MrSolidSnake745: Exposing end of sequence event to status consumers
-            statusBus.receiveUpdate(StatusUpdate.SEQUENCE_END);
+            statusBus.receiveUpdate(StatusUpdate.sequenceEnd(autoReset));
         }
     }
 
@@ -75,7 +78,7 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
     public void stop() {
         seq.stop();
         seq.setTickPosition(0);
-        statusBus.receiveUpdate(StatusUpdate.SEQUENCE_END);
+        statusBus.receiveUpdate(StatusUpdate.sequenceEnd(true)); // Always reset when stop button is pressed
     }
 
     public boolean isPlaying() {
