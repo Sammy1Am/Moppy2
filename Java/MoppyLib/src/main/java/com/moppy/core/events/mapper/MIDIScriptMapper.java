@@ -6,6 +6,9 @@ import com.moppy.core.events.mapper.scripts.ConditionScripts;
 import com.moppy.core.events.mapper.scripts.DeviceAddressScripts;
 import com.moppy.core.events.mapper.scripts.NoteScripts;
 import com.moppy.core.events.mapper.scripts.SubAddressScripts;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.Bindings;
@@ -22,6 +25,10 @@ public class MIDIScriptMapper extends MIDIEventMapper {
 
     private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("javascript");
     private final static Bindings TEST_BINDINGS;
+    private final Bindings localBindings = SCRIPT_ENGINE.createBindings();
+
+    private final HashMap<Integer, Integer> currentNotes = new HashMap<>(); // Sub-Address to Note map
+    private int nextOpenRoundRobinSubAddress = 0;
 
     private String conditionScript = ConditionScripts.ALL_EVENTS.toString();
     private String deviceAddressScript = DeviceAddressScripts.DEVICE_ONE.toString();
@@ -35,21 +42,32 @@ public class MIDIScriptMapper extends MIDIEventMapper {
         TEST_BINDINGS.put("v", 127);
     }
 
+    public MIDIScriptMapper() {
+        // Set some sane defaults for testing
+        localBindings.put("c", 0);
+        localBindings.put("n", 60);
+        localBindings.put("v", 127);
+        localBindings.put("midiCommand", ShortMessage.NOTE_ON);
+
+        // Setup utility functions
+        localBindings.put("nextRoundRobinSubAddress", (Function<Integer, Integer>)this::nextRoundRobinSubAddress);
+    }
+
     @Override
     public MoppyMessage mapEvent(MidiMessage event) {
         if (event instanceof ShortMessage) {
             ShortMessage midiMessage = (ShortMessage) event;
 
             // Bind message variables
-            Bindings eventBindings = SCRIPT_ENGINE.createBindings();
-            eventBindings.put("c", midiMessage.getChannel());
+            localBindings.put("c", midiMessage.getChannel());
+            localBindings.put("midiCommand", midiMessage.getCommand());
             if (midiMessage.getCommand() == ShortMessage.NOTE_ON || midiMessage.getCommand() == ShortMessage.NOTE_OFF) {
-                eventBindings.put("n", midiMessage.getData1());
-                eventBindings.put("v", midiMessage.getData2());
+                localBindings.put("n", midiMessage.getData1());
+                localBindings.put("v", midiMessage.getData2());
             }
             try {
 
-                if (!resolveCondition(eventBindings)) {
+                if (!resolveCondition(localBindings)) {
                     return null; // If the condition doesn't match, just give up
                 }
 
@@ -57,11 +75,11 @@ public class MIDIScriptMapper extends MIDIEventMapper {
                     case ShortMessage.NOTE_ON:
                         if (midiMessage.getData2() == 0) {
                             // For zero-velocity notes, turn the note off
-                            return MoppyMessageFactory.deviceStopNote(resolveDeviceId(eventBindings), resolveSubAddress(eventBindings), resolveNote(eventBindings));
+                            return MoppyMessageFactory.deviceStopNote(resolveDeviceId(localBindings), resolveSubAddress(localBindings), resolveNote(localBindings));
                         }
-                        return MoppyMessageFactory.devicePlayNote(resolveDeviceId(eventBindings), resolveSubAddress(eventBindings), resolveNote(eventBindings), (byte)midiMessage.getData2());
+                        return MoppyMessageFactory.devicePlayNote(resolveDeviceId(localBindings), resolveSubAddress(localBindings), resolveNote(localBindings), (byte)midiMessage.getData2());
                     case ShortMessage.NOTE_OFF:
-                        return MoppyMessageFactory.deviceStopNote(resolveDeviceId(eventBindings), resolveSubAddress(eventBindings), resolveNote(eventBindings));
+                        return MoppyMessageFactory.deviceStopNote(resolveDeviceId(localBindings), resolveSubAddress(localBindings), resolveNote(localBindings));
                     case ShortMessage.PITCH_BEND:
                         /*
                         MIDI pitch bends are weird.  This next line converts the two 7-bit pitch bend values
@@ -69,7 +87,7 @@ public class MIDIScriptMapper extends MIDIEventMapper {
                         short where 0 = no bend, and with a range of -8192 to 8191
                         */
                         short pitchBend = (short)(((midiMessage.getData2() << 7) + midiMessage.getData1()) - 8192);
-                        return MoppyMessageFactory.devicePitchBend(resolveDeviceId(eventBindings), resolveSubAddress(eventBindings), pitchBend);
+                        return MoppyMessageFactory.devicePitchBend(resolveDeviceId(localBindings), resolveSubAddress(localBindings), pitchBend);
                 }
             } catch (ScriptException | ClassCastException ex) {
                  Logger.getLogger(MIDIScriptMapper.class.getName()).log(Level.WARNING, null, ex);
@@ -111,23 +129,51 @@ public class MIDIScriptMapper extends MIDIEventMapper {
     // Setters will attempt to evaluate the new script before setting it.
 
     public void setConditionScript(String conditionScript) throws ScriptException {
-        boolean checkOutput = (boolean)SCRIPT_ENGINE.eval(conditionScript, TEST_BINDINGS);
+        boolean checkOutput = (boolean)SCRIPT_ENGINE.eval(conditionScript, localBindings);
         this.conditionScript = conditionScript;
     }
 
     public void setDeviceAddressScript(String deviceAddressScript) throws ScriptException {
-        byte checkOutput = ((Number)SCRIPT_ENGINE.eval(deviceAddressScript, TEST_BINDINGS)).byteValue();
+        byte checkOutput = ((Number)SCRIPT_ENGINE.eval(deviceAddressScript, localBindings)).byteValue();
         this.deviceAddressScript = deviceAddressScript;
     }
 
     public void setSubAddressScript(String subAddressScript) throws ScriptException {
-        byte checkOutput = ((Number)SCRIPT_ENGINE.eval(subAddressScript, TEST_BINDINGS)).byteValue();
+        byte checkOutput = ((Number)SCRIPT_ENGINE.eval(subAddressScript, localBindings)).byteValue();
         this.subAddressScript = subAddressScript;
     }
 
     public void setNoteScript(String noteScript) throws ScriptException {
-        byte checkOutput = ((Number)SCRIPT_ENGINE.eval(noteScript, TEST_BINDINGS)).byteValue();
+        byte checkOutput = ((Number)SCRIPT_ENGINE.eval(noteScript, localBindings)).byteValue();
         this.noteScript = noteScript;
     }
 
+    ////
+    // Utility functions accessible from scripts
+    ////
+
+    private int nextRoundRobinSubAddress(Integer numberOfChannels) {
+        int incomingNote = (int)localBindings.get("n"); // NOTE: Could be leftover binding from previously handled message!  Confirm this event is a NOTE_ON or NOTE_OFF event!
+        if (((int)localBindings.get("midiCommand")) == ShortMessage.NOTE_ON) {
+            // If this is a note on event, increment the sub address to the next available
+            nextOpenRoundRobinSubAddress = nextOpenRoundRobinSubAddress%8+1;
+            // Set the note in the map so we know what to turn off the next time we get a note off event
+            currentNotes.put(nextOpenRoundRobinSubAddress, incomingNote);
+            return nextOpenRoundRobinSubAddress;
+        } else if (((int)localBindings.get("midiCommand")) == ShortMessage.NOTE_OFF
+                && currentNotes.containsValue(incomingNote)) {
+            int subAddressToTurnOff = numberOfChannels+1; // Initialize to an address outside the rotation
+
+            // If we're currently playing this note somewhere, figure out where it is, and then remove it from the map
+            for (Entry<Integer, Integer> e : currentNotes.entrySet()) {
+                if (e.getValue().equals(incomingNote)) {
+                    subAddressToTurnOff = e.getKey();
+                    break;
+                }
+            }
+            currentNotes.remove(subAddressToTurnOff);
+            return subAddressToTurnOff;
+        }
+        return numberOfChannels+1; // If it's not a note on or off, push it outside the range (so hopefully it's ignored)
+    }
 }
