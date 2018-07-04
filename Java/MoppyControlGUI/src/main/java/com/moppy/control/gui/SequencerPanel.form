@@ -135,6 +135,10 @@
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="autoResetCB" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      </Group>
                   </Group>
               </Group>
           </Group>
@@ -174,7 +178,9 @@
                       <Component id="midiOutLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="midiOutCB" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="16" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="autoResetCB" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="23" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -210,6 +216,7 @@
         <Component class="javax.swing.JButton" name="stopButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x23f9;"/>
+            <Property name="toolTipText" type="java.lang.String" value="Stop / Reset instruments"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="stopButtonActionPerformed"/>
@@ -223,6 +230,7 @@
               </FontInfo>
             </Property>
             <Property name="text" type="java.lang.String" value="&#x23f5;"/>
+            <Property name="toolTipText" type="java.lang.String" value="Play / Pause sequence playback"/>
             <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
               <Insets value="[2, 14, 5, 14]"/>
             </Property>
@@ -301,6 +309,18 @@
           </Events>
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+          </AuxValues>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="autoResetCB">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Auto Reset"/>
+            <Property name="toolTipText" type="java.lang.String" value="Resets the instruments when a sequence ends (when unchecked, use the Stop button to reset)"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="autoResetCBActionPerformed"/>
+          </Events>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="autoResetCB.setSelected(MoppyPreferences.getConfiguration().isAutoReset());&#xd;&#xa;"/>
           </AuxValues>
         </Component>
       </SubComponents>

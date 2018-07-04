@@ -13,7 +13,11 @@ import lombok.Data;
  */
 @Data
 public class MoppyConfig {
+    // Sequencer
     private String fileLoadDirectory = ".";
+    private boolean autoReset = false;
+
+    // Mappers
     private List<MIDIScriptMapperConfig> mapperConfigs = new ArrayList<>();
 
     public MoppyConfig() {

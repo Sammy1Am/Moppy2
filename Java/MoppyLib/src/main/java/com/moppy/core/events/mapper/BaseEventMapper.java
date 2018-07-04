@@ -22,7 +22,12 @@ public class BaseEventMapper {
             case SEQUENCE_PAUSE:
                 return Arrays.asList(MoppyMessage.SYS_STOP);
             case SEQUENCE_END:
-                return Arrays.asList(MoppyMessage.SYS_STOP, MoppyMessage.SYS_RESET);
+                if ((boolean)statusUpdate.getData().orElse(false)) {
+                    // If doReset, add reset message.
+                    return Arrays.asList(MoppyMessage.SYS_STOP, MoppyMessage.SYS_RESET);
+                } else {
+                    return Arrays.asList(MoppyMessage.SYS_STOP);
+                }
             default:
                 return Collections.emptyList();
         }
