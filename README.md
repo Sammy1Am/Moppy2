@@ -8,3 +8,6 @@ The [wiki](https://github.com/SammyIAm/Moppy2/wiki) has additional information, 
 Have fun!
 
 \* Okay, not _everything_; you'll need to provide all the hardware.
+
+-------
+*If you've been here before but you're confused by all the newness, the original [MoppyClassic](https://github.com/SammyIAm/MoppyClassic) has still been preserved for posterity, but will no longer receive any updates.*
