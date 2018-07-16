@@ -1,20 +1,34 @@
 /*
- * FloppyDrives.cpp
- *
- * Output for controlling floppy drives.  The _original_ Moppy instrument!
+ * FloppyTower.cpp
+ * @author Sammy1Am, Lothean
+ * Output for controlling floppy drives towers, with velocity support!
+ * 1 note, but upto 9 floppy drives !
  */
 #include "MoppyInstrument.h"
-#include "FloppyDrives.h"
+#include "FloppyTower.h"
 
 
+
+bool decayEnabled = true;
+/*
+Allow you to choose wether Exponential Velocity Decay is enabled on your floppy tower
+WARNING : THIS IS A VERY CRUDE AND BODGED IMPLEMENTATION!
+If anybody wants to improve it, please, do it!
+*/
+
+
+
+
+int FloppyTower::velocity; // Isn't that obvious ?
+unsigned int FloppyTower::lastVelocity; // Last time that we decreased the velocity in the Exponential Decay
 // First drive being used for floppies, and the last drive.  Used for calculating
 // step and direction pins.
-const byte FIRST_DRIVE = 1;
-const byte LAST_DRIVE = 9;  // This sketch can handle only up to 9 drives (the max for Arduino Uno)
+int FloppyTower::FIRST_DRIVE = 1;
+int FloppyTower::LAST_DRIVE = 6;  // This sketch can handle only up to 9 drives (the max for Arduino Uno)
 
 // Maximum note number to attempt to play on floppy drives.  It's possible higher notes may work,
 // but they may also cause instability.
-const byte MAX_FLOPPY_NOTE = 71;
+int FloppyTower::MAX_FLOPPY_NOTE = 71;
 
 /*NOTE: The arrays below contain unused zero-indexes to avoid having to do extra
  * math to shift the 1-based subAddresses to 0-based indexes here.  Unlike the previous
@@ -28,27 +42,27 @@ const byte MAX_FLOPPY_NOTE = 71;
  NOTE: Index zero of this array controls the "resetAll" function, and should be the
  same as the largest value in this array
  */
-unsigned int FloppyDrives::MAX_POSITION[] = {158,158,158,158,158,158,158,158,158,158};
+unsigned int FloppyTower::MAX_POSITION[] = {158,158,158,158,158,158,158,158,158,158};
 
 //Array to track the current position of each floppy head.
-unsigned int FloppyDrives::currentPosition[] = {0,0,0,0,0,0,0,0,0,0};
+unsigned int FloppyTower::currentPosition[] = {0,0,0,0,0,0,0,0,0,0};
 
 /*Array to keep track of state of each pin.  Even indexes track the control-pins for toggle purposes.  Odd indexes
  track direction-pins.  LOW = forward, HIGH=reverse
  */
-int FloppyDrives::currentState[] = {0,0,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW};
+int FloppyTower::currentState[] = {0,0,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW};
 
 // Current period assigned to each drive.  0 = off.  Each period is two-ticks (as defined by
 // TIMER_RESOLUTION in MoppyInstrument.h) long.
-unsigned int FloppyDrives::currentPeriod[] = {0,0,0,0,0,0,0,0,0,0};
+unsigned int FloppyTower::currentPeriod[] = {0,0,0,0,0,0,0,0,0,0};
 
-// Tracks the current tick-count for each drive (see FloppyDrives::tick() below)
-unsigned int FloppyDrives::currentTick[] = {0,0,0,0,0,0,0,0,0,0};
+// Tracks the current tick-count for each drive (see FloppyTower::tick() below)
+unsigned int FloppyTower::currentTick[] = {0,0,0,0,0,0,0,0,0,0};
 
 // The period originally set by incoming messages (prior to any modifications from pitch-bending)
-unsigned int FloppyDrives::originalPeriod[] = {0,0,0,0,0,0,0,0,0,0};
+unsigned int FloppyTower::originalPeriod[] = {0,0,0,0,0,0,0,0,0,0};
 
-void FloppyDrives::setup() {
+void FloppyTower::setup() {
 
   // Prepare pins (0 and 1 are reserved for Serial communications)
   pinMode(2, OUTPUT); // Step control 1
@@ -89,7 +103,7 @@ void FloppyDrives::setup() {
 }
 
 // Play startup sound to confirm drive functionality
-void FloppyDrives::startupSound(byte driveNum) {
+void FloppyTower::startupSound(byte driveNum) {
   unsigned int chargeNotes[] = {
       noteDoubleTicks[31],
       noteDoubleTicks[36],
@@ -102,6 +116,7 @@ void FloppyDrives::startupSound(byte driveNum) {
   while(i < 5) {
     if (millis() - 200 > lastRun) {
       lastRun = millis();
+	  velocity = 127;
       currentPeriod[driveNum] = chargeNotes[i++];
     }
   }
@@ -112,7 +127,7 @@ void FloppyDrives::startupSound(byte driveNum) {
 //
 
 // Handles system messages (e.g. sequence start and stop)
-void FloppyDrives::systemMessage(uint8_t command, uint8_t payload[]) {
+void FloppyTower::systemMessage(uint8_t command, uint8_t payload[]) {
   switch(command) {
       // NETBYTE_SYS_PING is handled by the network adapter directly
     case NETBYTE_SYS_RESET: // System reset
@@ -128,7 +143,7 @@ void FloppyDrives::systemMessage(uint8_t command, uint8_t payload[]) {
 }
 
 // Handles device-specific messages (e.g. playing notes)
-void FloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
+void FloppyTower::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
   switch(command) {
     case NETBYTE_DEV_RESET: // Reset
       if (subAddress == 0x00) {
@@ -142,6 +157,7 @@ void FloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t pa
     	// Also set the originalPeriod in-case we pitch-bend
       if (payload[0] <= MAX_FLOPPY_NOTE) {
         currentPeriod[subAddress] = originalPeriod[subAddress] = noteDoubleTicks[payload[0]];
+		velocity = payload[1];
       }
       break;
     case NETBYTE_DEV_NOTEOFF: // Note Off
@@ -167,8 +183,17 @@ void FloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t pa
 Called by the timer interrupt at the specified resolution.  Because this is called extremely often,
 it's crucial that any computations here be kept to a minimum!
  */
-void FloppyDrives::tick()
+void FloppyTower::tick()
 {
+	    if (1000 < lastVelocity && velocity >= 40 && decayEnabled) {
+	  velocity = velocity - 20;
+	  lastVelocity=0;
+	  
+    }
+	else {
+	lastVelocity++;
+	}
+	
   /*
    If there is a period set for control pin 2, count the number of
    ticks that pass, and toggle the pin if the current period is reached.
@@ -180,65 +205,64 @@ void FloppyDrives::tick()
       currentTick[1]=0;
     }
   }
-  if (currentPeriod[2]>0){
+  else {
+  digitalWrite(2, HIGH);
+  }
+  
+  if (currentPeriod[1]>0 && velocity > 40){
     currentTick[2]++;
-    if (currentTick[2] >= currentPeriod[2]){
+    if (currentTick[2] >= currentPeriod[1]){
       togglePin(2,4,5);
       currentTick[2]=0;
     }
   }
-  if (currentPeriod[3]>0){
+  else {
+  digitalWrite(4, HIGH);
+  }
+  if (currentPeriod[1]>0 && velocity > 60) {
     currentTick[3]++;
-    if (currentTick[3] >= currentPeriod[3]){
+    if (currentTick[3] >= currentPeriod[1]){
       togglePin(3,6,7);
       currentTick[3]=0;
     }
   }
-  if (currentPeriod[4]>0){
+  else {
+  digitalWrite(6, HIGH);
+  }
+  if (currentPeriod[1]>0 && velocity > 85){
     currentTick[4]++;
-    if (currentTick[4] >= currentPeriod[4]){
+    if (currentTick[4] >= currentPeriod[1]){
       togglePin(4,8,9);
       currentTick[4]=0;
     }
   }
-  if (currentPeriod[5]>0){
+  else {
+  digitalWrite(8, HIGH);
+  }
+  if (currentPeriod[1]>0 && velocity > 85){
     currentTick[5]++;
-    if (currentTick[5] >= currentPeriod[5]){
+    if (currentTick[5] >= currentPeriod[1]){
       togglePin(5,10,11);
       currentTick[5]=0;
     }
   }
-  if (currentPeriod[6]>0){
+  else {
+  digitalWrite(10, HIGH);
+  }
+
+  if (currentPeriod[1]>0 && velocity > 85){
     currentTick[6]++;
-    if (currentTick[6] >= currentPeriod[6]){
+    if (currentTick[6] >= currentPeriod[1]){
       togglePin(6,12,13);
       currentTick[6]=0;
     }
   }
-  if (currentPeriod[7]>0){
-    currentTick[7]++;
-    if (currentTick[7] >= currentPeriod[7]){
-      togglePin(7,14,15);
-      currentTick[7]=0;
-    }
-  }
-  if (currentPeriod[8]>0){
-    currentTick[8]++;
-    if (currentTick[8] >= currentPeriod[8]){
-      togglePin(8,16,17);
-      currentTick[8]=0;
-    }
-  }
-  if (currentPeriod[9]>0){
-    currentTick[9]++;
-    if (currentTick[9] >= currentPeriod[9]){
-      togglePin(9,18,19);
-      currentTick[9]=0;
-    }
+  else {
+  digitalWrite(12, HIGH);
   }
 }
 
-void FloppyDrives::togglePin(byte driveNum, byte pin, byte direction_pin) {
+void FloppyTower::togglePin(byte driveNum, byte pin, byte direction_pin) {
 
   //Switch directions if end has been reached
   if (currentPosition[driveNum] >= MAX_POSITION[driveNum]) {
@@ -269,21 +293,21 @@ void FloppyDrives::togglePin(byte driveNum, byte pin, byte direction_pin) {
 //
 
 //Not used now, but good for debugging...
-void FloppyDrives::blinkLED(){
+void FloppyTower::blinkLED(){
   digitalWrite(13, HIGH); // set the LED on
   delay(250);              // wait for a second
   digitalWrite(13, LOW);
 }
 
 // Immediately stops all drives
-void FloppyDrives::haltAllDrives() {
+void FloppyTower::haltAllDrives() {
   for (byte d=FIRST_DRIVE;d<=LAST_DRIVE;d++) {
     currentPeriod[d] = 0;
   }
 }
 
 //For a given floppy number, runs the read-head all the way back to 0
-void FloppyDrives::reset(byte driveNum)
+void FloppyTower::reset(byte driveNum)
 {
   currentPeriod[driveNum] = 0; // Stop note
 
@@ -301,7 +325,7 @@ void FloppyDrives::reset(byte driveNum)
 }
 
 // Resets all the drives simultaneously
-void FloppyDrives::resetAll()
+void FloppyTower::resetAll()
 {
 
   // Stop all drives and set to reverse

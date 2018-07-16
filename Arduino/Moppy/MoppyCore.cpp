@@ -12,10 +12,13 @@
 #include "src/MoppyInstruments/FloppyDrives.h"
 FloppyDrives instrument = FloppyDrives();
 
+// One note per arduino, upto 9 drives, velocity support
+//#include "src/MoppyInstruments/FloppyTower.h"
+//FloppyTower instrument = FloppyTower();
 
-//Uncomment the 2 next lines and comment the 2 lines above this comment to switch to L298N mode
+// L298N output to control scanners or stepper motors; please see src/MoppyInstruments/L298N.h for pinout and additionnal info
 //#include "src/MoppyInstruments/L298N.h"
-//L298N instrument = L298N(); // please see src/MoppyInstruments/L298N.h for pinout and additionnal info
+//L298N instrument = L298N();
 
 
 // A single device (e.g. xylophone, drums, etc.) connected to shift registers
