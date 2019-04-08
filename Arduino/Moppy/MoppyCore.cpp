@@ -31,8 +31,14 @@ FloppyDrives instrument = FloppyDrives();
  */
 
 // Standard Arduino HardwareSerial implementation
-#include "src/MoppyNetworks/MoppySerial.h"
-MoppySerial network = MoppySerial(instrument.systemMessage, instrument.deviceMessage);
+//#include "src/MoppyNetworks/MoppySerial.h"
+//MoppySerial network = MoppySerial(instrument.systemMessage, instrument.deviceMessage);
+
+// Standard Arduino HardwareSerial implementation  (Still WIP / Maintaned by Magnusm1709)
+#include "src/MoppyNetworksMidi/MoppyMidi.h"
+MoppyMidi network = MoppyMidi(instrument.deviceMessage);
+
+
 
 //// UDP Implementation using some sort of network stack?  (Not implemented yet)
 // #include "src/MoppyNetworks/MoppyUDP.h"

@@ -129,34 +129,43 @@ void FloppyDrives::systemMessage(uint8_t command, uint8_t payload[]) {
 
 // Handles device-specific messages (e.g. playing notes)
 void FloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
-  switch(command) {
-    case NETBYTE_DEV_RESET: // Reset
-      if (subAddress == 0x00) {
-        resetAll();
-      } else {
-        reset(subAddress);
-      }
-      break;
-    case NETBYTE_DEV_NOTEON: // Note On
-      // Set the current period to the new value to play it immediately
-    	// Also set the originalPeriod in-case we pitch-bend
-      if (payload[0] <= MAX_FLOPPY_NOTE) {
-        currentPeriod[subAddress] = originalPeriod[subAddress] = noteDoubleTicks[payload[0]];
-      }
-      break;
-    case NETBYTE_DEV_NOTEOFF: // Note Off
-      currentPeriod[subAddress] = originalPeriod[subAddress] = 0;
-      break;
-    case NETBYTE_DEV_BENDPITCH: //Pitch bend
-      // A value from -8192 to 8191 representing the pitch deflection
-      int16_t bendDeflection = payload[0] << 8 | payload[1];
-
-      // A whole octave of bend would double the frequency (halve the the period) of notes
-      // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
-      //currentPeriod[subAddress] = originalPeriod[subAddress] / 1.4;
-      currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES*(bendDeflection/(float)8192));
-      break;
-  }
+    /*Serial.print("Command: ");
+    Serial.print(command);
+    Serial.print("\t NetByte: ");
+    Serial.print(NETBYTE_DEV_NOTEOFF);
+    Serial.print("\t Note: ");
+    Serial.println(payload[0]);*/
+    switch(command) {
+        case NETBYTE_DEV_RESET: // Reset
+            if (subAddress == 0x00) {
+                resetAll();
+            } else {
+                reset(subAddress);
+            }
+            break;
+        case NETBYTE_DEV_NOTEON: // Note On
+            // Set the current period to the new value to play it immediately
+            // Also set the originalPeriod in-case we pitch-bend
+            //Serial.println("Right Payload");
+            
+            if (payload[0] <= MAX_FLOPPY_NOTE) {
+                //Serial.println("schould play");
+                currentPeriod[subAddress] = originalPeriod[subAddress] = noteDoubleTicks[payload[0]];
+            }
+            break;
+        case NETBYTE_DEV_NOTEOFF: // Note Off
+            currentPeriod[subAddress] = originalPeriod[subAddress] = 0;
+            break;
+        case NETBYTE_DEV_BENDPITCH: //Pitch bend
+            // A value from -8192 to 8191 representing the pitch deflection
+            int16_t bendDeflection = payload[0] << 8 | payload[1];
+            
+            // A whole octave of bend would double the frequency (halve the the period) of notes
+            // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
+            //currentPeriod[subAddress] = originalPeriod[subAddress] / 1.4;
+            currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES*(bendDeflection/(float)8192));
+            break;
+    }
 }
 
 //
