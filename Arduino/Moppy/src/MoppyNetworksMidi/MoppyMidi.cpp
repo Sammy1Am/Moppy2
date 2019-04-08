@@ -8,7 +8,6 @@
 
 byte actPlayingNote[MAX_SUB_ADDRESS]; // MAX_SUB_ADDRESS = Number of Drives
 MoppyMidi::MoppyMidi(handleDeviceMessage dev) {
-    messageBuffer[0] = START_BYTE;
     deviceHandler = dev;
 }
 
