@@ -73,7 +73,7 @@ void MoppyMidi::readMessages() {
         if(secondByte == 0){
             firstBits[3] = 0;
         }else{
-            if(stereo){
+            if(STEREO){
                 for(int i = 0; i <= MAX_SUB_ADDRESS/2; i++){
                     if(actPlayingNote[i] == 0){
                         actPlayingNote[i] = secondByte;
