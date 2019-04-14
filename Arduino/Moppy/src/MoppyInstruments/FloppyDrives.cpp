@@ -129,12 +129,6 @@ void FloppyDrives::systemMessage(uint8_t command, uint8_t payload[]) {
 
 // Handles device-specific messages (e.g. playing notes)
 void FloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
-    /*Serial.print("Command: ");
-    Serial.print(command);
-    Serial.print("\t NetByte: ");
-    Serial.print(NETBYTE_DEV_NOTEOFF);
-    Serial.print("\t Note: ");
-    Serial.println(payload[0]);*/
     switch(command) {
         case NETBYTE_DEV_RESET: // Reset
             if (subAddress == 0x00) {
