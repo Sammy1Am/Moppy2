@@ -13,7 +13,7 @@
 
 #define MOPPY_BAUD_RATE 31250
 #define STEREO false
-
+#define ONLY3BYTE false
 typedef void (*handleDeviceMessage)(uint8_t, uint8_t, uint8_t[]);
 
 class MoppyMidi {
