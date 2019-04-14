@@ -19,7 +19,7 @@ void MoppyMidi::readMessages() {
     
     // Check if minimum needed data availabel
     // if minimum neede data is not reached it stops the function
-    if(Serial.available() < 3){
+    if(Serial.available() < 3 && ONLY3BYTE){
         return;
     }
     
