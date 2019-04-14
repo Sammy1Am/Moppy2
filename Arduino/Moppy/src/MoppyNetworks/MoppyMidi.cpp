@@ -1,4 +1,4 @@
-#include "../MoppyNetworksMidi/MoppyMidi.h"
+#include "../MoppyNetwork/MoppyMidi.h"
 /*
  * Serial communications implementation for Arduino.  Handler
  * functions are called to consume system and device messages received from
@@ -27,7 +27,7 @@ void MoppyMidi::readMessages() {
     // if it is not a first byte restart the routine
     byte firstByte = Serial.read(); // also called statusByte
     if(firstByte < 128){
-        readMessages();
+        Serial.write(firstByte);
         return;
     }
     
@@ -35,7 +35,8 @@ void MoppyMidi::readMessages() {
     // Check if the byte is a "secondByte"/"thirdByte" (because they are smaller than 128  (0...127))
     byte secondByte = Serial.read(); // Databyte
     if(secondByte > 127){
-        readMessages();
+        Serial.write(firstByte);
+        Serial.write(secondByte);
         return;
     }
     
@@ -43,7 +44,10 @@ void MoppyMidi::readMessages() {
     // Can be deleted because data is not needed
     byte thirdByte = Serial.read(); // dataByte
     if(thirdByte > 127){
-        readMessages();
+        Serial.write(firstByte);
+        Serial.write(secondByte);
+        Serial.write(thirdByte);
+
         return;
     }
     
@@ -80,6 +84,7 @@ void MoppyMidi::readMessages() {
                         deviceHandler(i+1, 0x09, &secondByte);
                         deviceHandler(i+1+MAX_SUB_ADDRESS/2, 0x09, &secondByte);
                         i = MAX_SUB_ADDRESS + 1;
+                        return;
                     }
                 }
             }else{
@@ -88,10 +93,10 @@ void MoppyMidi::readMessages() {
                         actPlayingNote[i] = secondByte;
                         deviceHandler(i+1, 0x09, &secondByte);
                         i = MAX_SUB_ADDRESS + 1;
+                        return;
                     }
                 }
             }
-            return;
         }
     }
     if( (firstBits[1] == 0 && firstBits[2] == 0 && firstBits[3] == 0)){
@@ -99,9 +104,9 @@ void MoppyMidi::readMessages() {
             if(secondByte == actPlayingNote[i]){
                 actPlayingNote[i] = 0;
                 deviceHandler(i+1, 0x08, &secondByte);
+                return;
             }
         }
-        return;
     }
     Serial.write(firstByte);
     Serial.write(secondByte);
