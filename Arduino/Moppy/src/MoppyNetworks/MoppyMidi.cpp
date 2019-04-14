@@ -1,4 +1,5 @@
-#include "../MoppyNetwork/MoppyMidi.h"
+#include "../MoppyNetworks/MoppyMidi.h"
+
 /*
  * Serial communications implementation for Arduino.  Handler
  * functions are called to consume system and device messages received from
@@ -19,7 +20,7 @@ void MoppyMidi::readMessages() {
     
     // Check if minimum needed data availabel
     // if minimum neede data is not reached it stops the function
-    if(Serial.available() < 3 && ONLY3BYTE){
+    if(Serial.available() < 3){
         return;
     }
     
@@ -70,8 +71,6 @@ void MoppyMidi::readMessages() {
     //boolean thirdBits[8] = getBits(thirdByte);
     
     
-    // Check if noteOn command          if not -> stop function
-    // TODO also check NoteOff
     if( (firstBits[1] == 0 && firstBits[2] == 0 && firstBits[3] == 1)){
         if(secondByte == 0){
             firstBits[3] = 0;
@@ -81,8 +80,8 @@ void MoppyMidi::readMessages() {
                     if(actPlayingNote[i] == 0){
                         actPlayingNote[i] = secondByte;
                         actPlayingNote[i+MAX_SUB_ADDRESS/2] = secondByte;
-                        deviceHandler(i+1, 0x09, &secondByte);
-                        deviceHandler(i+1+MAX_SUB_ADDRESS/2, 0x09, &secondByte);
+                        deviceHandler(i+1, NETBYTE_DEV_NOTEON, &secondByte);
+                        deviceHandler(i+1+MAX_SUB_ADDRESS/2, NETBYTE_DEV_NOTEON, &secondByte);
                         i = MAX_SUB_ADDRESS + 1;
                         return;
                     }
@@ -91,7 +90,7 @@ void MoppyMidi::readMessages() {
                 for(int i = 0; i <= MAX_SUB_ADDRESS; i++){
                     if(actPlayingNote[i] == 0){
                         actPlayingNote[i] = secondByte;
-                        deviceHandler(i+1, 0x09, &secondByte);
+                        deviceHandler(i+1, NETBYTE_DEV_NOTEON, &secondByte);
                         i = MAX_SUB_ADDRESS + 1;
                         return;
                     }
@@ -103,7 +102,7 @@ void MoppyMidi::readMessages() {
         for (int i = 0; i <= MAX_SUB_ADDRESS; i++){
             if(secondByte == actPlayingNote[i]){
                 actPlayingNote[i] = 0;
-                deviceHandler(i+1, 0x08, &secondByte);
+                deviceHandler(i+1, NETBYTE_DEV_NOTEOFF, &secondByte);
                 return;
             }
         }
