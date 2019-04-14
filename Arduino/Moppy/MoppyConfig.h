@@ -12,7 +12,7 @@
 // Play a startup sound when the Arduino is initialized.  Helpful
 // for debugging purposes, but can be turned off once everything
 // is working
-#define PLAY_STARTUP_SOUND false
+#define PLAY_STARTUP_SOUND true
 
 // Device address for this Arduino (only messages sent to this address
 // will be processed.
