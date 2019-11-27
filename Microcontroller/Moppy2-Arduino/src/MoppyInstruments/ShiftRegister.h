@@ -12,7 +12,7 @@
 #include "../MoppyConfig.h"
 #include "../MoppyNetworks/MoppyNetwork.h"
 
-class ShiftRegister {
+class ShiftRegister : public MoppyInstrument {
 public:
   void setup();
   void systemMessage(uint8_t command, uint8_t payload[]);

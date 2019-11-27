@@ -28,11 +28,11 @@ pin 17 (A3), IN4 for bridge 4
 #include "../MoppyConfig.h"
 #include "../MoppyNetworks/MoppyNetwork.h"
 
-class L298N {
+class L298N : public MoppyInstrument {
 public:
-  static void setup();
-  static void systemMessage(uint8_t command, uint8_t payload[]);
-  static void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
+  void setup();
+  void systemMessage(uint8_t command, uint8_t payload[]);
+  void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
 protected:
   static int FIRST_BRIDGE;
   static int LAST_BRIDGE;
