@@ -8,14 +8,15 @@
 
 #include <Arduino.h>
 #include <TimerOne.h>
-#include "../../MoppyConfig.h"
+#include "MoppyInstrument.h"
+#include "../MoppyConfig.h"
 #include "../MoppyNetworks/MoppyNetwork.h"
 
 class ShiftRegister {
 public:
-  static void setup();
-  static void systemMessage(uint8_t command, uint8_t payload[]);
-  static void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
+  void setup();
+  void systemMessage(uint8_t command, uint8_t payload[]);
+  void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
 protected:
   static uint8_t shiftData[];
   static uint8_t activeTicksLeft[];

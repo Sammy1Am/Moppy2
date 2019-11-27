@@ -1,14 +1,13 @@
 #include "../MoppyNetworks/MoppySerial.h"
 
 /*
- * Serial communications implementation for Arduino.  Handler
- * functions are called to consume system and device messages received from
- * the network.
+ * Serial communications implementation for Arduino.  Instrument
+ * has its handler functions called for device and system messages
  */
-MoppySerial::MoppySerial(handleSystemMessage sys, handleDeviceMessage dev) {
+MoppySerial::MoppySerial(MoppyInstrument *instrument)
+{
   messageBuffer[0] = START_BYTE;
-  systemHandler = sys;
-  deviceHandler = dev;
+  targetInstrument = instrument;
 }
 
 void MoppySerial::begin(long baud) {
@@ -79,10 +78,10 @@ void MoppySerial::readMessages() {
           if (messageBuffer[4] == NETBYTE_SYS_PING) {
         	  sendPong(); // Respond with pong if requested
           } else {
-        	  systemHandler(messageBuffer[4], &messageBuffer[5]);
+            targetInstrument->systemMessage(messageBuffer[4], &messageBuffer[5]);
           }
         } else {
-          deviceHandler(messageBuffer[2], messageBuffer[4], &messageBuffer[5]);
+          targetInstrument->deviceMessage(messageBuffer[2], messageBuffer[4], &messageBuffer[5]);
         }
 
        messagePos = 0; // Start looking for a new message
