@@ -9,7 +9,7 @@ CRGB leds[NUM_LEDS];
 CHSV hsv_leds[NUM_LEDS];
 const uint8_t driveToLEDMap[8] = {12, 16, 8, 20, 4, 24, 0, 28};
 bool updateNeeded = false;
-const uint8_t FADE_SPEED = 10;
+const uint8_t FADE_SPEED = 20;
 
 void DriveLights::setup() {
     FastLED.addLeds<LPD8806, DATA_PIN, CLOCK_PIN, BRG>(leds, NUM_LEDS);
@@ -18,7 +18,7 @@ void DriveLights::setup() {
 
     startupShow();
 
-    lightsTicker = new Ticker(lightsTick, 10, 0, MILLIS);
+    lightsTicker = new Ticker(lightsTick, 20, 0, MILLIS);
     lightsTicker->start();
 }
 
