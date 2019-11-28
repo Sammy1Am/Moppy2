@@ -5,11 +5,15 @@
  */
 #include "DriveLights.h"
 
-CRGB leds[NUM_LEDS];
-CHSV hsv_leds[NUM_LEDS];
-const uint8_t driveToLEDMap[8] = {12, 16, 8, 20, 4, 24, 0, 28};
+// Still not sure why these can't all be defined in the header file... a TODO for sure.
+CRGB leds[NUM_LEDS] = {0};
+CHSV hsv_drives[NUM_DRIVES];
+CHSV hsv_drives_background[NUM_DRIVES];
+CHSV hsv_drives_target[NUM_DRIVES] = {RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET};
+bool drives_fading[NUM_DRIVES];
+uint8_t DRIVE_TO_LEDS_MAP[NUM_DRIVES] = {12, 16, 8, 20, 4, 24, 0, 28};
+
 bool updateNeeded = false;
-const uint8_t FADE_SPEED = 20;
 
 void DriveLights::setup() {
     FastLED.addLeds<LPD8806, DATA_PIN, CLOCK_PIN, BRG>(leds, NUM_LEDS);
@@ -18,7 +22,7 @@ void DriveLights::setup() {
 
     startupShow();
 
-    lightsTicker = new Ticker(lightsTick, 20, 0, MILLIS);
+    lightsTicker = new Ticker(lightsTick, TICKER_RATE_MS, 0, MILLIS);
     lightsTicker->start();
 }
 
@@ -32,6 +36,12 @@ void DriveLights::lightsTick() {
     if (updateNeeded) {
         updateNeeded = false;
         FastLED.show();
+    }
+}
+
+void DriveLights::copyToLEDS(uint8_t driveIndex) {
+    for (uint8_t l = DRIVE_TO_LEDS_MAP[driveIndex]; l < DRIVE_TO_LEDS_MAP[driveIndex] + 4; l++) {
+        leds[l] = hsv_drives[driveIndex];
     }
 }
 
@@ -49,15 +59,15 @@ void DriveLights::dev_reset(uint8_t subAddress) {
     if (subAddress == 0x00) {
         FastLED.clear(true);
     } else {
-        setDriveRGB(subAddress, CRGB::Black);
+        setDrive(subAddress - 1, CHSV(0, 0, 0));
     }
 }
 void DriveLights::dev_noteOn(uint8_t subAddress, uint8_t payload[]) {
-    setDrive(subAddress, getColor(subAddress, decorationNotePeriods[payload[0]]));
+    setDrive(subAddress - 1, getColor(subAddress - 1, payload[0]));
 }
+
 void DriveLights::dev_noteOff(uint8_t subAddress, uint8_t payload[]) {
-    //setDrive(subAddress, CRGB::Black);
-    fadeDrive(subAddress);
+    drives_fading[subAddress - 1] = 1; // Tell drive to fade (depending on mode)
 }
 void DriveLights::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     //TODO
@@ -70,66 +80,53 @@ void DriveLights::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     // currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES*(bendDeflection/(float)8192));
 }
 
-void DriveLights::setDriveRGB(uint8_t driveNumber, CRGB newColor) {
-    uint8_t startIndex = driveToLEDMap[driveNumber - 1];
-    for (uint8_t i = startIndex; i < startIndex + 4; i++) {
-        leds[i] = newColor;
-    }
+void DriveLights::setDrive(uint8_t driveIndex, CHSV newColor) {
+    hsv_drives[driveIndex] = newColor;
+    copyToLEDS(driveIndex);
     updateNeeded = true;
 }
 
-void DriveLights::setDrive(uint8_t driveNumber, CHSV newColor) {
-    uint8_t startIndex = driveToLEDMap[driveNumber - 1];
-    for (uint8_t i = startIndex; i < startIndex + 4; i++) {
-        hsv_leds[i] = newColor;
-        leds[i] = newColor;
-    }
-    updateNeeded = true;
-}
-
-void DriveLights::fadeDrive(uint8_t driveNumber) {
-    uint8_t startIndex = driveToLEDMap[driveNumber - 1];
-    for (uint8_t i = startIndex; i < startIndex + 4; i++) {
-        hsv_leds[i].val = 254;
-    }
-}
-
-    void DriveLights::startupShow() {
-    CRGB colors[3] = {CRGB::Red, CRGB::Green, CRGB::Blue};
+void DriveLights::startupShow() {
+    CHSV colors[3] = {RED_TARGET, BLUE_TARGET, GREEN_TARGET};
     for (uint8_t c = 0; c < 3; c++) {
-        for (uint8_t i = 1; i <= 8; i++) {
-            setDriveRGB(i, colors[c]);
+        for (uint8_t i = 0; i < 8; i++) {
+            setDrive(i, colors[c]);
             FastLED.show(); // Explicitly show because the Ticker isn't on yet.
             delay(100);
-            setDriveRGB(i, CRGB::Black);
+            setDrive(i, CHSV(0, 0, 0));
             FastLED.show(); // Explicitly show because the Ticker isn't on yet.
         }
     }
 }
 
 //TODO Add different color modes, and MIDI-message color assignments
-CHSV DriveLights::getColor(uint8_t driveNumber, unsigned int notePeriod) {
-    return CHSV(int(128 * log(notePeriod / 478) / log(2)) % 255, 255, 255);
+CHSV DriveLights::getColor(uint8_t driveIndex, uint8_t noteNum) {
+    if (hsv_drives_target[driveIndex] == RAINBOW_TARGET) {
+        unsigned int notePeriod = NOTE_PERIODS[noteNum];
+        return CHSV(int(128 * log(notePeriod / 478) / log(2)) % 255, 255, 255);
+    } else {
+        return hsv_drives_target[driveIndex];
+    }
 }
 
 void DriveLights::fadeAllLights() {
     boolean updateCurrent = false;
     boolean updateAll = false;
-    for (int l = 0; l < NUM_LEDS; l++) {
+    for (int l = 0; l < NUM_DRIVES; l++) {
         updateCurrent = false;
 
-        if (hsv_leds[l].val == 0) {
-            continue;
-        } else if (hsv_leds[l].val < FADE_SPEED) {
-            hsv_leds[l].val = 0;
-            updateCurrent = true;
-        } else if (hsv_leds[l].val < 255) {
-            hsv_leds[l].val -= FADE_SPEED;
+        if (drives_fading[l]) {
+            if (hsv_drives[l].val < FADE_SPEED) {
+                drives_fading[l] = false;
+                hsv_drives[l].val = 0;
+            } else {
+                hsv_drives[l].val -= FADE_SPEED;
+            }
             updateCurrent = true;
         }
 
         if (updateCurrent) {
-            leds[l] = hsv_leds[l];
+            copyToLEDS(l);
             updateAll = true;
         }
     }
