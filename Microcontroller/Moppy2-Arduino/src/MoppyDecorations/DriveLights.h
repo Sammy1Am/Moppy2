@@ -21,6 +21,7 @@
 const CHSV RED_TARGET{0, 255, 255};
 const CHSV GREEN_TARGET{96, 255, 255};
 const CHSV BLUE_TARGET{160, 255, 255};
+const CHSV DIM_TARGET{0, 0, 32};
 const CHSV BLACK_TARGET{0, 0, 0};
 const CHSV RAINBOW_TARGET{1, 0, 0}; // Set to target rainbow colors
 
@@ -62,8 +63,7 @@ protected:
 private:
     static void fadeAllLights();
     static void copyToLEDS(uint8_t driveIndex);
-
-    
+    static void resetToBackground();
 
     static const uint8_t FADE_SPEED = 20;
     static const uint8_t TICKER_RATE_MS = 20;

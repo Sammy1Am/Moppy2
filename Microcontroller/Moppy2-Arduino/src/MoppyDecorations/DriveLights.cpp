@@ -8,8 +8,26 @@
 // Still not sure why these can't all be defined in the header file... a TODO for sure.
 CRGB leds[NUM_LEDS] = {0};
 CHSV hsv_drives[NUM_DRIVES];
-CHSV hsv_drives_background[NUM_DRIVES];
-CHSV hsv_drives_target[NUM_DRIVES] = {RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET, RAINBOW_TARGET};
+CHSV hsv_drives_background[NUM_DRIVES] = {
+    DIM_TARGET,
+    DIM_TARGET,
+    DIM_TARGET,
+    DIM_TARGET,
+    DIM_TARGET,
+    DIM_TARGET,
+    DIM_TARGET,
+    DIM_TARGET,
+};
+CHSV hsv_drives_target[NUM_DRIVES] = {
+    RAINBOW_TARGET, 
+    RAINBOW_TARGET, 
+    RAINBOW_TARGET, 
+    RAINBOW_TARGET, 
+    RAINBOW_TARGET, 
+    RAINBOW_TARGET, 
+    RAINBOW_TARGET, 
+    RAINBOW_TARGET};
+
 bool drives_fading[NUM_DRIVES];
 uint8_t DRIVE_TO_LEDS_MAP[NUM_DRIVES] = {12, 16, 8, 20, 4, 24, 0, 28};
 
@@ -45,21 +63,28 @@ void DriveLights::copyToLEDS(uint8_t driveIndex) {
     }
 }
 
+void DriveLights::resetToBackground() {
+    for (uint8_t d = 0; d < NUM_DRIVES; d++) {
+        setDrive(d, hsv_drives_background[d]);
+    }
+    updateNeeded = true;
+}
+
 //
 //// Message Handlers
 //
 void DriveLights::sys_sequenceStop() {
-    FastLED.clear(true);
+    resetToBackground();
 }
 void DriveLights::sys_reset() {
-    FastLED.clear(true);
+    resetToBackground();
 }
 
 void DriveLights::dev_reset(uint8_t subAddress) {
     if (subAddress == 0x00) {
-        FastLED.clear(true);
+        resetToBackground();
     } else {
-        setDrive(subAddress - 1, CHSV(0, 0, 0));
+        setDrive(subAddress - 1, hsv_drives_background[subAddress - 1]);
     }
 }
 void DriveLights::dev_noteOn(uint8_t subAddress, uint8_t payload[]) {
@@ -67,7 +92,7 @@ void DriveLights::dev_noteOn(uint8_t subAddress, uint8_t payload[]) {
 }
 
 void DriveLights::dev_noteOff(uint8_t subAddress, uint8_t payload[]) {
-    drives_fading[subAddress - 1] = 1; // Tell drive to fade (depending on mode)
+    drives_fading[subAddress - 1] = true; // Tell drive to fade (depending on mode)
 }
 void DriveLights::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     //TODO
@@ -81,6 +106,7 @@ void DriveLights::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
 }
 
 void DriveLights::setDrive(uint8_t driveIndex, CHSV newColor) {
+    drives_fading[driveIndex] = false; // Don't fade if we're setting to a new color!
     hsv_drives[driveIndex] = newColor;
     copyToLEDS(driveIndex);
     updateNeeded = true;
@@ -116,13 +142,45 @@ void DriveLights::fadeAllLights() {
         updateCurrent = false;
 
         if (drives_fading[l]) {
-            if (hsv_drives[l].val < FADE_SPEED) {
-                drives_fading[l] = false;
-                hsv_drives[l].val = 0;
+            CHSV targetColor = hsv_drives_background[l];
+
+            int hueDelta = hsv_drives[l].hue - targetColor.hue;
+
+            if (hueDelta > FADE_SPEED) {
+                hsv_drives[l].hue -= FADE_SPEED;
+            } else if (hueDelta < -FADE_SPEED) {
+                hsv_drives[l].hue += FADE_SPEED;
             } else {
-                hsv_drives[l].val -= FADE_SPEED;
+                hsv_drives[l].hue = targetColor.hue;
             }
+
+            int satDelta = hsv_drives[l].sat - targetColor.sat;
+
+            if (satDelta > FADE_SPEED) {
+                hsv_drives[l].sat -= FADE_SPEED;
+            } else if (satDelta < -FADE_SPEED) {
+                hsv_drives[l].sat += FADE_SPEED;
+            } else {
+                hsv_drives[l].sat = targetColor.sat;
+            }
+
+            int valDelta = hsv_drives[l].val - targetColor.val;
+
+            if (valDelta > FADE_SPEED) {
+                hsv_drives[l].val -= FADE_SPEED;
+            } else if (valDelta < -FADE_SPEED) {
+                hsv_drives[l].val += FADE_SPEED;
+            } else {
+                hsv_drives[l].val = targetColor.val;
+            }
+
+            
             updateCurrent = true;
+
+            if (hueDelta == 0 && satDelta == 0 && valDelta == 0) {
+                // We made it!
+                drives_fading[l] = false;
+            }
         }
 
         if (updateCurrent) {
