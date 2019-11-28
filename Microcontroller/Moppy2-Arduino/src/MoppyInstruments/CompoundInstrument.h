@@ -18,8 +18,8 @@ class CompoundInstrument : public MoppyInstrument {
 
   public:
     void setup();
-    void systemMessage(uint8_t command, uint8_t payload[]);
-    void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
+    void handleSystemMessage(uint8_t command, uint8_t payload[]);
+    void handleDeviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
     CompoundInstrument(MoppyInstrument *a, MoppyInstrument *b)
     {
       instrumentA = a;

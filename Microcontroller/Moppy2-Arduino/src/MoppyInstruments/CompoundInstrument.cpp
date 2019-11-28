@@ -17,13 +17,13 @@ void CompoundInstrument::setup() {
 //
 
 // Handles system messages (e.g. sequence start and stop)
-void CompoundInstrument::systemMessage(uint8_t command, uint8_t payload[]) {
+void CompoundInstrument::handleSystemMessage(uint8_t command, uint8_t payload[]) {
   instrumentA->handleSystemMessage(command, payload);
   instrumentB->handleSystemMessage(command, payload);
 }
 
 // Handles device-specific messages (e.g. playing notes)
-void CompoundInstrument::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
-  instrumentA->handleDeviceMessage(subAddress, command, payload);
-  instrumentB->handleDeviceMessage(subAddress, command, payload);
+void CompoundInstrument::handleDeviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
+    instrumentA->handleDeviceMessage(subAddress, command, payload);
+    instrumentB->handleDeviceMessage(subAddress, command, payload);
 }
