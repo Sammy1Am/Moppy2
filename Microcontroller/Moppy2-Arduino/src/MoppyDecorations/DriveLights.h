@@ -35,9 +35,13 @@ public:
       void dev_bendPitch(uint8_t subAddress, uint8_t payload[]) override;
 
       static void lightsTick();
-      static void setDrive(uint8_t driveNumber, CRGB newColor);
-      static CRGB getColor(uint8_t driveNumber, unsigned int notePeriod);
+      static void setDriveRGB(uint8_t driveNumber, CRGB newColor);
+      static void setDrive(uint8_t driveNumber, CHSV newColor);
+      static void fadeDrive(uint8_t driveNumber);
+      static CHSV getColor(uint8_t driveNumber, unsigned int notePeriod);
       static void startupShow();
+  private:
+      static void fadeAllLights();
 };
 
 #endif /* SRC_MOPPYDECORATIONS_DRIVELIGHTS_H_ */
