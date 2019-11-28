@@ -10,7 +10,7 @@
 #include "../MoppyMessageConsumer.h"
 
 // The period of notes in microseconds
-const unsigned int notePeriods[128] = {
+const unsigned int decorationNotePeriods[128] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     30578, 28861, 27242, 25713, 24270, 22909, 21622, 20409, 19263, 18182, 17161, 16198, //C1 - B1

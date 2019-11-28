@@ -4,10 +4,8 @@
  * Serial communications implementation for Arduino.  Instrument
  * has its handler functions called for device and system messages
  */
-MoppySerial::MoppySerial(MoppyInstrument *instrument)
-{
-  messageBuffer[0] = START_BYTE;
-  targetInstrument = instrument;
+MoppySerial::MoppySerial(MoppyMessageConsumer *messageConsumer) {
+    targetConsumer = messageConsumer;
 }
 
 void MoppySerial::begin(long baud) {
@@ -78,10 +76,10 @@ void MoppySerial::readMessages() {
           if (messageBuffer[4] == NETBYTE_SYS_PING) {
         	  sendPong(); // Respond with pong if requested
           } else {
-            targetInstrument->handleSystemMessage(messageBuffer[4], &messageBuffer[5]);
+            targetConsumer->handleSystemMessage(messageBuffer[4], &messageBuffer[5]);
           }
         } else {
-          targetInstrument->handleDeviceMessage(messageBuffer[2], messageBuffer[4], &messageBuffer[5]);
+            targetConsumer->handleDeviceMessage(messageBuffer[2], messageBuffer[4], &messageBuffer[5]);
         }
 
        messagePos = 0; // Start looking for a new message

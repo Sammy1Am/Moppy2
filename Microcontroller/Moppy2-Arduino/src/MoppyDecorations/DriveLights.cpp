@@ -4,8 +4,6 @@
  * Output for controlling decorative LEDs.
  */
 #include "DriveLights.h"
-#include "MoppyInstrument.h"
-#include <math.h>
 
 CRGB leds[NUM_LEDS];
 const uint8_t driveToLEDMap[8] = {12, 16, 8, 20, 4, 24, 0, 28};
@@ -50,7 +48,7 @@ void DriveLights::dev_reset(uint8_t subAddress) {
     }
 }
 void DriveLights::dev_noteOn(uint8_t subAddress, uint8_t payload[]) {
-    setDrive(subAddress, getColor(subAddress, notePeriods[payload[0]]));
+    setDrive(subAddress, getColor(subAddress, decorationNotePeriods[payload[0]]));
 }
 void DriveLights::dev_noteOff(uint8_t subAddress, uint8_t payload[]) {
     setDrive(subAddress, CRGB::Black);

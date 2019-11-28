@@ -3,13 +3,14 @@
  *
  */
 
-#ifndef SRC_MOPPYINSTRUMENTS_DRIVELIGHTS_H_
-#define SRC_MOPPYINSTRUMENTS_DRIVELIGHTS_H_
+#ifndef SRC_MOPPYDECORATIONS_DRIVELIGHTS_H_
+#define SRC_MOPPYDECORATIONS_DRIVELIGHTS_H_
 
+#include "../MoppyConfig.h"
+#include "MoppyDecoration.h"
 #include <Arduino.h>
 #include <Ticker.h>
-#include "MoppyDecoration.h"
-#include "../MoppyConfig.h"
+#include <math.h>
 
 #include <FastLED.h>
 #define NUM_LEDS 32
@@ -38,6 +39,4 @@ protected:
     static void startupShow();
 };
 
-
-
-#endif /* SRC_MOPPYINSTRUMENTS_DRIVELIGHTS_H_ */
+#endif /* SRC_MOPPYDECORATIONS_DRIVELIGHTS_H_ */

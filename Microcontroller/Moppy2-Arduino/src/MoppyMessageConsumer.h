@@ -11,7 +11,7 @@
 
 class MoppyMessageConsumer {
 public:
-    void handleSystemMessage(uint8_t command, uint8_t payload[]) {
+    virtual void handleSystemMessage(uint8_t command, uint8_t payload[]) {
         switch (command) {
         // NETBYTE_SYS_PING is handled by the network adapter directly
         case NETBYTE_SYS_START: // Sequence start
@@ -29,7 +29,7 @@ public:
         }
     };
 
-    void handleDeviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
+    virtual void handleDeviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
         switch (command) {
         case NETBYTE_DEV_RESET: // Reset
             if (subAddress == 0x00) {
