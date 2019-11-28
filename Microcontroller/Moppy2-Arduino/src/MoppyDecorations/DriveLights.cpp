@@ -14,25 +14,26 @@ void DriveLights::setup() {
     FastLED.setBrightness(128);
     FastLED.clear(true);
 
-    //Ticker lightsTicker(lightsTick, 100);
-    //lightsTicker.start();
-
     startupShow();
+
+    lightsTicker = new Ticker(lightsTick, 10, 0, MILLIS);
+    lightsTicker->start();
+}
+
+void DriveLights::decoLoop() {
+    lightsTicker->update();
 }
 
 void DriveLights::lightsTick() {
-  if (updateNeeded) {
-      updateNeeded = false;
-      FastLED.show();
-  }
+    if (updateNeeded) {
+        updateNeeded = false;
+        FastLED.show();
+    }
 }
 
 //
 //// Message Handlers
 //
-void DriveLights::sys_sequenceStart() {
-    FastLED.clear(true);
-}
 void DriveLights::sys_sequenceStop() {
     FastLED.clear(true);
 }
@@ -70,7 +71,7 @@ void DriveLights::setDrive(uint8_t driveNumber, CRGB newColor) {
         leds[i] = newColor;
     }
     updateNeeded = true;
-    FastLED.show();
+    //FastLED.show();
 }
 
 void DriveLights::startupShow() {
@@ -78,8 +79,10 @@ void DriveLights::startupShow() {
     for (uint8_t c = 0; c < 3; c++) {
         for (uint8_t i = 1; i <= 8; i++) {
             setDrive(i, colors[c]);
+            FastLED.show(); // Explicitly show because the Ticker isn't on yet.
             delay(100);
             setDrive(i, CRGB::Black);
+            FastLED.show(); // Explicitly show because the Ticker isn't on yet.
         }
     }
 }

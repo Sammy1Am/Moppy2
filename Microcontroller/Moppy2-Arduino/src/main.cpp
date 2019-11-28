@@ -75,4 +75,7 @@ void loop()
 	// Endlessly read messages on the network.  The network implementation
 	// will call the system or device handlers on the intrument whenever a message is received.
     network.readMessages();
+
+    // Loop over decorations to give them time for processing
+    decoration->decoLoop();
 }

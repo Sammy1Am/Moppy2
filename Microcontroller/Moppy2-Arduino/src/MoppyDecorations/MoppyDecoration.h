@@ -31,6 +31,7 @@ class MoppyDecoration : public MoppyMessageConsumer
 {
 public:
     virtual void setup() = 0;
+    virtual void decoLoop(){}; /* Called as part of the main program loop.  Avoid taking too much time away from networking */
 };
 
 #endif /* MOPPY_SRC_MOPPYDECORATIONS_MOPPYDECORATION_H_ */

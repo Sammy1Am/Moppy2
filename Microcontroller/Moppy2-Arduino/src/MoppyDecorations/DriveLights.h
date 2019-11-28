@@ -19,24 +19,25 @@
 
 class DriveLights : public MoppyDecoration {
 public:
-  void setup();
+  void setup() override;
+  void decoLoop() override;
 
-protected:
+  protected:
   //static CRGB leds[NUM_LEDS];
+      Ticker *lightsTicker;
 
-    void sys_sequenceStart() override;
-    void sys_sequenceStop() override;
-    void sys_reset() override;
+      void sys_sequenceStop() override;
+      void sys_reset() override;
 
-    void dev_reset(uint8_t subAddress) override;
-    void dev_noteOn(uint8_t subAddress, uint8_t payload[]) override;
-    void dev_noteOff(uint8_t subAddress, uint8_t payload[]) override;
-    void dev_bendPitch(uint8_t subAddress, uint8_t payload[]) override;
+      void dev_reset(uint8_t subAddress) override;
+      void dev_noteOn(uint8_t subAddress, uint8_t payload[]) override;
+      void dev_noteOff(uint8_t subAddress, uint8_t payload[]) override;
+      void dev_bendPitch(uint8_t subAddress, uint8_t payload[]) override;
 
-    static void lightsTick();
-    static void setDrive(uint8_t driveNumber, CRGB newColor);
-    static CRGB getColor(uint8_t driveNumber, unsigned int notePeriod);
-    static void startupShow();
+      static void lightsTick();
+      static void setDrive(uint8_t driveNumber, CRGB newColor);
+      static CRGB getColor(uint8_t driveNumber, unsigned int notePeriod);
+      static void startupShow();
 };
 
 #endif /* SRC_MOPPYDECORATIONS_DRIVELIGHTS_H_ */
