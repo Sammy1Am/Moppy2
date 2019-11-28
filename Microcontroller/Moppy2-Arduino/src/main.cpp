@@ -1,29 +1,33 @@
 #include <Arduino.h>
+#include "MoppyInstruments/MoppyInstrument.h"
 
 /**********
  * MoppyInstruments handle the sound-creation logic for your setup.  The
  * instrument class provides a systemMessage handler function and a deviceMessage
- * handler function for handling messages received by the network.
+ * handler function for handling messages received by the network and a tick
+ * function for precise timing events.
  *
- * Uncomment the appropriate instrument class for your setup
+ * Uncomment the appropriate include line for your setup, and use that 
+ * instrument's constructor
  */
 
 // Floppy drives directly connected to the Arduino's digital pins
 #include "MoppyInstruments/FloppyDrives.h"
-//FloppyDrives instrument = FloppyDrives();
 
-#include "MoppyInstruments/DriveLights.h"
-#include "MoppyInstruments/CompoundInstrument.h"
-MoppyInstrument *instrument = new CompoundInstrument(new FloppyDrives(), new DriveLights());
-
-//Uncomment the 2 next lines and comment the 2 lines above this comment to switch to L298N mode
+// L298N stepper motor driver
 //#include "src/MoppyInstruments/L298N.h"
-//MoppyInstrument instrument = L298N(); // please see src/MoppyInstruments/L298N.h for pinout and additionnal info
-
 
 // A single device (e.g. xylophone, drums, etc.) connected to shift registers
 //#include "src/MoppyInstruments/ShiftRegister.h"
-//MoppyInstrument instrument = ShiftRegister();
+
+// Decorative LED lights
+//#include "MoppyInstruments/DriveLights.h"
+
+// A Compound instrument for pairing two instruments on a single board
+//#include "MoppyInstruments/CompoundInstrument.h"
+
+//MoppyInstrument *instrument = new CompoundInstrument(new FloppyDrives(), new DriveLights());
+FloppyDrives *instrument = new FloppyDrives();
 
 /**********
  * MoppyNetwork classes receive messages sent by the Controller application,
@@ -41,10 +45,11 @@ MoppyInstrument *instrument = new CompoundInstrument(new FloppyDrives(), new Dri
     // #include "src/MoppyNetworks/MoppyUDP.h"
     // MoppyUDP network = MoppyUDP(instrument.systemMessage, instrument.deviceMessage);
 
-    //The setup function is called once at startup of the sketch
+
+//The setup function is called once at startup of the sketch
 void setup()
 {
-	// Call setup() on the instrument to allow to to prepare for action
+    // Call setup() on the instrument to allow to to prepare for action
     instrument->setup();
 
     // Tell the network to start receiving messages

@@ -7,7 +7,7 @@
 #define SRC_MOPPYINSTRUMENTS_DRIVELIGHTS_H_
 
 #include <Arduino.h>
-#include <TimerOne.h>
+#include <Ticker.h>
 #include "MoppyInstrument.h"
 #include "../MoppyConfig.h"
 #include "../MoppyNetworks/MoppyNetwork.h"
@@ -22,12 +22,14 @@ public:
   void setup();
   void systemMessage(uint8_t command, uint8_t payload[]);
   void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
+  void tick() {};
+
 protected:
   //static CRGB leds[NUM_LEDS];
-
-  static void setDrive(uint8_t driveNumber, CRGB newColor);
-  static CRGB getColor(uint8_t driveNumber, unsigned int notePeriod);
-  static void startupShow();
+    static void lightsTick();
+    static void setDrive(uint8_t driveNumber, CRGB newColor);
+    static CRGB getColor(uint8_t driveNumber, unsigned int notePeriod);
+    static void startupShow();
 };
 
 

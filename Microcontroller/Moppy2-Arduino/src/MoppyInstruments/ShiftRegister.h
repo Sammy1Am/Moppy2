@@ -7,7 +7,6 @@
 #define SRC_MOPPYINSTRUMENTS_SHIFTREGISTER_H_
 
 #include <Arduino.h>
-#include <TimerOne.h>
 #include "MoppyInstrument.h"
 #include "../MoppyConfig.h"
 #include "../MoppyNetworks/MoppyNetwork.h"
@@ -17,12 +16,13 @@ public:
   void setup();
   void systemMessage(uint8_t command, uint8_t payload[]);
   void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
+  void tick();
+
 protected:
   static uint8_t shiftData[];
   static uint8_t activeTicksLeft[];
   static boolean shouldShift;
 
-  static void tick();
   static void blinkLED();
   static void startupSound(byte driveNum);
   static void shiftAllData();

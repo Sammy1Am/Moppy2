@@ -23,5 +23,4 @@
 #define MIN_SUB_ADDRESS 1
 #define MAX_SUB_ADDRESS 8
 
-
 #endif /* SRC_MOPPYCONFIG_H_ */

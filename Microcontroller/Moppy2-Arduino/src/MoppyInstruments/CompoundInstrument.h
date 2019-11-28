@@ -20,7 +20,7 @@ class CompoundInstrument : public MoppyInstrument {
     void setup();
     void systemMessage(uint8_t command, uint8_t payload[]);
     void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
-    CompoundInstrument(MoppyInstrument* a, MoppyInstrument* b)
+    CompoundInstrument(MoppyInstrument *a, MoppyInstrument *b)
     {
       instrumentA = a;
       instrumentB = b;

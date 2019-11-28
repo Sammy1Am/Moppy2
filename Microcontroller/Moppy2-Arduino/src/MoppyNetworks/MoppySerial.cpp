@@ -78,10 +78,10 @@ void MoppySerial::readMessages() {
           if (messageBuffer[4] == NETBYTE_SYS_PING) {
         	  sendPong(); // Respond with pong if requested
           } else {
-            targetInstrument->systemMessage(messageBuffer[4], &messageBuffer[5]);
+            targetInstrument->handleSystemMessage(messageBuffer[4], &messageBuffer[5]);
           }
         } else {
-          targetInstrument->deviceMessage(messageBuffer[2], messageBuffer[4], &messageBuffer[5]);
+          targetInstrument->handleDeviceMessage(messageBuffer[2], messageBuffer[4], &messageBuffer[5]);
         }
 
        messagePos = 0; // Start looking for a new message

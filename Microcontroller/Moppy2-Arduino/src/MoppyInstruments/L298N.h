@@ -23,7 +23,6 @@ pin 17 (A3), IN4 for bridge 4
 #define SRC_MOPPYINSTRUMENTS_L298N_H_
 
 #include <Arduino.h>
-#include <TimerOne.h>
 #include "MoppyInstrument.h"
 #include "../MoppyConfig.h"
 #include "../MoppyNetworks/MoppyNetwork.h"
@@ -33,6 +32,8 @@ public:
   void setup();
   void systemMessage(uint8_t command, uint8_t payload[]);
   void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
+  void tick();
+
 protected:
   static int FIRST_BRIDGE;
   static int LAST_BRIDGE;
@@ -47,7 +48,6 @@ protected:
   static void step(byte bridgeNum, byte pin1, byte pin2, byte pin3, byte pin4);
   static void haltAllDrives();
   static void reset(byte bridgeNum);
-  static void tick();
   static void blinkLED();
   static void startupSound(byte bridgeNum);
   static void L298Nvariables();

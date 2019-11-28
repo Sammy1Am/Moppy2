@@ -21,8 +21,6 @@
 const uint8_t FIRST_NOTE = 79;
 const uint8_t LAST_NOTE = FIRST_NOTE + (NUM_NOTES-1);
 
-#define SHIFT_TIMER_RESOLUTION 1000 //Microsecond resolution for starting and ending notes
-
 // The velocity of the incoming notes will adjust the pulse length from MIN_PULSE_TICKS to MIN_PULSE_TICKS + PULSE_TICKS_RANGE
 #define MIN_PULSE_TICKS 10 // Minimum length of "on" pulse for each bit in ticks (e.g. RESOLUTION * PULSE_TICKS microseconds)
 #define PULSE_TICKS_RANGE 60 // Maximum number of ticks to add to MIN_PULSE_TICKS for maximum velocity
@@ -46,14 +44,11 @@ void ShiftRegister::setup() {
 
   pinMode(13, OUTPUT); // Built-in LED for blinking
 
+  //TODO Timer resolution should be larger (like 1ms for this library)!
 
   // With all pins setup, let's do a first run reset
   zeroOutputs();
   delay(500); // Wait a half second for safety
-
-  // Setup timer to handle interrupts for floppy driving
-  Timer1.initialize(SHIFT_TIMER_RESOLUTION); // Set up a timer at the resolution defined in MoppyInstrument.h
-  Timer1.attachInterrupt(tick); // Attach the tick function
 }
 
 

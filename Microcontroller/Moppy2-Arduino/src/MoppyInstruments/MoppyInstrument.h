@@ -7,6 +7,7 @@
 #define MOPPY_SRC_MOPPYINSTRUMENTS_MOPPYINSTRUMENT_H_
 
 #include <Arduino.h>
+#include "../MoppyMessageConsumer.h"
 
 // Number of octaves to bend notes by at full-deflection (MIDI pitch bending is weird).
 // Described as cents/cents-in-an-octave
@@ -68,12 +69,10 @@ const unsigned int noteTicks[128] = {
     0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION,
     0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0 / TIMER_RESOLUTION, 0};
 
-class MoppyInstrument
+class MoppyInstrument : public MoppyMessageConsumer
 {
 public:
     virtual void setup() = 0;
-    virtual void systemMessage(uint8_t command, uint8_t payload[]) = 0;
-    virtual void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) = 0;
 };
 
 #endif /* MOPPY_SRC_MOPPYINSTRUMENTS_MOPPYINSTRUMENT_H_ */
