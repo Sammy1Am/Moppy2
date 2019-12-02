@@ -21,7 +21,7 @@
 const CHSV RED_TARGET{0, 255, 255};
 const CHSV GREEN_TARGET{96, 255, 255};
 const CHSV BLUE_TARGET{160, 255, 255};
-const CHSV DIM_TARGET{0, 0, 32};
+const CHSV DIM_TARGET{0, 0, 16};
 const CHSV BLACK_TARGET{0, 0, 0};
 const CHSV RAINBOW_TARGET{1, 0, 0}; // Set to target rainbow colors
 
@@ -55,15 +55,17 @@ protected:
     void dev_noteOff(uint8_t subAddress, uint8_t payload[]) override;
     void dev_bendPitch(uint8_t subAddress, uint8_t payload[]) override;
 
+private:
     static void lightsTick();
     static void setDrive(uint8_t driveIndex, CHSV newColor);
     static CHSV getColor(uint8_t driveIndex, uint8_t noteNum);
     static void startupShow();
-
-private:
     static void fadeAllLights();
     static void copyToLEDS(uint8_t driveIndex);
-    static void resetToBackground();
+    static void fadeToBackground();
+
+    static void setTargetColor(uint8_t driveIndex, CHSV newColor);
+    static void setBackgroundColor(uint8_t driveIndex, CHSV newColor);
 
     static const uint8_t FADE_SPEED = 20;
     static const uint8_t TICKER_RATE_MS = 20;

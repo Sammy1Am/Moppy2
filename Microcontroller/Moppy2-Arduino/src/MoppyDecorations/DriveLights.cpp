@@ -8,16 +8,7 @@
 // Still not sure why these can't all be defined in the header file... a TODO for sure.
 CRGB leds[NUM_LEDS] = {0};
 CHSV hsv_drives[NUM_DRIVES];
-CHSV hsv_drives_background[NUM_DRIVES] = {
-    DIM_TARGET,
-    DIM_TARGET,
-    DIM_TARGET,
-    DIM_TARGET,
-    DIM_TARGET,
-    DIM_TARGET,
-    DIM_TARGET,
-    DIM_TARGET,
-};
+CHSV hsv_drives_background[NUM_DRIVES];
 CHSV hsv_drives_target[NUM_DRIVES] = {
     RAINBOW_TARGET, 
     RAINBOW_TARGET, 
@@ -38,7 +29,9 @@ void DriveLights::setup() {
     FastLED.setBrightness(128);
     FastLED.clear(true);
 
-    startupShow();
+    if (PLAY_STARTUP_SOUND) {
+        startupShow();
+    }
 
     lightsTicker = new Ticker(lightsTick, TICKER_RATE_MS, 0, MILLIS);
     lightsTicker->start();
@@ -63,9 +56,9 @@ void DriveLights::copyToLEDS(uint8_t driveIndex) {
     }
 }
 
-void DriveLights::resetToBackground() {
+void DriveLights::fadeToBackground() {
     for (uint8_t d = 0; d < NUM_DRIVES; d++) {
-        setDrive(d, hsv_drives_background[d]);
+        drives_fading[d] = true;
     }
     updateNeeded = true;
 }
@@ -74,15 +67,15 @@ void DriveLights::resetToBackground() {
 //// Message Handlers
 //
 void DriveLights::sys_sequenceStop() {
-    resetToBackground();
+    fadeToBackground();
 }
 void DriveLights::sys_reset() {
-    resetToBackground();
+    FastLED.clear(true);
 }
 
 void DriveLights::dev_reset(uint8_t subAddress) {
     if (subAddress == 0x00) {
-        resetToBackground();
+        FastLED.clear(true);
     } else {
         setDrive(subAddress - 1, hsv_drives_background[subAddress - 1]);
     }
@@ -105,6 +98,16 @@ void DriveLights::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     // currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES*(bendDeflection/(float)8192));
 }
 
+void DriveLights::setTargetColor(uint8_t driveIndex, CHSV newColor) {
+    hsv_drives_target[driveIndex] = newColor;
+}
+
+// Assign new drive background color, and fade to it immediately
+void DriveLights::setBackgroundColor(uint8_t driveIndex, CHSV newColor) {
+    hsv_drives_background[driveIndex] = newColor;
+    drives_fading[driveIndex] = true;
+}
+
 void DriveLights::setDrive(uint8_t driveIndex, CHSV newColor) {
     drives_fading[driveIndex] = false; // Don't fade if we're setting to a new color!
     hsv_drives[driveIndex] = newColor;
@@ -125,7 +128,6 @@ void DriveLights::startupShow() {
     }
 }
 
-//TODO Add different color modes, and MIDI-message color assignments
 CHSV DriveLights::getColor(uint8_t driveIndex, uint8_t noteNum) {
     if (hsv_drives_target[driveIndex] == RAINBOW_TARGET) {
         unsigned int notePeriod = NOTE_PERIODS[noteNum];
@@ -143,25 +145,32 @@ void DriveLights::fadeAllLights() {
 
         if (drives_fading[l]) {
             CHSV targetColor = hsv_drives_background[l];
+            int hueDelta = 0;
+            int satDelta = 0;
+            // Only worry about hue and saturation if the target is going to be visible at all
+            if (targetColor.val > 0) {
 
-            int hueDelta = hsv_drives[l].hue - targetColor.hue;
+                hueDelta = hsv_drives[l].hue - targetColor.hue;
 
-            if (hueDelta > FADE_SPEED) {
-                hsv_drives[l].hue -= FADE_SPEED;
-            } else if (hueDelta < -FADE_SPEED) {
-                hsv_drives[l].hue += FADE_SPEED;
-            } else {
-                hsv_drives[l].hue = targetColor.hue;
-            }
+                if (hueDelta > FADE_SPEED) {
+                    hsv_drives[l].hue -= FADE_SPEED;
+                } else if (hueDelta < -FADE_SPEED) {
+                    hsv_drives[l].hue += FADE_SPEED;
+                } else {
+                    hsv_drives[l].hue = targetColor.hue;
+                    hueDelta = 0;
+                }
 
-            int satDelta = hsv_drives[l].sat - targetColor.sat;
+                satDelta = hsv_drives[l].sat - targetColor.sat;
 
-            if (satDelta > FADE_SPEED) {
-                hsv_drives[l].sat -= FADE_SPEED;
-            } else if (satDelta < -FADE_SPEED) {
-                hsv_drives[l].sat += FADE_SPEED;
-            } else {
-                hsv_drives[l].sat = targetColor.sat;
+                if (satDelta > FADE_SPEED) {
+                    hsv_drives[l].sat -= FADE_SPEED;
+                } else if (satDelta < -FADE_SPEED) {
+                    hsv_drives[l].sat += FADE_SPEED;
+                } else {
+                    hsv_drives[l].sat = targetColor.sat;
+                    satDelta = 0;
+                }
             }
 
             int valDelta = hsv_drives[l].val - targetColor.val;
@@ -172,6 +181,13 @@ void DriveLights::fadeAllLights() {
                 hsv_drives[l].val += FADE_SPEED;
             } else {
                 hsv_drives[l].val = targetColor.val;
+                valDelta = 0;
+
+                // If we just got through fading to black, we're done; set the color properties
+                if (targetColor.val == 0) {
+                    hsv_drives[l].hue = targetColor.hue;
+                    hsv_drives[l].sat = targetColor.sat;
+                }
             }
 
             
