@@ -63,7 +63,7 @@ protected:
     virtual void dev_noteOn(uint8_t subAddress, uint8_t payload[]){};
     virtual void dev_noteOff(uint8_t subAddress, uint8_t payload[]){};
     virtual void dev_bendPitch(uint8_t subAddress, uint8_t payload[]){};
-    virtual void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]){};
+    virtual void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]){}; //TODO Probably should include a payloadLength on all of these...
 };
 
 #endif /* MOPPY_SRC_MOPPYMESSAGECONSUMER_H_ */

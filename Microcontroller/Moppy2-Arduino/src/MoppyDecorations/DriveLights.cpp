@@ -98,6 +98,17 @@ void DriveLights::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     // currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES*(bendDeflection/(float)8192));
 }
 
+void DriveLights::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
+    switch (command) {
+    case NETBYTE_DEV_SETTARGETCOLOR:
+        setTargetColor(subAddress - 1, CHSV(payload[0]*2, payload[1]*2, payload[2]*2)); // MIDI bytes only go to 127, so * 2
+        break;
+    case NETBYTE_DEV_SETBGCOLOR:
+        setBackgroundColor(subAddress - 1, CHSV(payload[0]*2, payload[1]*2, payload[2]*2)); // MIDI bytes only go to 127, so * 2
+        break;
+        }
+}
+
 void DriveLights::setTargetColor(uint8_t driveIndex, CHSV newColor) {
     hsv_drives_target[driveIndex] = newColor;
 }

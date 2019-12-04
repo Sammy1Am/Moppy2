@@ -18,6 +18,9 @@
 #define DATA_PIN 18
 #define CLOCK_PIN 19
 
+#define NETBYTE_DEV_SETTARGETCOLOR 0x61
+#define NETBYTE_DEV_SETBGCOLOR 0x62
+
 const CHSV RED_TARGET{0, 255, 255};
 const CHSV GREEN_TARGET{96, 255, 255};
 const CHSV BLUE_TARGET{160, 255, 255};
@@ -54,6 +57,7 @@ protected:
     void dev_noteOn(uint8_t subAddress, uint8_t payload[]) override;
     void dev_noteOff(uint8_t subAddress, uint8_t payload[]) override;
     void dev_bendPitch(uint8_t subAddress, uint8_t payload[]) override;
+    void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
 
 private:
     static void lightsTick();
