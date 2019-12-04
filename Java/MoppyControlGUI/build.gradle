@@ -43,5 +43,5 @@ repositories {
 dependencies {
     compile project(':MoppyLib')
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.3'
-    compileOnly "org.projectlombok:lombok:1.16.16"
+    compileOnly "org.projectlombok:lombok:1.18.10"
 }

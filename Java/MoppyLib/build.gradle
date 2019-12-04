@@ -31,7 +31,7 @@ repositories {
 
 dependencies {
     compile 'com.fazecast:jSerialComm:2.0.2'
-    compileOnly "org.projectlombok:lombok:1.16.16"
+    compileOnly "org.projectlombok:lombok:1.18.10"
     // TODO: Add dependencies here ...
     // You can read more about how to add dependency here:
     //   http://www.gradle.org/docs/current/userguide/dependency_management.html#sec:how_to_declare_your_dependencies
