@@ -127,7 +127,7 @@ void DriveLights::setDrive(uint8_t driveIndex, CHSV newColor) {
 }
 
 void DriveLights::startupShow() {
-    CHSV colors[3] = {RED_TARGET, BLUE_TARGET, GREEN_TARGET};
+    CHSV colors[3] = {RED_TARGET, GREEN_TARGET, BLUE_TARGET};
     for (uint8_t c = 0; c < 3; c++) {
         for (uint8_t i = 0; i < 8; i++) {
             setDrive(i, colors[c]);
