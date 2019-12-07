@@ -31,10 +31,7 @@ namespace instruments {
       void dev_bendPitch(uint8_t subAddress, uint8_t payload[]) override;
 
   private:
-      // First drive being used for floppies, and the last drive.  Used for calculating
-      // step and direction pins.
-      static const byte FIRST_DRIVE = 1;
-      static const byte LAST_DRIVE = 8; // This may also determine the size of some arrays
+      static const byte LAST_DRIVE = 8; // Number of drives being used.  This determines the size of some arrays.
 
       // Maximum note number to attempt to play on floppy drives.  It's possible higher notes may work,
       // but they may also cause instability.
@@ -43,19 +40,20 @@ namespace instruments {
       
       static unsigned int MAX_POSITION[LAST_DRIVE];
       static unsigned int currentPosition[LAST_DRIVE];
-      static uint8_t currentState[2];
-      static unsigned int currentPeriod[];
-      static unsigned int currentTick[];
-      static unsigned int originalPeriod[];
+      static uint8_t stepBits; // Bits that represent the current state of the step pins
+      static uint8_t directionBits; // Bits that represent the current state of the direction pins
+      static unsigned int currentPeriod[LAST_DRIVE];
+      static unsigned int currentTick[LAST_DRIVE];
+      static unsigned int originalPeriod[LAST_DRIVE];
 
       static void tick();
       static void resetAll();
-      static void togglePin(byte driveNum, byte pin, byte direction_pin);
+      static void togglePin(byte driveIndex);
       static void shiftBits();
       static void haltAllDrives();
       static void reset(byte driveNum);
       static void blinkLED();
-      static void startupSound(byte driveNum);
+      static void startupSound(byte driveIndex);
   };
 }
 
