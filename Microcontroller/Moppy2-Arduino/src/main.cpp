@@ -13,7 +13,7 @@
  */
 
 // Floppy drives directly connected to the Arduino's digital pins
-#include "MoppyInstruments/FloppyDrives.h"
+//#include "MoppyInstruments/FloppyDrives.h"
 
 // L298N stepper motor driver
 //#include "src/MoppyInstruments/L298N.h"
@@ -21,10 +21,13 @@
 // A single device (e.g. xylophone, drums, etc.) connected to shift registers
 //#include "src/MoppyInstruments/ShiftRegister.h"
 
+// Floppy drives connected to 74HC595 shift registers
+#include "MoppyInstruments/ShiftedFloppyDrives.h"
+
 // A Compound instrument for pairing two instruments on a single board
 //#include "MoppyInstruments/CompoundInstrument.h"
 
-MoppyInstrument *instrument = new FloppyDrives();
+MoppyInstrument *instrument = new instruments::ShiftedFloppyDrives();
 
 
 /*************

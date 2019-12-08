@@ -33,10 +33,11 @@ unsigned int ShiftedFloppyDrives::originalPeriod[] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 void ShiftedFloppyDrives::setup() {
 
-    // pinMode(DATA_PIN, OUTPUT);
-    // pinMode(CLOCK_PIN, OUTPUT);
+    //pinMode(13, OUTPUT);
+    //pinMode(14, OUTPUT);
     pinMode(LATCH_PIN, OUTPUT);
     SPI.begin();
+    SPI.beginTransaction(SPISettings(16000000, LSBFIRST, SPI_MODE0)); // We're never ending this, hopefully that's okay...
 
     // With all pins setup, let's do a first run reset
     resetAll();
@@ -170,12 +171,9 @@ void ShiftedFloppyDrives::shiftBits() {
     digitalWrite(LATCH_PIN, LOW);
 #endif
 
-    SPI.beginTransaction(SPISettings(16000000, LSBFIRST, SPI_MODE0));
-
     SPI.transfer(directionBits);
     SPI.transfer(stepBits);
 
-    SPI.endTransaction();
 #ifdef ARDUINO_AVR_UNO
     PORTD |= B00010000;
 #else
