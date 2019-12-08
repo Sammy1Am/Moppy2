@@ -7,7 +7,7 @@
 #include "MoppyInstrument.h"
 namespace instruments {
 
-uint8_t ShiftedFloppyDrives::stepBits = 0; // Bits that represent the current state of the step pins
+uint8_t ShiftedFloppyDrives::stepBits = 0;      // Bits that represent the current state of the step pins
 uint8_t ShiftedFloppyDrives::directionBits = 0; // Bits that represent the current state of the direction pins
 
 /*An array of maximum track positions for each floppy drive.  3.5" Floppies have
@@ -42,15 +42,15 @@ void ShiftedFloppyDrives::setup() {
     resetAll();
     delay(500); // Wait a half second for safety
 
-      // Setup timer to handle interrupts for floppy driving
+    // Setup timer to handle interrupts for floppy driving
     MoppyTimer::initialize(TIMER_RESOLUTION, tick);
 
-      // If MoppyConfig wants a startup sound, play the startupSound on the
-      // first drive.
-      if (PLAY_STARTUP_SOUND) {
-          startupSound(0);
-          delay(500);
-          resetAll();
+    // If MoppyConfig wants a startup sound, play the startupSound on the
+    // first drive.
+    if (PLAY_STARTUP_SOUND) {
+        startupSound(0);
+        delay(500);
+        resetAll();
     }
 }
 
@@ -94,11 +94,11 @@ void ShiftedFloppyDrives::dev_reset(uint8_t subAddress) {
 
 void ShiftedFloppyDrives::dev_noteOn(uint8_t subAddress, uint8_t payload[]) {
     if (payload[0] <= MAX_FLOPPY_NOTE) {
-        currentPeriod[subAddress-1] = originalPeriod[subAddress-1] = noteDoubleTicks[payload[0]];
+        currentPeriod[subAddress - 1] = originalPeriod[subAddress - 1] = noteDoubleTicks[payload[0]];
     }
 };
 void ShiftedFloppyDrives::dev_noteOff(uint8_t subAddress, uint8_t payload[]) {
-    currentPeriod[subAddress-1] = originalPeriod[subAddress-1] = 0;
+    currentPeriod[subAddress - 1] = originalPeriod[subAddress - 1] = 0;
 };
 void ShiftedFloppyDrives::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     // A value from -8192 to 8191 representing the pitch deflection
@@ -107,7 +107,7 @@ void ShiftedFloppyDrives::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     // A whole octave of bend would double the frequency (halve the the period) of notes
     // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
     //currentPeriod[subAddress] = originalPeriod[subAddress] / 1.4;
-    currentPeriod[subAddress-1] = originalPeriod[subAddress-1] / pow(2.0, BEND_OCTAVES * (bendDeflection / (float)8192));
+    currentPeriod[subAddress - 1] = originalPeriod[subAddress - 1] / pow(2.0, BEND_OCTAVES * (bendDeflection / (float)8192));
 };
 
 //
@@ -135,13 +135,12 @@ void ShiftedFloppyDrives::tick() {
                 currentTick[d] = 0;
             }
         }
-        }
+    }
 
-        if (shiftNeeded) {
-            shiftBits();
-        }
+    if (shiftNeeded) {
+        shiftBits();
+    }
 }
-
 
 void ShiftedFloppyDrives::togglePin(byte driveIndex) {
 
@@ -165,7 +164,11 @@ void ShiftedFloppyDrives::togglePin(byte driveIndex) {
 }
 
 void ShiftedFloppyDrives::shiftBits() {
+#ifdef ARDUINO_AVR_UNO
     PORTD &= B11101111;
+#else
+    digitalWrite(LATCH_PIN, LOW);
+#endif
 
     SPI.beginTransaction(SPISettings(16000000, LSBFIRST, SPI_MODE0));
 
@@ -173,7 +176,11 @@ void ShiftedFloppyDrives::shiftBits() {
     SPI.transfer(stepBits);
 
     SPI.endTransaction();
+#ifdef ARDUINO_AVR_UNO
     PORTD |= B00010000;
+#else
+    digitalWrite(LATCH_PIN, HIGH);
+#endif
 }
 #pragma GCC pop_options
 
