@@ -12,7 +12,7 @@
 #include "../MoppyMessageConsumer.h"
 #include "MoppyNetwork.h"
 
-#define MOPPY_BAUD_RATE 57600
+#define MOPPY_BAUD_RATE 115200
 
 class MoppySerial {
   public:
