@@ -16,10 +16,7 @@ namespace instruments {
   class ShiftedFloppyDrives : public MoppyInstrument {
   public:
     void setup();
-
-    static const int DATA_PIN = 11;  //SER
-    static const int CLOCK_PIN = 13; //SRCLK
-    static const int LATCH_PIN = 4; //RCLK
+    static const int LATCH_PIN = 2; //RCLK
 
   protected:
       void sys_sequenceStop() override;

@@ -33,8 +33,8 @@ unsigned int ShiftedFloppyDrives::originalPeriod[] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 void ShiftedFloppyDrives::setup() {
 
-    pinMode(DATA_PIN, OUTPUT);
-    pinMode(CLOCK_PIN, OUTPUT);
+    // pinMode(DATA_PIN, OUTPUT);
+    // pinMode(CLOCK_PIN, OUTPUT);
     pinMode(LATCH_PIN, OUTPUT);
     SPI.begin();
 

@@ -15,8 +15,8 @@
 #include <FastLED.h>
 #define NUM_DRIVES 8
 #define NUM_LEDS (4*NUM_DRIVES)
-#define DATA_PIN 18
-#define CLOCK_PIN 19
+#define DATA_PIN 4
+#define CLOCK_PIN 5
 
 #define NETBYTE_DEV_SETTARGETCOLOR 0x61
 #define NETBYTE_DEV_SETBGCOLOR 0x62
