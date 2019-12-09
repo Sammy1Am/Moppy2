@@ -17,7 +17,7 @@
 class MoppySerial {
   public:
       MoppySerial(MoppyMessageConsumer *messageConsumer);
-      void begin(long baud = MOPPY_BAUD_RATE);
+      void begin();
       void readMessages();
   private:
     MoppyMessageConsumer *targetConsumer;

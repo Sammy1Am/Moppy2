@@ -8,8 +8,8 @@ MoppySerial::MoppySerial(MoppyMessageConsumer *messageConsumer) {
     targetConsumer = messageConsumer;
 }
 
-void MoppySerial::begin(long baud) {
-  Serial.begin(baud);
+void MoppySerial::begin() {
+  Serial.begin(MOPPY_BAUD_RATE);
 }
 
 /* MoppyMessages contain the following bytes:
