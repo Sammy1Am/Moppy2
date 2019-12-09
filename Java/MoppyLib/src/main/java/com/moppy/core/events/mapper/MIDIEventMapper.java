@@ -4,7 +4,6 @@ import com.moppy.core.comms.MoppyMessage;
 import com.moppy.core.comms.MoppyMessageFactory;
 
 import java.util.Arrays;
-import java.util.logging.Logger;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.SysexMessage;

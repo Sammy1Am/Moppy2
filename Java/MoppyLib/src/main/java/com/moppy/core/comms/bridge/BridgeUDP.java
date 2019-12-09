@@ -32,7 +32,7 @@ public class BridgeUDP extends NetworkBridge {
     private Thread listenerThread = null;
 
     public BridgeUDP() throws UnknownHostException {
-        groupAddress = InetAddress.getByName("227.2.2.7");
+        groupAddress = InetAddress.getByName("239.2.2.7");
     }
 
     @Override

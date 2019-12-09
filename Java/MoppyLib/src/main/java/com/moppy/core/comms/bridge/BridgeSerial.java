@@ -27,7 +27,7 @@ public class BridgeSerial extends NetworkBridge {
 
     public BridgeSerial(String serialPortName) {
         serialPort = SerialPort.getCommPort(serialPortName);
-        serialPort.setBaudRate(57600);
+        serialPort.setBaudRate(115200);
     }
 
     public static List<String> getAvailableSerials() {
