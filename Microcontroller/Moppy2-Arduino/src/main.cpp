@@ -52,16 +52,14 @@ MoppyDecoration *decoration = new DriveLights();
 // Standard Arduino HardwareSerial implementation
 #include "MoppyNetworks/MoppySerial.h"
 #include "MoppyInstruments/CompoundConsumer.h"
-MoppySerial network = MoppySerial(new CompoundConsumer(instrument, decoration));
+//MoppySerial network = MoppySerial(new CompoundConsumer(instrument, decoration));
 
 //// UDP Implementation using some sort of network stack?  (Not implemented yet)
-// #include "src/MoppyNetworks/MoppyUDP.h"
-// MoppyUDP network = MoppyUDP(instrument.systemMessage, instrument.deviceMessage);
-
+#include "MoppyNetworks/MoppyUDP.h"
+MoppyUDP network = MoppyUDP(new CompoundConsumer(instrument, decoration));
 
 //The setup function is called once at startup of the sketch
-void setup()
-{
+void setup() {
     // Call setup() on the instrument to allow to to prepare for action
     instrument->setup();
 
@@ -73,9 +71,8 @@ void setup()
 }
 
 // The loop function is called in an endless loop
-void loop()
-{
-	// Endlessly read messages on the network.  The network implementation
+void loop() {
+    // Endlessly read messages on the network.  The network implementation
 	// will call the system or device handlers on the intrument whenever a message is received.
     network.readMessages();
 

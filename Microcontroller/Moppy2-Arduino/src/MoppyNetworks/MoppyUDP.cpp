@@ -18,6 +18,7 @@ void MoppyUDP::begin() {
     DNSServer dns;
     AsyncWiFiManager wifiManager(&server, &dns);
     wifiManager.autoConnect("FloppyDrives", "m0ppydrives");
+    startOTA();
     startUDP();
 }
 
@@ -38,7 +39,49 @@ bool MoppyUDP::startUDP() {
     return connected;
 }
 
+void MoppyUDP::startOTA() {
+    ArduinoOTA.setPort(8377);
+    ArduinoOTA.setPassword("flashdrive");
+
+    ArduinoOTA.onStart([]() {
+        String type;
+        if (ArduinoOTA.getCommand() == U_FLASH) {
+            type = "sketch";
+        } else { // U_FS
+            type = "filesystem";
+        }
+
+        // NOTE: if updating FS this would be the place to unmount FS using FS.end()
+        Serial.println("Start updating " + type);
+    });
+    ArduinoOTA.onEnd([]() {
+        Serial.println("\nEnd");
+    });
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+        Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    });
+    ArduinoOTA.onError([](ota_error_t error) {
+        Serial.printf("Error[%u]: ", error);
+        if (error == OTA_AUTH_ERROR) {
+            Serial.println("Auth Failed");
+        } else if (error == OTA_BEGIN_ERROR) {
+            Serial.println("Begin Failed");
+        } else if (error == OTA_CONNECT_ERROR) {
+            Serial.println("Connect Failed");
+        } else if (error == OTA_RECEIVE_ERROR) {
+            Serial.println("Receive Failed");
+        } else if (error == OTA_END_ERROR) {
+            Serial.println("End Failed");
+        }
+    });
+    ArduinoOTA.begin();
+}
+
 void MoppyUDP::readMessages() {
+    // Handle OTA
+    ArduinoOTA.handle();
+
+    // Handle UDP packets
     int packetSize = UDP.parsePacket();
     if (packetSize) {
         // Serial.println("");
@@ -62,16 +105,6 @@ void MoppyUDP::readMessages() {
 
         UDP.flush(); // Just incase we got a really long packet
     }
-
-    // udpLoopCounter++;
-
-    // if (udpLoopCounter >= 50000) {
-    //     Serial.println("Sending packet");
-    //     udpLoopCounter = 0;
-    //     UDP.beginPacket(IPAddress(192, 168, 7, 169), 64460);
-    //     UDP.write(ReplyBuffer);
-    //     UDP.endPacket();
-    // }
 }
 
 /* MoppyMessages contain the following bytes:
