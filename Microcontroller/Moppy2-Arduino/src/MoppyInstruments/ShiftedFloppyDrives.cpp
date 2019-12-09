@@ -33,8 +33,6 @@ unsigned int ShiftedFloppyDrives::originalPeriod[] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 void ShiftedFloppyDrives::setup() {
 
-    //pinMode(13, OUTPUT);
-    //pinMode(14, OUTPUT);
     pinMode(LATCH_PIN, OUTPUT);
     SPI.begin();
     SPI.beginTransaction(SPISettings(16000000, LSBFIRST, SPI_MODE0)); // We're never ending this, hopefully that's okay...
@@ -118,10 +116,12 @@ void ShiftedFloppyDrives::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
 /*
 Called by the timer interrupt at the specified resolution.  Because this is called extremely often,
 it's crucial that any computations here be kept to a minimum!
+
+Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but may increase speed generally anyway
  */
 #pragma GCC push_options
 #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
-void ShiftedFloppyDrives::tick() {
+void ICACHE_RAM_ATTR ShiftedFloppyDrives::tick() {
     bool shiftNeeded = false; // True if bits need to be written to registers
     /*
    For each drive, count the number of
@@ -143,7 +143,7 @@ void ShiftedFloppyDrives::tick() {
     }
 }
 
-void ShiftedFloppyDrives::togglePin(byte driveIndex) {
+void ICACHE_RAM_ATTR ShiftedFloppyDrives::togglePin(byte driveIndex) {
 
     unsigned int *cPos = &currentPosition[driveIndex];
 
@@ -164,7 +164,7 @@ void ShiftedFloppyDrives::togglePin(byte driveIndex) {
     stepBits ^= (1 << driveIndex);
 }
 
-void ShiftedFloppyDrives::shiftBits() {
+void ICACHE_RAM_ATTR ShiftedFloppyDrives::shiftBits() {
 #ifdef ARDUINO_AVR_UNO
     PORTD &= B11101111;
 #else
@@ -193,7 +193,7 @@ void ShiftedFloppyDrives::haltAllDrives() {
     }
 }
 
-//For a given floppy number, runs the read-head all the way back to 0
+//TODO For a given floppy number, runs the read-head all the way back to 0
 void ShiftedFloppyDrives::reset(byte driveNum) {
     // currentPeriod[driveNum] = 0; // Stop note
 
