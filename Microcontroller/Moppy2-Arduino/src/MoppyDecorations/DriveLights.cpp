@@ -22,6 +22,8 @@ CHSV hsv_drives_target[NUM_DRIVES] = {
 bool drives_fading[NUM_DRIVES];
 uint8_t DRIVE_TO_LEDS_MAP[NUM_DRIVES] = {12, 16, 8, 20, 4, 24, 0, 28};
 
+CHSV DriveLights::originalSetColor[NUM_DRIVES];
+
 bool updateNeeded = false;
 
 void DriveLights::setup() {
@@ -71,6 +73,11 @@ void DriveLights::sys_sequenceStop() {
 }
 void DriveLights::sys_reset() {
     FastLED.clear(true);
+    // Reset all targeted colors
+    for (int t = 0; t < NUM_DRIVES;t++){
+        hsv_drives_target[t] = RAINBOW_TARGET;
+        hsv_drives_background[t] = BLACK_TARGET;
+    }
 }
 
 void DriveLights::dev_reset(uint8_t subAddress) {
@@ -81,7 +88,9 @@ void DriveLights::dev_reset(uint8_t subAddress) {
     }
 }
 void DriveLights::dev_noteOn(uint8_t subAddress, uint8_t payload[]) {
-    setDrive(subAddress - 1, getColor(subAddress - 1, payload[0]));
+    CHSV newColor = getColor(subAddress - 1, payload[0]);
+    setDrive(subAddress - 1, newColor);
+    originalSetColor[subAddress - 1] = newColor;
 }
 
 void DriveLights::dev_noteOff(uint8_t subAddress, uint8_t payload[]) {
@@ -92,10 +101,11 @@ void DriveLights::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     // A value from -8192 to 8191 representing the pitch deflection
     int16_t bendDeflection = payload[0] << 8 | payload[1];
 
-    // A whole octave of bend would double the frequency (halve the the period) of notes
+    // A whole octave of bend would add 127 "degrees" (out of 255) to the hue
     // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
-    // //currentPeriod[subAddress] = originalPeriod[subAddress] / 1.4;
-    // currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES*(bendDeflection/(float)8192));
+
+    uint8_t newHue = originalSetColor[subAddress - 1].hue + (255 * (BEND_OCTAVES * (bendDeflection / (float)8192)));
+    setDrive(subAddress - 1, CHSV(newHue, 255, 255));
 }
 
 void DriveLights::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
@@ -141,8 +151,7 @@ void DriveLights::startupShow() {
 
 CHSV DriveLights::getColor(uint8_t driveIndex, uint8_t noteNum) {
     if (hsv_drives_target[driveIndex] == RAINBOW_TARGET) {
-        unsigned int notePeriod = NOTE_PERIODS[noteNum];
-        return CHSV(int(128 * log(notePeriod / 478) / log(2)) % 255, 255, 255);
+        return CHSV((noteNum%24)*10.6, 255, 255); // Color-wheel over 24 notes (2 octaves)
     } else {
         return hsv_drives_target[driveIndex];
     }
