@@ -6,7 +6,7 @@
 #include "DriveLights.h"
 
 // Still not sure why these can't all be defined in the header file... a TODO for sure.
-CRGB leds[NUM_LEDS] = {0};
+CRGB leds[NUM_LEDS];
 CHSV hsv_drives[NUM_DRIVES];
 CHSV hsv_drives_background[NUM_DRIVES];
 CHSV hsv_drives_target[NUM_DRIVES] = {
@@ -30,6 +30,7 @@ void DriveLights::setup() {
     FastLED.addLeds<LPD8806, DATA_PIN, CLOCK_PIN, BRG>(leds, NUM_LEDS);
     FastLED.setBrightness(128);
     FastLED.clear(true);
+    FastLED.clear(true); // Do this twice to eliminate some weird glowing
 
     if (PLAY_STARTUP_SOUND) {
         startupShow();
