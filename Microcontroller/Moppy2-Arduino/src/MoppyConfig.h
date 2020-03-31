@@ -23,4 +23,20 @@
 #define MIN_SUB_ADDRESS 1
 #define MAX_SUB_ADDRESS 8
 
+////
+// Uncomment **ONLY ONE** of these instruments
+////
+
+#define INSTRUMENT_FLOPPIES
+//#define INSTRUMENT_L298N
+//#define INSTRUMENT_SHIFTED_FLOPPIES
+//#define INSTRUMENT_SHIFT_REGISTER
+
+////
+// Uncomment **ONLY ONE** of these networks
+////
+
+#define NETWORK_SERIAL
+//#define NETWORK_UDP
+
 #endif /* SRC_MOPPYCONFIG_H_ */

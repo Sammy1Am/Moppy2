@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "MoppyConfig.h"
 #include "MoppyInstruments/MoppyInstrument.h"
 #include "MoppyDecorations/MoppyDecoration.h"
 
@@ -12,22 +13,34 @@
  * instrument's constructor
  */
 
+//MoppyInstrument *instrument;
+
 // Floppy drives directly connected to the Arduino's digital pins
-//#include "MoppyInstruments/FloppyDrives.h"
+#ifdef INSTRUMENT_FLOPPIES
+#include "MoppyInstruments/FloppyDrives.h"
+    MoppyInstrument *instrument = new instruments::FloppyDrives();
+#endif
 
 // L298N stepper motor driver
-//#include "src/MoppyInstruments/L298N.h"
+#ifdef INSTRUMENT_L298N
+#include "MoppyInstruments/L298N.h"
+MoppyInstrument *instrument = new instruments::L298N();
+#endif
 
 // A single device (e.g. xylophone, drums, etc.) connected to shift registers
-//#include "src/MoppyInstruments/ShiftRegister.h"
+#ifdef INSTRUMENT_SHIFT_REGISTER
+#include "MoppyInstruments/ShiftRegister.h"
+MoppyInstrument *instrument = new instruments::ShiftRegister();
+#endif
 
 // Floppy drives connected to 74HC595 shift registers
+#ifdef INSTRUMENT_SHIFTED_FLOPPIES
 #include "MoppyInstruments/ShiftedFloppyDrives.h"
-
-// A Compound instrument for pairing two instruments on a single board
-//#include "MoppyInstruments/CompoundInstrument.h"
-
 MoppyInstrument *instrument = new instruments::ShiftedFloppyDrives();
+#endif
+
+// A Compound instrument for pairing two instruments on a single board (advanced)
+//#include "MoppyInstruments/CompoundInstrument.h"
 
 
 /*************
@@ -49,14 +62,19 @@ MoppyDecoration *decoration = new DriveLights();
  * Uncomment the appropriate networking class for your setup
  */
 
-// Standard Arduino HardwareSerial implementation
-#include "MoppyNetworks/MoppySerial.h"
 #include "MoppyInstruments/CompoundConsumer.h"
-//MoppySerial network = MoppySerial(new CompoundConsumer(instrument, decoration));
+
+// Standard Arduino HardwareSerial implementation
+#ifdef NETWORK_SERIAL
+#include "MoppyNetworks/MoppySerial.h"
+MoppySerial network = MoppySerial(new CompoundConsumer(instrument, decoration));
+#endif
 
 //// UDP Implementation using some sort of network stack?  (Not implemented yet)
+#ifdef NETWORK_UDP
 #include "MoppyNetworks/MoppyUDP.h"
 MoppyUDP network = MoppyUDP(new CompoundConsumer(instrument, decoration));
+#endif
 
 //The setup function is called once at startup of the sketch
 void setup() {
