@@ -36,6 +36,7 @@ namespace instruments {
 
       
       static unsigned int MAX_POSITION[LAST_DRIVE];
+      static unsigned int MIN_POSITION[LAST_DRIVE];
       static unsigned int currentPosition[LAST_DRIVE];
       static uint8_t stepBits; // Bits that represent the current state of the step pins
       static uint8_t directionBits; // Bits that represent the current state of the direction pins

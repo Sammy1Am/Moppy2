@@ -17,6 +17,8 @@ uint8_t ShiftedFloppyDrives::directionBits = 0; // Bits that represent the curre
  same as the largest value in this array
  */
 unsigned int ShiftedFloppyDrives::MAX_POSITION[] = {158, 158, 158, 158, 158, 158, 158, 158};
+unsigned int ShiftedFloppyDrives::MIN_POSITION[] = {0, 0, 0, 0, 0, 0, 0, 0};
+// ^ Use 81 and 79 for in-place playing
 
 //Array to track the current position of each floppy head.
 unsigned int ShiftedFloppyDrives::currentPosition[] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -150,7 +152,7 @@ void ICACHE_RAM_ATTR ShiftedFloppyDrives::togglePin(byte driveIndex) {
     //Switch directions if end has been reached
     if (*cPos >= MAX_POSITION[driveIndex]) {
         bitSet(directionBits, driveIndex);
-    } else if (*cPos <= 0) {
+    } else if (*cPos <= MIN_POSITION[driveIndex]) {
         bitClear(directionBits, driveIndex);
     }
 
