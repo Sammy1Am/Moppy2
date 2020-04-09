@@ -28,6 +28,11 @@ const CHSV DIM_TARGET{0, 0, 16};
 const CHSV BLACK_TARGET{0, 0, 0};
 const CHSV RAINBOW_TARGET{1, 0, 0}; // Set to target rainbow colors
 
+// FastLED casts CHSV to CRGB before == operations, which doesn't work well with our custom color markers (e.g. RAINBOW_TARGET)
+inline __attribute__((always_inline)) bool operator==(const CHSV &lhs, const CHSV &rhs) {
+    return (lhs.h == rhs.h) && (lhs.s == rhs.s) && (lhs.v == rhs.v);
+}
+
 class DriveLights : public MoppyDecoration {
 public:
     void setup() override;
