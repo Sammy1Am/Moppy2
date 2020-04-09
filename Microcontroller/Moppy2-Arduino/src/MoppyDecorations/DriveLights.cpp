@@ -98,7 +98,9 @@ void DriveLights::dev_noteOff(uint8_t subAddress, uint8_t payload[]) {
     drives_fading[subAddress - 1] = true; // Tell drive to fade (depending on mode)
 }
 void DriveLights::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
-    //TODO
+    if (originalSetColor[subAddress - 1].sat==0){
+        return; // If there's no color, don't worry about bending
+    }
     // A value from -8192 to 8191 representing the pitch deflection
     int16_t bendDeflection = payload[0] << 8 | payload[1];
 
@@ -106,7 +108,7 @@ void DriveLights::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
 
     uint8_t newHue = originalSetColor[subAddress - 1].hue + (255 * (BEND_OCTAVES * (bendDeflection / (float)8192)));
-    setDrive(subAddress - 1, CHSV(newHue, 255, 255));
+    setDrive(subAddress - 1, CHSV(newHue, originalSetColor[subAddress - 1].sat, originalSetColor[subAddress - 1].val));
 }
 
 void DriveLights::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {

@@ -26,7 +26,7 @@ const CHSV GREEN_TARGET{96, 255, 255};
 const CHSV BLUE_TARGET{160, 255, 255};
 const CHSV DIM_TARGET{0, 0, 16};
 const CHSV BLACK_TARGET{0, 0, 0};
-const CHSV RAINBOW_TARGET{1, 0, 0}; // Set to target rainbow colors
+const CHSV RAINBOW_TARGET{2, 0, 0}; // Set to target rainbow colors (needs to be even values)
 
 // FastLED casts CHSV to CRGB before == operations, which doesn't work well with our custom color markers (e.g. RAINBOW_TARGET)
 inline __attribute__((always_inline)) bool operator==(const CHSV &lhs, const CHSV &rhs) {
