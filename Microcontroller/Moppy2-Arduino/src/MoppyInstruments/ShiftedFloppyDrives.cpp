@@ -111,6 +111,24 @@ void ShiftedFloppyDrives::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     currentPeriod[subAddress - 1] = originalPeriod[subAddress - 1] / pow(2.0, BEND_OCTAVES * (bendDeflection / (float)8192));
 };
 
+void ShiftedFloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
+    switch (command) {
+    case NETBYTE_DEV_SETMOVEMENT:
+        setMovement(subAddress - 1, payload[0]==0); // MIDI bytes only go to 127, so * 2
+        break;
+    }
+}
+
+void ShiftedFloppyDrives::setMovement(byte driveIndex, bool movementEnabled) {
+    if (movementEnabled) {
+        MIN_POSITION[driveIndex] = 0;
+        MAX_POSITION[driveIndex] = 158;
+    } else {
+        MIN_POSITION[driveIndex] = 79;
+        MAX_POSITION[driveIndex] = 81;
+    }
+}
+
 //
 //// Floppy driving functions
 //
@@ -123,7 +141,7 @@ Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but m
  */
 #pragma GCC push_options
 #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
-void ICACHE_RAM_ATTR ShiftedFloppyDrives::tick() {
+    void ICACHE_RAM_ATTR ShiftedFloppyDrives::tick() {
     bool shiftNeeded = false; // True if bits need to be written to registers
     /*
    For each drive, count the number of
@@ -234,6 +252,7 @@ void ShiftedFloppyDrives::resetAll() {
     // Return tracking to ready state
     directionBits = 0x0;
     for (byte d = 0; d < LAST_DRIVE; d++) {
+        setMovement(d, true); // Turn movement back on by default
         currentPosition[d] = 0; // We're reset.
     }
 }

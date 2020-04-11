@@ -155,6 +155,10 @@ void DriveLights::startupShow() {
 CHSV DriveLights::getColor(uint8_t driveIndex, uint8_t noteNum) {
     if (hsv_drives_target[driveIndex] == RAINBOW_TARGET) {
         return CHSV((noteNum%24)*10.6, 255, 255); // Color-wheel over 24 notes (2 octaves)
+    } 
+    // Targets with 2-sat and 2-val will have their sat scaled instead of hue
+    else if (hsv_drives_target[driveIndex].sat == 2 && hsv_drives_target[driveIndex].val == 2) {
+        return CHSV(hsv_drives_target[driveIndex].hue, ((noteNum % 12) * 16)+79, 255); // Vary saturation over 24 notes (2 octaves)
     } else {
         return hsv_drives_target[driveIndex];
     }

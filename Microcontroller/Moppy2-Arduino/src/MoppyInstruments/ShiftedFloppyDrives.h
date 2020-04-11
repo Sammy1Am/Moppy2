@@ -26,6 +26,7 @@ namespace instruments {
       void dev_noteOn(uint8_t subAddress, uint8_t payload[]) override;
       void dev_noteOff(uint8_t subAddress, uint8_t payload[]) override;
       void dev_bendPitch(uint8_t subAddress, uint8_t payload[]) override;
+      void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
 
   private:
       static const byte LAST_DRIVE = 8; // Number of drives being used.  This determines the size of some arrays.
@@ -52,6 +53,7 @@ namespace instruments {
       static void reset(byte driveNum);
       static void blinkLED();
       static void startupSound(byte driveIndex);
+      static void setMovement(byte driveIndex, bool movementEnabled);
   };
 }
 
