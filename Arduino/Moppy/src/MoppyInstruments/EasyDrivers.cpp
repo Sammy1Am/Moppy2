@@ -1,7 +1,7 @@
 /*
  * EasyDrivers.cpp
  * @author : Sammy1Am, modified for the EasyDriver/A3967 by tobiasfrck
- * Output for controlling easydrivers.
+ * Output for controlling EasyDrivers.
  */
 #include "MoppyInstrument.h"
 #include "EasyDrivers.h"
@@ -24,7 +24,7 @@ const byte MAX_DRIVER_NOTE = 119;
  */
 
 
-//Microstep Resolution of each stepper motor:
+// Microstep Resolution of each stepper motor:
 //                              {MS1,MS2,MS1,MS2,MS1,MS2}
 unsigned int stepResolution[] = {LOW,LOW,LOW,LOW,LOW,LOW};
 /*
@@ -39,12 +39,12 @@ unsigned int stepResolution[] = {LOW,LOW,LOW,LOW,LOW,LOW};
 +------+-------+-------------------------+
 | H    | H     | Eigth Step              |
 +------+-------+-------------------------+
-*/
+ */
 
 /*
 NOTE: This integer controls the "resetAll" function, and should contain the highest value maximum poisitions of all EasyDrivers
-*/
- // Uncomment this if you want to be able to reset the drivers!
+ */
+// Uncomment this if you want to be able to reset the drivers!
 //unsigned int max_position = 7200;
 
 
@@ -88,7 +88,7 @@ void EasyDrivers::setup() {
   pinMode(19, INPUT_PULLUP); // Rear Direction-Switch 3
 
 
-  //Set the step resolution of each driver
+  // Set the step resolution of each driver
   for(byte respin = 0;respin<LAST_DRIVER;respin++) {
     digitalWrite(respin*4+4,stepResolution[respin*2]);
     digitalWrite(respin*4+5,stepResolution[respin*2+1]);
@@ -221,17 +221,17 @@ void EasyDrivers::tick()
 }
 
 void EasyDrivers::togglePin(byte driverNum, byte pin, byte direction_pin) {
-//Switch directions if either end has been reached.
-  if (digitalRead(driverNum*2+12)==LOW) { //If front direction pin is on, change direction.
+// Switch directions if either end has been reached.
+  if (digitalRead(driverNum*2+12)==LOW) { // If front direction pin is on, change direction.
     currentState[direction_pin] = HIGH;
     digitalWrite(direction_pin,HIGH);
   }
-  else if (digitalRead(driverNum*2+13)==LOW) { //If rear direction pin is on, change direction.
+  else if (digitalRead(driverNum*2+13)==LOW) { // If rear direction pin is on, change direction.
     currentState[direction_pin] = LOW;
     digitalWrite(direction_pin,LOW);
   }
 
-  //Pulse the step pin
+  // Pulse the step pin
   digitalWrite(pin,currentState[pin]);
   currentState[pin] = ~currentState[pin];
 }
@@ -241,7 +241,7 @@ void EasyDrivers::togglePin(byte driverNum, byte pin, byte direction_pin) {
 //// UTILITY FUNCTIONS
 //
 
-//Not used now, but good for debugging...
+// Not used now, but good for debugging...
 void EasyDrivers::blinkLED(){
   digitalWrite(13, HIGH); // set the LED on
   delay(250);              // wait for a second
@@ -255,7 +255,7 @@ void EasyDrivers::haltAllDrivers() {
   }
 }
 
-//For a given driver number, runs e.g. the scanner-head all the way back to the rear
+// For a given driver number, runs e.g. the scanner-head all the way back to the rear
 void EasyDrivers::reset(byte driverNum)
 {
   currentPeriod[driverNum] = 0; // Stop note
@@ -276,11 +276,11 @@ void EasyDrivers::reset(byte driverNum)
   currentState[stepPin+1] = LOW; // Ready to go forward.
 }
 
-// Resets all the drives simultaneously
+// Resets all the drivers simultaneously
 void EasyDrivers::resetAll()
 {
 
-  // Stop all drives and set to reverse
+  // Stop all drivers and set to reverse
   for (byte d=FIRST_DRIVER;d<=LAST_DRIVER;d++) {
     byte stepPin = (d - 1) * 4 + 2; //2, 6, 10
     currentPeriod[d] = 0;
