@@ -1,27 +1,26 @@
 /*
  * EasyDrivers.cpp
- * @author : Sammy1Am, modified for the EasyDriver by tobiasfrck
+ * @author : Sammy1Am, modified for the EasyDriver/A3967 by tobiasfrck
  * Output for controlling easydrivers.
  */
 #include "MoppyInstrument.h"
 #include "EasyDrivers.h"
 
 
-// First driver being used for floppies, and the last driver.  Used for calculating
-// step and direction pins.
+// This is used for calculating step and direction pins.
 const byte FIRST_DRIVER = 1;
 const byte LAST_DRIVER = 3;  // This sketch can handle only up to 3 drivers (the max for Arduino Uno)
 
-// ------------TESTING REQUIERED---------------------
+
 // Maximum note number to attempt to play on easydrivers.  It's possible higher notes may work,
 // but they need to be added in "MoppyInstrument.h".
-const byte MAX_DRIVER_NOTE = 107;
+const byte MAX_DRIVER_NOTE = 119;
 
 
 /*NOTE: The arrays below contain unused zero-indexes to avoid having to do extra
  * math to shift the 1-based subAddresses to 0-based indexes here.  Unlike the previous
- * version of Moppy, we *will* be doing math to calculate which drive maps to which pin,
- * so there are as many values as drives (plus the extra zero-index)
+ * version of Moppy, we *will* be doing math to calculate which driver maps to which pin,
+ * so there are as many values as drivers (plus the extra zero-index)
  */
 
 
@@ -58,7 +57,7 @@ int EasyDrivers::currentState[] = {0,0,LOW,LOW,LOW,LOW,LOW,LOW};
 // TIMER_RESOLUTION in MoppyInstrument.h) long.
 unsigned int EasyDrivers::currentPeriod[] = {0,0,0,0,0};
 
-// Tracks the current tick-count for each drive (see EasyDrivers::tick() below)
+// Tracks the current tick-count for each driver (see EasyDrivers::tick() below)
 unsigned int EasyDrivers::currentTick[] = {0,0,0,0,0};
 
 // The period originally set by incoming messages (prior to any modifications from pitch-bending)
@@ -147,7 +146,7 @@ void EasyDrivers::systemMessage(uint8_t command, uint8_t payload[]) {
       // Nothing to do here yet
       break;
     case NETBYTE_SYS_STOP: // Sequence stop
-      haltAllDrives();
+      haltAllDrivers();
       break;
   }
 }
@@ -249,8 +248,8 @@ void EasyDrivers::blinkLED(){
   digitalWrite(13, LOW);
 }
 
-// Immediately stops all drives
-void EasyDrivers::haltAllDrives() {
+// Immediately stops all drivers
+void EasyDrivers::haltAllDrivers() {
   for (byte d=FIRST_DRIVER;d<=LAST_DRIVER;d++) {
     currentPeriod[d] = 0;
   }
