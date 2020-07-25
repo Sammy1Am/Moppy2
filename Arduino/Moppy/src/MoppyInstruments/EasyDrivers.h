@@ -26,7 +26,7 @@ protected:
 
   static void resetAll();
   static void togglePin(byte driverNum, byte pin, byte direction_pin);
-  static void haltAllDrives();
+  static void haltAllDrivers();
   static void reset(byte driverNum);
   static void tick();
   static void blinkLED();
