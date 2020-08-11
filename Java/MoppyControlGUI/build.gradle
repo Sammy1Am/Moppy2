@@ -38,7 +38,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
     // Use JUnit test framework
-    testImplementation 'junit:junit:4.12'
+    //testImplementation 'junit:junit:4.12'
 }
 
 application {
