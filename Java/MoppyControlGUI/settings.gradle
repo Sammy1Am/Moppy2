@@ -1,4 +1,4 @@
 rootProject.name = 'MoppyControlGUI'
 
 include ':MoppyLib'
-project(':MoppyLib').projectDir = new File(settingsDir, '../MoppyLib')
+project(':MoppyLib').projectDir = file('../MoppyLib')
