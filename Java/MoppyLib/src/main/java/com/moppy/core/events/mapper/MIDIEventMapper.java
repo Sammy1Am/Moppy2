@@ -2,8 +2,11 @@ package com.moppy.core.events.mapper;
 
 import com.moppy.core.comms.MoppyMessage;
 import com.moppy.core.comms.MoppyMessageFactory;
+
+import java.util.Arrays;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
+import javax.sound.midi.SysexMessage;
 
 /**
  * Maps MIDI events to MoppyMessages
@@ -41,6 +44,19 @@ public abstract class MIDIEventMapper implements EventMapper<MidiMessage> {
                             */
                             short pitchBend = (short)((((midiMessage.getData2() & 0xff) << 7) + midiMessage.getData1() & 0xff) - 8192);
                             return MoppyMessageFactory.devicePitchBend(targetAddress, (byte)(midiMessage.getChannel()+1), pitchBend);
+                    }
+                } else if (event instanceof SysexMessage) {
+                    SysexMessage sysexMessage = (SysexMessage) event;
+                    // Check to make sure it's a "Moppy" System exclusive message
+                    if (sysexMessage.getData()[0] == MoppyMessage.START_BYTE) {
+                        // Convert the system exclusive message directly into a MoppyMessage
+                        // NO VALIDATION IS DONE HERE (so the system exclusive messages must be
+                        // well-formatted)
+                        return MoppyMessageFactory
+                                .fromBytes(Arrays.copyOf(sysexMessage.getData(), sysexMessage.getData().length - 1)); // Remove
+                                                                                                                      // trailing
+                                                                                                                      // 0xf7
+                                                                                                                      // byte
                     }
                 }
                 return null; // We don't know how to handle this event
