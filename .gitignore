@@ -33,3 +33,9 @@ hs_err_pid*
 /Java/*/.nb-gradle-properties
 /Java/MoppyControlGUI/.nb-gradle/
 /Java/MoppyControlGUI/build/
+
+#VS Code Files
+Java/*/.classpath
+Java/*/.project
+Java/*/.settings/org.eclipse.jdt.core.prefs
+Java/*/.settings/org.eclipse.buildship.core.prefs
