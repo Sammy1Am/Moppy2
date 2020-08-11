@@ -6,6 +6,8 @@ import com.moppy.core.events.mapper.scripts.ConditionScripts;
 import com.moppy.core.events.mapper.scripts.DeviceAddressScripts;
 import com.moppy.core.events.mapper.scripts.NoteScripts;
 import com.moppy.core.events.mapper.scripts.SubAddressScripts;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -17,6 +19,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
+import javax.sound.midi.SysexMessage;
 
 /**
  * Maps events based on JavaScript expressions.
@@ -91,6 +94,15 @@ public class MIDIScriptMapper extends MIDIEventMapper {
                 }
             } catch (ScriptException | ClassCastException ex) {
                  Logger.getLogger(MIDIScriptMapper.class.getName()).log(Level.WARNING, null, ex);
+            }
+        } else if (event instanceof SysexMessage) {
+            SysexMessage sysexMessage = (SysexMessage) event;
+            // Check to make sure it's a "Moppy" System exclusive message
+            if (sysexMessage.getData()[0] == MoppyMessage.START_BYTE) {
+                // Convert the system exclusive message directly into a MoppyMessage
+                // NO VALIDATION IS DONE HERE (so the system exclusive messages must be
+                // well-formatted)
+                return MoppyMessageFactory.fromBytes(Arrays.copyOf(sysexMessage.getData(), sysexMessage.getData().length-1)); // Remove trailing 0xf7 byte
             }
         }
         return null; // We don't know how to handle this event
