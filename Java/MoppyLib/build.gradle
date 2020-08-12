@@ -20,6 +20,8 @@ repositories {
 
 dependencies {
     implementation 'com.fazecast:jSerialComm:2.6.+'
+    implementation 'org.graalvm.js:js:20.1.+'
+    implementation 'org.graalvm.js:js-scriptengine:20.1.+'
     compileOnly 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 

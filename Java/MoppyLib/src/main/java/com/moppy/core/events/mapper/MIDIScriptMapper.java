@@ -26,7 +26,7 @@ import javax.sound.midi.SysexMessage;
  */
 public class MIDIScriptMapper extends MIDIEventMapper {
 
-    private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("javascript");
+    private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("graal.js");
     private final static Bindings TEST_BINDINGS;
     private final static Bindings TEST_BINDINGS_LOW;
     private final static Bindings TEST_BINDINGS_HIGH;
