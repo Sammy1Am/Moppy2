@@ -39,3 +39,4 @@ Java/*/.classpath
 Java/*/.project
 Java/*/.settings/org.eclipse.jdt.core.prefs
 Java/*/.settings/org.eclipse.buildship.core.prefs
+Java/MoppyControlGUI/**/*.form
