@@ -44,7 +44,6 @@ public class MapperPanel extends javax.swing.JPanel {
         SUBADDRESS_MAP.put("Custom", "");
 
         NOTE_MAP.put(NoteScripts.FORCE_INTO_RANGE.displayName(), NoteScripts.FORCE_INTO_RANGE.toString());
-        NOTE_MAP.put(NoteScripts.IGNORE_OUT_OF_RANGE.displayName(), NoteScripts.IGNORE_OUT_OF_RANGE.toString());
         NOTE_MAP.put(NoteScripts.STRAIGHT_THROUGH.displayName(), NoteScripts.STRAIGHT_THROUGH.toString());
         NOTE_MAP.put("Custom", "");
     }

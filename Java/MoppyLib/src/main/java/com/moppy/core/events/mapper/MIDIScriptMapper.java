@@ -28,6 +28,8 @@ public class MIDIScriptMapper extends MIDIEventMapper {
 
     private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("javascript");
     private final static Bindings TEST_BINDINGS;
+    private final static Bindings TEST_BINDINGS_LOW;
+    private final static Bindings TEST_BINDINGS_HIGH;
     private final Bindings localBindings = SCRIPT_ENGINE.createBindings();
 
     private final HashMap<Integer, Integer> currentNotes = new HashMap<>(); // Sub-Address to Note map
@@ -40,9 +42,20 @@ public class MIDIScriptMapper extends MIDIEventMapper {
 
     static {
         TEST_BINDINGS = SCRIPT_ENGINE.createBindings();
+        TEST_BINDINGS_LOW = SCRIPT_ENGINE.createBindings();
+        TEST_BINDINGS_HIGH = SCRIPT_ENGINE.createBindings();
+
         TEST_BINDINGS.put("c", 0);
         TEST_BINDINGS.put("n", 60);
         TEST_BINDINGS.put("v", 127);
+
+        TEST_BINDINGS_LOW.put("c", 0);
+        TEST_BINDINGS_LOW.put("n", 0);
+        TEST_BINDINGS_LOW.put("v", 0);
+
+        TEST_BINDINGS_HIGH.put("c", 15);
+        TEST_BINDINGS_HIGH.put("n", 127);
+        TEST_BINDINGS_HIGH.put("v", 127);
     }
 
     public MIDIScriptMapper() {
@@ -59,7 +72,7 @@ public class MIDIScriptMapper extends MIDIEventMapper {
     @Override
     public MoppyMessage mapEvent(MidiMessage event) {
         if (event instanceof ShortMessage) {
-            ShortMessage midiMessage = (ShortMessage) event;
+            ShortMessage midiMessage = (ShortMessage)event;
 
             // Bind message variables
             localBindings.put("c", midiMessage.getChannel());
@@ -93,10 +106,10 @@ public class MIDIScriptMapper extends MIDIEventMapper {
                         return MoppyMessageFactory.devicePitchBend(resolveDeviceId(localBindings), resolveSubAddress(localBindings), pitchBend);
                 }
             } catch (ScriptException | ClassCastException ex) {
-                 Logger.getLogger(MIDIScriptMapper.class.getName()).log(Level.WARNING, null, ex);
+                Logger.getLogger(MIDIScriptMapper.class.getName()).log(Level.WARNING, null, ex);
             }
         } else if (event instanceof SysexMessage) {
-            SysexMessage sysexMessage = (SysexMessage) event;
+            SysexMessage sysexMessage = (SysexMessage)event;
             // Check to make sure it's a "Moppy" System exclusive message
             if (sysexMessage.getData()[0] == MoppyMessage.START_BYTE) {
                 // Convert the system exclusive message directly into a MoppyMessage
@@ -115,9 +128,11 @@ public class MIDIScriptMapper extends MIDIEventMapper {
     private byte resolveDeviceId(Bindings bindings) throws ScriptException {
         return ((Number)SCRIPT_ENGINE.eval(deviceAddressScript, bindings)).byteValue();
     }
+
     private byte resolveSubAddress(Bindings bindings) throws ScriptException {
         return ((Number)SCRIPT_ENGINE.eval(subAddressScript, bindings)).byteValue();
     }
+
     private byte resolveNote(Bindings bindings) throws ScriptException {
         return ((Number)SCRIPT_ENGINE.eval(noteScript, bindings)).byteValue();
     }
@@ -141,22 +156,50 @@ public class MIDIScriptMapper extends MIDIEventMapper {
     // Setters will attempt to evaluate the new script before setting it.
 
     public void setConditionScript(String conditionScript) throws ScriptException {
-        boolean checkOutput = (boolean)SCRIPT_ENGINE.eval(conditionScript, localBindings);
+        try {
+            boolean checkOutput = (boolean)SCRIPT_ENGINE.eval(conditionScript, TEST_BINDINGS);
+            checkOutput = (boolean)SCRIPT_ENGINE.eval(conditionScript, TEST_BINDINGS_LOW);
+            checkOutput = (boolean)SCRIPT_ENGINE.eval(conditionScript, TEST_BINDINGS_HIGH);
+        } catch (NullPointerException npe) {
+            throw new ScriptException("Script result is null (and should not be)!");
+        }
         this.conditionScript = conditionScript;
     }
 
     public void setDeviceAddressScript(String deviceAddressScript) throws ScriptException {
-        byte checkOutput = ((Number)SCRIPT_ENGINE.eval(deviceAddressScript, localBindings)).byteValue();
+        try {
+            byte checkOutput = ((Number)SCRIPT_ENGINE.eval(deviceAddressScript, TEST_BINDINGS)).byteValue();
+            checkOutput = ((Number)SCRIPT_ENGINE.eval(deviceAddressScript, TEST_BINDINGS_LOW)).byteValue();
+            checkOutput = ((Number)SCRIPT_ENGINE.eval(deviceAddressScript, TEST_BINDINGS_HIGH)).byteValue();
+        } catch (NullPointerException npe) {
+            throw new ScriptException("Script result is null (and should not be)!");
+        }
         this.deviceAddressScript = deviceAddressScript;
     }
 
     public void setSubAddressScript(String subAddressScript) throws ScriptException {
-        byte checkOutput = ((Number)SCRIPT_ENGINE.eval(subAddressScript, localBindings)).byteValue();
+        try {
+            byte checkOutput = ((Number)SCRIPT_ENGINE.eval(subAddressScript, TEST_BINDINGS)).byteValue();
+            checkOutput = ((Number)SCRIPT_ENGINE.eval(subAddressScript, TEST_BINDINGS_LOW)).byteValue();
+            checkOutput = ((Number)SCRIPT_ENGINE.eval(subAddressScript, TEST_BINDINGS_HIGH)).byteValue();
+        } catch (
+
+        NullPointerException npe) {
+            throw new ScriptException("Script result is null (and should not be)!");
+        }
         this.subAddressScript = subAddressScript;
     }
 
     public void setNoteScript(String noteScript) throws ScriptException {
-        byte checkOutput = ((Number)SCRIPT_ENGINE.eval(noteScript, localBindings)).byteValue();
+        try {
+            byte checkOutput = ((Number)SCRIPT_ENGINE.eval(noteScript, TEST_BINDINGS)).byteValue();
+            checkOutput = ((Number)SCRIPT_ENGINE.eval(noteScript, TEST_BINDINGS_LOW)).byteValue();
+            checkOutput = ((Number)SCRIPT_ENGINE.eval(noteScript, TEST_BINDINGS_HIGH)).byteValue();
+        } catch (
+
+        NullPointerException npe) {
+            throw new ScriptException("Script result is null (and should not be)!");
+        }
         this.noteScript = noteScript;
     }
 
@@ -165,7 +208,7 @@ public class MIDIScriptMapper extends MIDIEventMapper {
     ////
 
     private int nextRoundRobinSubAddress(Integer numberOfChannels) {
-        int incomingNote = (int)localBindings.get("n"); // NOTE: Could be leftover binding from previously handled message!  Confirm this event is a NOTE_ON or NOTE_OFF event!
+        int incomingNote = (int)localBindings.get("n"); // NOTE: Could be leftover binding from previously handled message! Confirm this event is a NOTE_ON or NOTE_OFF event!
         if (((int)localBindings.get("midiCommand")) == ShortMessage.NOTE_ON) {
             // If this is a note on event, increment the sub address to the next available
             nextOpenRoundRobinSubAddress = nextOpenRoundRobinSubAddress%8+1;
