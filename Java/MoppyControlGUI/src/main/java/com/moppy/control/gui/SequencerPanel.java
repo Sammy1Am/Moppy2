@@ -360,7 +360,7 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
     private void sequenceSliderMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sequenceSliderMouseDragged
         midiSequencer.setSecondsPosition(sequenceSlider.getValue());
         Duration length = Duration.ofSeconds(midiSequencer.getSecondsPosition());
-        sequenceCurrentTimeLabel.setText(String.format(TIME_CODE_FORMAT, length.toMinutes(), length.getSeconds()));
+        sequenceCurrentTimeLabel.setText(String.format(TIME_CODE_FORMAT, length.toMinutes(), length.getSeconds()%60));
     }//GEN-LAST:event_sequenceSliderMouseDragged
 
     private void sequenceSliderMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sequenceSliderMousePressed
