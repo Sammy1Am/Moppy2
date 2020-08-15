@@ -40,3 +40,11 @@ Java/*/.project
 Java/*/.settings/org.eclipse.jdt.core.prefs
 Java/*/.settings/org.eclipse.buildship.core.prefs
 Java/MoppyControlGUI/**/*.form
+**/.vscode/extensions.json
+
+#PlatformIO
+Microcontroller/**/.pio
+Microcontroller/**/.vscode/.browse.c_cpp.db*
+Microcontroller/**/.vscode/c_cpp_properties.json
+Microcontroller/**/.vscode/launch.json
+Microcontroller/**/.vscode/ipch

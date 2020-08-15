@@ -9,7 +9,7 @@
  */
 
 // Floppy drives directly connected to the Arduino's digital pins
-#include "src/MoppyInstruments/FloppyDrives.h"
+#include "MoppyInstruments/FloppyDrives.h"
 FloppyDrives instrument = FloppyDrives();
 
 //Uncomment the 2 next lines and comment the 2 lines above this comment to switch to EasyDriver mode
@@ -35,7 +35,7 @@ FloppyDrives instrument = FloppyDrives();
  */
 
 // Standard Arduino HardwareSerial implementation
-#include "src/MoppyNetworks/MoppySerial.h"
+#include "MoppyNetworks/MoppySerial.h"
 MoppySerial network = MoppySerial(instrument.systemMessage, instrument.deviceMessage);
 
 // Standard Arduino HardwareSerial implementation  (Still WIP / Maintaned by Magnusm1709)

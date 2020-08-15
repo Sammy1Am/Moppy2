@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 #include "Arduino.h"
-#include "../../MoppyConfig.h"
+#include "../MoppyConfig.h"
 #include "MoppyNetwork.h"
 
 #define MOPPY_BAUD_RATE 57600
