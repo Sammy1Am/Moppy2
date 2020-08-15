@@ -8,7 +8,7 @@
 
 #include <Arduino.h>
 #include <TimerOne.h>
-#include "../../MoppyConfig.h"
+#include "../MoppyConfig.h"
 #include "../MoppyNetworks/MoppyNetwork.h"
 
 class FloppyDrives {

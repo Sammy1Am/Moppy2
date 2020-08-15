@@ -24,7 +24,7 @@ pin 17 (A3), IN4 for bridge 4
 
 #include <Arduino.h>
 #include <TimerOne.h>
-#include "../../MoppyConfig.h"
+#include "../MoppyConfig.h"
 #include "../MoppyNetworks/MoppyNetwork.h"
 
 class L298N {
