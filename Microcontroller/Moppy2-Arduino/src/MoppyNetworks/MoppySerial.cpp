@@ -1,18 +1,15 @@
 #include "../MoppyNetworks/MoppySerial.h"
 
 /*
- * Serial communications implementation for Arduino.  Handler
- * functions are called to consume system and device messages received from
- * the network.
+ * Serial communications implementation for Arduino.  Instrument
+ * has its handler functions called for device and system messages
  */
-MoppySerial::MoppySerial(handleSystemMessage sys, handleDeviceMessage dev) {
-  messageBuffer[0] = START_BYTE;
-  systemHandler = sys;
-  deviceHandler = dev;
+MoppySerial::MoppySerial(MoppyMessageConsumer *messageConsumer) {
+    targetConsumer = messageConsumer;
 }
 
-void MoppySerial::begin(long baud) {
-  Serial.begin(baud);
+void MoppySerial::begin() {
+    Serial.begin(MOPPY_BAUD_RATE);
 }
 
 /* MoppyMessages contain the following bytes:
@@ -26,71 +23,69 @@ void MoppySerial::begin(long baud) {
 
 void MoppySerial::readMessages() {
 
-  // If we're waiting for position 4, then we know how many bytes we're waiting for, no need
-  // to start reading until they're all there.
-  // TODO: This will break for large messages because the Arduino buffer size is only 64 bytes.
-  // This should be optimized a bit.
-  while ((messagePos != 4 && Serial.available()) 
-      || (messagePos == 4 && Serial.available() >= messageBuffer[3])) {
-        
-    switch (messagePos) {
-      case 0:
-        if (Serial.read() == START_BYTE) {
-          messagePos = 1;
-        }
-        break;
-      case 1:
-        messageBuffer[1] = Serial.read(); // Read device address
+    // If we're waiting for position 4, then we know how many bytes we're waiting for, no need
+    // to start reading until they're all there.
+    // TODO: This will break for large messages because the Arduino buffer size is only 64 bytes.
+    // This should be optimized a bit.
+    while ((messagePos != 4 && Serial.available()) || (messagePos == 4 && Serial.available() >= messageBuffer[3])) {
 
-        if (messageBuffer[1] == SYSTEM_ADDRESS) {
-          messagePos = 2; // System messages are for everyone, move to subAddress
-          break;
-        }
+        switch (messagePos) {
+        case 0:
+            if (Serial.read() == START_BYTE) {
+                messagePos = 1;
+            }
+            break;
+        case 1:
+            messageBuffer[1] = Serial.read(); // Read device address
 
-        // For Serial communications it's extremely unlikely that we'll be receiving messages not meant
-        // for us, but this can help squash noise from being treated as a message
-        if (messageBuffer[1] != DEVICE_ADDRESS) {
-          messagePos = 0; // This message isn't for us
-          break;
-        }
-        
-        messagePos = 2; // Get subAddress next
-        break;
-      case 2:
-        messageBuffer[2] = Serial.read(); // Read sub address
+            if (messageBuffer[1] == SYSTEM_ADDRESS) {
+                messagePos = 2; // System messages are for everyone, move to subAddress
+                break;
+            }
 
-        if (messageBuffer[2] == 0x00 || (messageBuffer[2] >= MIN_SUB_ADDRESS && messageBuffer[2] <= MAX_SUB_ADDRESS)) {
-          messagePos++; // Valid subAddress, continue
-          break;
-        }
-        
-        messagePos = 0; // Not listening to this subAddress, skip this message
-        break;
-      case 3:
-        messageBuffer[3] = Serial.read(); // Read message body size
-        messagePos++;
-        break;
-      case 4:
-        // Read command and payload
-        Serial.readBytes(messageBuffer + 4, messageBuffer[3]);
+            // For Serial communications it's extremely unlikely that we'll be receiving messages not meant
+            // for us, but this can help squash noise from being treated as a message
+            if (messageBuffer[1] != DEVICE_ADDRESS) {
+                messagePos = 0; // This message isn't for us
+                break;
+            }
 
-        // Call appropriate handler
-        if (messageBuffer[1] == SYSTEM_ADDRESS) {
-          if (messageBuffer[4] == NETBYTE_SYS_PING) {
-        	  sendPong(); // Respond with pong if requested
-          } else {
-        	  systemHandler(messageBuffer[4], &messageBuffer[5]);
-          }
-        } else {
-          deviceHandler(messageBuffer[2], messageBuffer[4], &messageBuffer[5]);
-        }
+            messagePos = 2; // Get subAddress next
+            break;
+        case 2:
+            messageBuffer[2] = Serial.read(); // Read sub address
 
-       messagePos = 0; // Start looking for a new message
+            if (messageBuffer[2] == 0x00 || (messageBuffer[2] >= MIN_SUB_ADDRESS && messageBuffer[2] <= MAX_SUB_ADDRESS)) {
+                messagePos++; // Valid subAddress, continue
+                break;
+            }
+
+            messagePos = 0; // Not listening to this subAddress, skip this message
+            break;
+        case 3:
+            messageBuffer[3] = Serial.read(); // Read message body size
+            messagePos++;
+            break;
+        case 4:
+            // Read command and payload
+            Serial.readBytes(messageBuffer + 4, messageBuffer[3]);
+
+            // Call appropriate handler
+            if (messageBuffer[1] == SYSTEM_ADDRESS) {
+                if (messageBuffer[4] == NETBYTE_SYS_PING) {
+                    sendPong(); // Respond with pong if requested
+                } else {
+                    targetConsumer->handleSystemMessage(messageBuffer[4], &messageBuffer[5]);
+                }
+            } else {
+                targetConsumer->handleDeviceMessage(messageBuffer[2], messageBuffer[4], &messageBuffer[5]);
+            }
+
+            messagePos = 0; // Start looking for a new message
+        }
     }
-  }
 }
 
 void MoppySerial::sendPong() {
-  Serial.write(pongBytes, sizeof(pongBytes));
+    Serial.write(pongBytes, sizeof(pongBytes));
 }
-

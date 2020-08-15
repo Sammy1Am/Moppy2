@@ -8,6 +8,7 @@
 
 #include "MoppyInstrument.h"
 
+namespace instruments {
 // Define pins for connection to shift registers
 #define DATA_PIN 2
 #define SHIFT_CLOCK_PIN 3
@@ -163,3 +164,4 @@ void ShiftRegister::zeroOutputs() {
   }
   shiftAllData();
 }
+} // namespace instruments

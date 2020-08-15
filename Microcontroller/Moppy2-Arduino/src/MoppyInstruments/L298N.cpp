@@ -6,6 +6,7 @@
 #include "MoppyInstrument.h"
 #include "L298N.h"
 
+namespace instruments {
 // Used to keep track of what to do for the next step according to the table of bipolar stepper motors.
 int L298N::currentStep[] = {0,0,0,0,0}; 
 
@@ -305,3 +306,4 @@ void L298N::resetAll()
     currentPosition[d] = 0; // We're reset.
   }
 }
+} // namespace instruments

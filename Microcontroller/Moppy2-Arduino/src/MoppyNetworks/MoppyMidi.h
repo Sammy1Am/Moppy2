@@ -9,20 +9,20 @@
 #include <stdint.h>
 #include "Arduino.h"
 #include "../MoppyConfig.h"
+#include "../MoppyMessageConsumer.h"
 #include "MoppyNetwork.h"
 
 #define MOPPY_BAUD_RATE 31250
 #define STEREO false
 #define ONLY3BYTE false
-typedef void (*handleDeviceMessage)(uint8_t, uint8_t, uint8_t[]);
 
 class MoppyMidi {
   public:
-    MoppyMidi(handleDeviceMessage);
-    void begin(long baud = MOPPY_BAUD_RATE);
+    MoppyMidi(MoppyMessageConsumer *messageConsumer);
+    void begin();
     void readMessages();
   private:
-    handleDeviceMessage deviceHandler;
+      MoppyMessageConsumer *targetConsumer;
 };
 
 
