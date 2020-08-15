@@ -12,6 +12,10 @@
 #include "src/MoppyInstruments/FloppyDrives.h"
 FloppyDrives instrument = FloppyDrives();
 
+//Uncomment the 2 next lines and comment the 2 lines above this comment to switch to EasyDriver mode
+//#include "src/MoppyInstruments/EasyDrivers.h"
+//EasyDrivers instrument = EasyDrivers();
+
 
 //Uncomment the 2 next lines and comment the 2 lines above this comment to switch to L298N mode
 //#include "src/MoppyInstruments/L298N.h"
@@ -50,7 +54,7 @@ void setup()
 {
 	// Call setup() on the instrument to allow to to prepare for action
     instrument.setup();
-
+    
     // Tell the network to start receiving messages
     network.begin();
 }
