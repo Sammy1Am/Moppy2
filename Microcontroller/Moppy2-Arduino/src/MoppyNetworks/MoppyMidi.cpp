@@ -8,12 +8,12 @@
 
 
 byte actPlayingNote[MAX_SUB_ADDRESS]; // MAX_SUB_ADDRESS = Number of Drives
-MoppyMidi::MoppyMidi(handleDeviceMessage dev) {
-    deviceHandler = dev;
+MoppyMidi::MoppyMidi(MoppyMessageConsumer *messageConsumer) {
+    targetConsumer = messageConsumer;
 }
 
-void MoppyMidi::begin(long baud) {
-    Serial.begin(baud); // need to be 31250 for midi
+void MoppyMidi::begin() {
+    Serial.begin(MOPPY_BAUD_RATE); // need to be 31250 for midi
 }
 
 void MoppyMidi::readMessages() {
@@ -80,8 +80,8 @@ void MoppyMidi::readMessages() {
                     if(actPlayingNote[i] == 0){
                         actPlayingNote[i] = secondByte;
                         actPlayingNote[i+MAX_SUB_ADDRESS/2] = secondByte;
-                        deviceHandler(i+1, NETBYTE_DEV_NOTEON, &secondByte);
-                        deviceHandler(i+1+MAX_SUB_ADDRESS/2, NETBYTE_DEV_NOTEON, &secondByte);
+                        targetConsumer->handleDeviceMessage(i+1, NETBYTE_DEV_NOTEON, &secondByte);
+                        targetConsumer->handleDeviceMessage(i+1+MAX_SUB_ADDRESS/2, NETBYTE_DEV_NOTEON, &secondByte);
                         i = MAX_SUB_ADDRESS + 1;
                         return;
                     }
@@ -90,7 +90,7 @@ void MoppyMidi::readMessages() {
                 for(int i = 0; i <= MAX_SUB_ADDRESS; i++){
                     if(actPlayingNote[i] == 0){
                         actPlayingNote[i] = secondByte;
-                        deviceHandler(i+1, NETBYTE_DEV_NOTEON, &secondByte);
+                        targetConsumer->handleDeviceMessage(i+1, NETBYTE_DEV_NOTEON, &secondByte);
                         i = MAX_SUB_ADDRESS + 1;
                         return;
                     }
@@ -102,7 +102,7 @@ void MoppyMidi::readMessages() {
         for (int i = 0; i <= MAX_SUB_ADDRESS; i++){
             if(secondByte == actPlayingNote[i]){
                 actPlayingNote[i] = 0;
-                deviceHandler(i+1, NETBYTE_DEV_NOTEOFF, &secondByte);
+                targetConsumer->handleDeviceMessage(i + 1, NETBYTE_DEV_NOTEON, &secondByte);
                 return;
             }
         }

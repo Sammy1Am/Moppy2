@@ -6,7 +6,7 @@
 #include "MoppyInstrument.h"
 #include "EasyDrivers.h"
 
-
+namespace instruments {
 // This is used for calculating step and direction pins.
 const byte FIRST_DRIVER = 1;
 const byte LAST_DRIVER = 3;  // This sketch can handle only up to 3 drivers (the max for Arduino Uno)
@@ -312,3 +312,4 @@ void EasyDrivers::resetAll()
     currentState[stepPin+1] = LOW; // Ready to go forward.
   }
 }
+} // namespace instruments

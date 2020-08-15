@@ -6,7 +6,7 @@
 #include "MoppyInstrument.h"
 #include "FloppyDrives.h"
 
-
+namespace instruments {
 // First drive being used for floppies, and the last drive.  Used for calculating
 // step and direction pins.
 const byte FIRST_DRIVE = 1;
@@ -330,3 +330,4 @@ void FloppyDrives::resetAll()
     currentState[stepPin+1] = LOW; // Ready to go forward.
   }
 }
+} // namespace instruments

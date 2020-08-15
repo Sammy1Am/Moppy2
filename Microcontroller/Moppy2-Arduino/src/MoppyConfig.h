@@ -9,6 +9,23 @@
 // Moppy Device configuration
 ////
 
+////
+// Uncomment **ONLY ONE** of these instruments
+////
+
+#define INSTRUMENT_FLOPPIES
+//#define INSTRUMENT_EASYDRIVER
+//#define INSTRUMENT_L298N
+//#define INSTRUMENT_SHIFTED_FLOPPIES
+//#define INSTRUMENT_SHIFT_REGISTER
+
+////
+// Uncomment **ONLY ONE** of these networks
+////
+
+#define NETWORK_SERIAL
+//#define NETWORK_UDP
+
 // Play a startup sound when the Arduino is initialized.  Helpful
 // for debugging purposes, but can be turned off once everything
 // is working
