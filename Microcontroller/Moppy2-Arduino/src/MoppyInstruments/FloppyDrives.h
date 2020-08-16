@@ -36,6 +36,15 @@ namespace instruments {
     static unsigned int currentTick[];
     static unsigned int originalPeriod[];
 
+    // First drive being used for floppies, and the last drive.  Used for calculating
+    // step and direction pins.
+    static const byte FIRST_DRIVE = 1;
+    static const byte LAST_DRIVE = 8; // This sketch can handle only up to 9 drives (the max for Arduino Uno)
+
+    // Maximum note number to attempt to play on floppy drives.  It's possible higher notes may work,
+    // but they may also cause instability.
+    static const byte MAX_FLOPPY_NOTE = 71;
+
     static void resetAll();
     static void togglePin(byte driveNum, byte pin, byte direction_pin);
     static void haltAllDrives();
