@@ -15,10 +15,20 @@
 namespace instruments {
   class FloppyDrives : public MoppyInstrument {
   public:
-    void setup();
-    void systemMessage(uint8_t command, uint8_t payload[]);
-    void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
+      void setup();
+
   protected:
+      void sys_sequenceStop() override;
+      void sys_reset() override;
+
+      void dev_reset(uint8_t subAddress) override;
+      void dev_noteOn(uint8_t subAddress, uint8_t payload[]) override;
+      void dev_noteOff(uint8_t subAddress, uint8_t payload[]) override;
+      void dev_bendPitch(uint8_t subAddress, uint8_t payload[]) override;
+
+      //void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
+
+  private:
     static unsigned int MAX_POSITION[];
     static unsigned int currentPosition[];
     static int currentState[];

@@ -16,9 +16,15 @@ namespace instruments {
   class ShiftRegister : public MoppyInstrument {
   public:
     void setup();
-    void systemMessage(uint8_t command, uint8_t payload[]);
-    void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
+
   protected:
+    void sys_sequenceStop() override;
+    void sys_reset() override;
+
+    void dev_reset(uint8_t subAddress) override;
+    void dev_noteOn(uint8_t subAddress, uint8_t payload[]) override;
+
+  private:
     static uint8_t shiftData[];
     static uint8_t activeTicksLeft[];
     static boolean shouldShift;

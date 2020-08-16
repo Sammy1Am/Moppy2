@@ -135,52 +135,42 @@ void EasyDrivers::startupSound(byte driverNum) {
 //// Message Handlers
 //
 
-// Handles system messages (e.g. sequence start and stop)
-void EasyDrivers::systemMessage(uint8_t command, uint8_t payload[]) {
-  switch(command) {
-      // NETBYTE_SYS_PING is handled by the network adapter directly
-    case NETBYTE_SYS_RESET: // System reset
-      resetAll();
-      break;
-    case NETBYTE_SYS_START: // Sequence start
-      // Nothing to do here yet
-      break;
-    case NETBYTE_SYS_STOP: // Sequence stop
-      haltAllDrivers();
-      break;
-  }
+void EasyDrivers::sys_reset() {
+    resetAll();
 }
 
-// Handles device-specific messages (e.g. playing notes)
-void EasyDrivers::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
-  switch(command) {
-    case NETBYTE_DEV_RESET: // Reset
-      if (subAddress == 0x00) {
-        resetAll();
-      } else {
-        reset(subAddress);
-      }
-      break;
-    case NETBYTE_DEV_NOTEON: // Note On
-      // Set the current period to the new value to play it immediately
-    	// Also set the originalPeriod in-case we pitch-bend
-      if (payload[0] <= MAX_DRIVER_NOTE) {
-        currentPeriod[subAddress] = originalPeriod[subAddress] = noteDoubleTicks[payload[0]];
-      }
-      break;
-    case NETBYTE_DEV_NOTEOFF: // Note Off
-      currentPeriod[subAddress] = originalPeriod[subAddress] = 0;
-      break;
-    case NETBYTE_DEV_BENDPITCH: //Pitch bend
-      // A value from -8192 to 8191 representing the pitch deflection
-      int16_t bendDeflection = payload[0] << 8 | payload[1];
+void EasyDrivers::sys_sequenceStop() {
+    haltAllDrivers();
+}
 
-      // A whole octave of bend would double the frequency (halve the the period) of notes
-      // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
-      //currentPeriod[subAddress] = originalPeriod[subAddress] / 1.4;
-      currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES*(bendDeflection/(float)8192));
-      break;
-  }
+void EasyDrivers::dev_reset(uint8_t subAddress) {
+    if (subAddress == 0x00) {
+        resetAll();
+    } else {
+        reset(subAddress);
+    }
+}
+
+void EasyDrivers::dev_noteOn(uint8_t subAddress, uint8_t payload[]) {
+    // Set the current period to the new value to play it immediately
+    // Also set the originalPeriod in-case we pitch-bend
+    if (payload[0] <= MAX_DRIVER_NOTE) {
+        currentPeriod[subAddress] = originalPeriod[subAddress] = noteDoubleTicks[payload[0]];
+    }
+}
+
+void EasyDrivers::dev_noteOff(uint8_t subAddress, uint8_t payload[]) {
+    currentPeriod[subAddress] = originalPeriod[subAddress] = 0;
+}
+
+void EasyDrivers::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
+    // A value from -8192 to 8191 representing the pitch deflection
+    int16_t bendDeflection = payload[0] << 8 | payload[1];
+
+    // A whole octave of bend would double the frequency (halve the the period) of notes
+    // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
+    //currentPeriod[subAddress] = originalPeriod[subAddress] / 1.4;
+    currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES * (bendDeflection / (float)8192));
 }
 
 //
