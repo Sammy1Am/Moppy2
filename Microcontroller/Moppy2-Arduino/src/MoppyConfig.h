@@ -31,7 +31,7 @@
 // is working
 #define PLAY_STARTUP_SOUND true
 
-// Device address for this Arduino (only messages sent to this address
+// Device address for this microcontroller (only messages sent to this address
 // will be processed.
 #define DEVICE_ADDRESS 0x01
 
