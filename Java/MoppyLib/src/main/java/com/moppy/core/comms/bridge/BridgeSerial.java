@@ -1,11 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.moppy.core.comms.bridge;
 
 import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortTimeoutException;
 import com.moppy.core.comms.MoppyMessage;
 import com.moppy.core.comms.MoppyMessageFactory;
 import com.moppy.core.comms.NetworkMessageConsumer;
@@ -27,7 +23,7 @@ public class BridgeSerial extends NetworkBridge {
 
     public BridgeSerial(String serialPortName) {
         serialPort = SerialPort.getCommPort(serialPortName);
-        serialPort.setBaudRate(115200);
+        serialPort.setBaudRate(57600);
     }
 
     public static List<String> getAvailableSerials() {
@@ -42,10 +38,10 @@ public class BridgeSerial extends NetworkBridge {
             throw new IOException("Failed to open serialPort!");
         }
 
-        // Set to semiblocking mode (will wait for up to 100 milliseconds before returning nothing from a read)
-        // On a very slow connection this could maaaybe cause some messages to be dropped / corrupted, but for
-        // serial connections it should be a minor risk
-        serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 100, 0);
+        // Set to semiblocking mode (will wait for up to 3200 milliseconds before returning nothing from a read)
+        // This is just longer than the frequency of pings by default, so we should expect at least a pong
+        // to read this often.
+        serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 3200, 0);
 
         // Create and start listener thread
         SerialListener listener = new SerialListener(serialPort, this);
@@ -107,23 +103,27 @@ public class BridgeSerial extends NetworkBridge {
 
             try (InputStream serialIn = serialPort.getInputStream()) {
                 while (serialPort.isOpen() && !Thread.interrupted()) {
-                    // Keep reading until we get a START_BYTE
-                    if (serialIn.read() == MoppyMessage.START_BYTE) {
-                        buffer[1] = (byte)serialIn.read(); // Get Address
-                        buffer[2] = (byte)serialIn.read(); // Get Sub-Address
-                        buffer[3] = (byte)serialIn.read(); // Get body size
-                        serialIn.read(buffer, 4, buffer[3]); // Read body into buffer
-                        totalMessageLength = 4 + buffer[3];
+                    try {
+                        // Keep reading until we get a START_BYTE
+                        if (serialIn.read() == MoppyMessage.START_BYTE) {
+                            buffer[1] = (byte)serialIn.read(); // Get Address
+                            buffer[2] = (byte)serialIn.read(); // Get Sub-Address
+                            buffer[3] = (byte)serialIn.read(); // Get body size
+                            serialIn.read(buffer, 4, buffer[3]); // Read body into buffer
+                            totalMessageLength = 4 + buffer[3];
 
-                        try {
-                            messageConsumer.acceptNetworkMessage(MoppyMessageFactory.networkReceivedFromBytes(
-                                Arrays.copyOf(buffer, totalMessageLength),
-                                BridgeSerial.class.getName(),
-                                serialPort.getSystemPortName(),
-                                "Serial Device")); // Serial ports don't really have a remote address
-                        } catch (IllegalArgumentException ex) {
-                            Logger.getLogger(BridgeSerial.class.getName()).log(Level.WARNING, "Exception reading network message", ex);
+                            try {
+                                messageConsumer.acceptNetworkMessage(MoppyMessageFactory.networkReceivedFromBytes(
+                                    Arrays.copyOf(buffer, totalMessageLength),
+                                    BridgeSerial.class.getName(),
+                                    serialPort.getSystemPortName(),
+                                    "Serial Device")); // Serial ports don't really have a remote address
+                            } catch (IllegalArgumentException ex) {
+                                Logger.getLogger(BridgeSerial.class.getName()).log(Level.WARNING, "Exception reading network message", ex);
+                            }
                         }
+                    } catch (SerialPortTimeoutException ex) {
+                        // This is fine, we're not always expecting data right away
                     }
                 }
             } catch (IOException ex) {

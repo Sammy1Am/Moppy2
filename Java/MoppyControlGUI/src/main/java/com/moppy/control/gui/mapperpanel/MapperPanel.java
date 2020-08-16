@@ -6,6 +6,7 @@ import com.moppy.core.events.mapper.scripts.ConditionScripts;
 import com.moppy.core.events.mapper.scripts.DeviceAddressScripts;
 import com.moppy.core.events.mapper.scripts.NoteScripts;
 import com.moppy.core.events.mapper.scripts.SubAddressScripts;
+import org.graalvm.polyglot.PolyglotException;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +45,6 @@ public class MapperPanel extends javax.swing.JPanel {
         SUBADDRESS_MAP.put("Custom", "");
 
         NOTE_MAP.put(NoteScripts.FORCE_INTO_RANGE.displayName(), NoteScripts.FORCE_INTO_RANGE.toString());
-        NOTE_MAP.put(NoteScripts.IGNORE_OUT_OF_RANGE.displayName(), NoteScripts.IGNORE_OUT_OF_RANGE.toString());
         NOTE_MAP.put(NoteScripts.STRAIGHT_THROUGH.displayName(), NoteScripts.STRAIGHT_THROUGH.toString());
         NOTE_MAP.put("Custom", "");
     }
@@ -389,7 +389,7 @@ public class MapperPanel extends javax.swing.JPanel {
             mapper.setConditionScript(conditionTextArea.getText());
             mapperConfig.setConditionCustomScript(conditionTextArea.getText());
             conditionTextArea.setForeground(Color.BLACK);
-        } catch (ScriptException ex) {
+        } catch (PolyglotException | NullPointerException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
             conditionTextArea.setForeground(Color.RED);
         }
@@ -400,7 +400,7 @@ public class MapperPanel extends javax.swing.JPanel {
             mapper.setDeviceAddressScript(deviceAddressTextArea.getText());
             mapperConfig.setDeviceAddressCustomScript(deviceAddressTextArea.getText());
             deviceAddressTextArea.setForeground(Color.BLACK);
-        } catch (ScriptException ex) {
+        } catch (PolyglotException | NullPointerException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
             deviceAddressTextArea.setForeground(Color.RED);
         }
@@ -411,7 +411,7 @@ public class MapperPanel extends javax.swing.JPanel {
             mapper.setSubAddressScript(subAddressTextArea.getText());
             mapperConfig.setSubAddressCustomScript(subAddressTextArea.getText());
             subAddressTextArea.setForeground(Color.BLACK);
-        } catch (ScriptException ex) {
+        } catch (PolyglotException | NullPointerException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
             subAddressTextArea.setForeground(Color.RED);
         }
@@ -422,7 +422,7 @@ public class MapperPanel extends javax.swing.JPanel {
             mapper.setNoteScript(noteTextArea.getText());
             mapperConfig.setNoteCustomScript(noteTextArea.getText());
             noteTextArea.setForeground(Color.BLACK);
-        } catch (ScriptException ex) {
+        } catch (PolyglotException | NullPointerException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
             noteTextArea.setForeground(Color.RED);
         }
@@ -443,7 +443,7 @@ public class MapperPanel extends javax.swing.JPanel {
         }
         try {
             mapper.setConditionScript(conditionTextArea.getText());
-        } catch (ScriptException ex) {
+        } catch (PolyglotException | NullPointerException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
             noteTextArea.setForeground(Color.RED);
         }
@@ -459,7 +459,7 @@ public class MapperPanel extends javax.swing.JPanel {
         }
         try {
             mapper.setDeviceAddressScript(deviceAddressTextArea.getText());
-        } catch (ScriptException ex) {
+        } catch (PolyglotException | NullPointerException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
             noteTextArea.setForeground(Color.RED);
         }
@@ -475,7 +475,7 @@ public class MapperPanel extends javax.swing.JPanel {
         }
         try {
             mapper.setSubAddressScript(subAddressTextArea.getText());
-        } catch (ScriptException ex) {
+        } catch (PolyglotException | NullPointerException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
             noteTextArea.setForeground(Color.RED);
         }
@@ -491,7 +491,7 @@ public class MapperPanel extends javax.swing.JPanel {
         }
         try {
             mapper.setNoteScript(noteTextArea.getText());
-        } catch (ScriptException ex) {
+        } catch (PolyglotException | NullPointerException ex) {
             Logger.getLogger(MapperPanel.class.getName()).log(Level.WARNING, null, ex);
             noteTextArea.setForeground(Color.RED);
         }

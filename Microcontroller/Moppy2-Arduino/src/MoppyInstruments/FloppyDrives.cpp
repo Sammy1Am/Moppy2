@@ -6,7 +6,7 @@
 #include "MoppyInstrument.h"
 #include "FloppyDrives.h"
 
-
+namespace instruments {
 // First drive being used for floppies, and the last drive.  Used for calculating
 // step and direction pins.
 const byte FIRST_DRIVE = 1;
@@ -67,6 +67,8 @@ void FloppyDrives::setup() {
   pinMode(15, OUTPUT); // Direction 7
   pinMode(16, OUTPUT); // Step control 8
   pinMode(17, OUTPUT); // Direction 8
+  pinMode(18, OUTPUT); // Direction 9
+  pinMode(19, OUTPUT); // Step control 9
 
 
   // With all pins setup, let's do a first run reset
@@ -128,10 +130,12 @@ void FloppyDrives::dev_noteOn(uint8_t subAddress, uint8_t payload[]) {
     if (payload[0] <= MAX_FLOPPY_NOTE) {
         currentPeriod[subAddress] = originalPeriod[subAddress] = noteDoubleTicks[payload[0]];
     }
-};
+}
+
 void FloppyDrives::dev_noteOff(uint8_t subAddress, uint8_t payload[]) {
     currentPeriod[subAddress] = originalPeriod[subAddress] = 0;
-};
+}
+
 void FloppyDrives::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     // A value from -8192 to 8191 representing the pitch deflection
     int16_t bendDeflection = payload[0] << 8 | payload[1];
@@ -140,7 +144,7 @@ void FloppyDrives::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
     //currentPeriod[subAddress] = originalPeriod[subAddress] / 1.4;
     currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES * (bendDeflection / (float)8192));
-};
+}
 
 //
 //// Floppy driving functions
@@ -313,3 +317,4 @@ void FloppyDrives::resetAll()
     currentState[stepPin+1] = LOW; // Ready to go forward.
   }
 }
+} // namespace instruments

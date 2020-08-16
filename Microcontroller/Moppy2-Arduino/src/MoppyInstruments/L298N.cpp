@@ -6,6 +6,7 @@
 #include "MoppyInstrument.h"
 #include "L298N.h"
 
+namespace instruments {
 // Used to keep track of what to do for the next step according to the table of bipolar stepper motors.
 int L298N::currentStep[] = {0,0,0,0,0}; 
 
@@ -66,6 +67,9 @@ void L298N::setup() {
   resetAll();
   delay(500); // Wait a half second for safety
 
+  // Setup timer to handle interrupts for driving the bridges
+  MoppyTimer::initialize(TIMER_RESOLUTION, tick);
+
   // If MoppyConfig wants a startup sound, play the startupSound on the
   // first drive.
   if (PLAY_STARTUP_SOUND) {
@@ -98,51 +102,39 @@ void L298N::startupSound(byte driveNum) {
 //// Message Handlers
 //
 
-// Handles system messages (e.g. sequence start and stop)
-void L298N::systemMessage(uint8_t command, uint8_t payload[]) {
-  switch(command) {
-      // NETBYTE_SYS_PING is handled by the network adapter directly
-    case NETBYTE_SYS_RESET: // System reset
-      resetAll();
-      break;
-    case NETBYTE_SYS_START: // Sequence start
-      // Nothing to do here yet
-      break;
-    case NETBYTE_SYS_STOP: // Sequence stop
-      haltAllDrives();
-      break;
-  }
+void L298N::sys_reset() {
+    resetAll();
 }
 
-// Handles device-specific messages (e.g. playing notes)
-void L298N::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
-  switch(command) {
-    case NETBYTE_DEV_RESET: // Reset
-      if (subAddress == 0x00) {
+void L298N::sys_sequenceStop() {
+    haltAllDrives();
+}
+
+void L298N::dev_reset(uint8_t subAddress) {
+    if (subAddress == 0x00) {
         resetAll();
-      } else {
+    } else {
         reset(subAddress);
-      }
-      break;
-    case NETBYTE_DEV_NOTEON: // Note On
-      // Set the current period to the new value to play it immediately
-    	// Also set the L298N::originalPeriod in-case we pitch-bend
-      currentPeriod[subAddress] = originalPeriod[subAddress] = noteTicks[payload[0]];
-      break;
-    case NETBYTE_DEV_NOTEOFF: // Note Off
-      currentPeriod[subAddress] = originalPeriod[subAddress] = 0;
-      break;
-    case NETBYTE_DEV_BENDPITCH: //Pitch bend
-      // A value from -8192 to 8191 representing the pitch deflection
-      int16_t bendDeflection = payload[0] << 8 | payload[1];
-
-      // A whole octave of bend would double the frequency (halve the the period) of notes
-      // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
-      //L298N::currentPeriod[subAddress] = L298N::originalPeriod[subAddress] / 1.4;
-      currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES*(bendDeflection/(float)8192));
-      break;
-  }
+    }
 }
+
+void L298N::dev_noteOn(uint8_t subAddress, uint8_t payload[]) {
+    currentPeriod[subAddress] = originalPeriod[subAddress] = noteTicks[payload[0]];
+}
+
+void L298N::dev_noteOff(uint8_t subAddress, uint8_t payload[]) {
+    currentPeriod[subAddress] = originalPeriod[subAddress] = 0;
+};
+
+void L298N::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
+    // A value from -8192 to 8191 representing the pitch deflection
+    int16_t bendDeflection = payload[0] << 8 | payload[1];
+
+    // A whole octave of bend would double the frequency (halve the the period) of notes
+    // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
+    //L298N::currentPeriod[subAddress] = L298N::originalPeriod[subAddress] / 1.4;
+    currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES * (bendDeflection / (float)8192));
+};
 
 //
 //// Bridge driving functions
@@ -301,3 +293,4 @@ void L298N::resetAll()
     currentPosition[d] = 0; // We're reset.
   }
 }
+} // namespace instruments

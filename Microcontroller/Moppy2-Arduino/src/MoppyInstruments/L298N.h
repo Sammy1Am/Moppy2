@@ -23,34 +23,42 @@ pin 17 (A3), IN4 for bridge 4
 #define SRC_MOPPYINSTRUMENTS_L298N_H_
 
 #include <Arduino.h>
+#include "MoppyTimer.h"
 #include "MoppyInstrument.h"
 #include "../MoppyConfig.h"
 #include "../MoppyNetworks/MoppyNetwork.h"
 
-class L298N : public MoppyInstrument {
-public:
-  void setup();
-  void systemMessage(uint8_t command, uint8_t payload[]);
-  void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
-  void tick();
+namespace instruments {
+  class L298N : public MoppyInstrument {
+  public:
+    void setup();
+  protected:
+    void sys_sequenceStop() override;
+    void sys_reset() override;
 
-protected:
-  static int FIRST_BRIDGE;
-  static int LAST_BRIDGE;
-  static unsigned int MAX_POSITION[];
-  static unsigned int currentPosition[];
-  static int currentStep[];
-  static int currentDir[];
-  static unsigned int currentPeriod[];
-  static unsigned int currentTick[];
-  static unsigned int originalPeriod[];
-  static void resetAll();
-  static void step(byte bridgeNum, byte pin1, byte pin2, byte pin3, byte pin4);
-  static void haltAllDrives();
-  static void reset(byte bridgeNum);
-  static void blinkLED();
-  static void startupSound(byte bridgeNum);
-  static void L298Nvariables();
-};
+    void dev_reset(uint8_t subAddress) override;
+    void dev_noteOn(uint8_t subAddress, uint8_t payload[]) override;
+    void dev_noteOff(uint8_t subAddress, uint8_t payload[]) override;
+    void dev_bendPitch(uint8_t subAddress, uint8_t payload[]) override;
+  private:
+    static int FIRST_BRIDGE;
+    static int LAST_BRIDGE;
+    static unsigned int MAX_POSITION[];
+    static unsigned int currentPosition[];
+    static int currentStep[];
+    static int currentDir[];
+    static unsigned int currentPeriod[];
+    static unsigned int currentTick[];
+    static unsigned int originalPeriod[];
+    static void resetAll();
+    static void step(byte bridgeNum, byte pin1, byte pin2, byte pin3, byte pin4);
+    static void haltAllDrives();
+    static void reset(byte bridgeNum);
+    static void tick();
+    static void blinkLED();
+    static void startupSound(byte bridgeNum);
+    static void L298Nvariables();
+  };
+}
 
 #endif /* SRC_MOPPYINSTRUMENTS_L298N_H_ */

@@ -9,16 +9,19 @@
  * handler function for handling messages received by the network and a tick
  * function for precise timing events.
  *
- * Uncomment the appropriate include line for your setup, and use that 
- * instrument's constructor
+ * Configure the appropriate instrument class for your setup in MoppyConfig.h
  */
-
-//MoppyInstrument *instrument;
 
 // Floppy drives directly connected to the Arduino's digital pins
 #ifdef INSTRUMENT_FLOPPIES
 #include "MoppyInstruments/FloppyDrives.h"
-    MoppyInstrument *instrument = new instruments::FloppyDrives();
+MoppyInstrument *instrument = new instruments::FloppyDrives();
+#endif
+
+// EasyDriver stepper motor driver
+#ifdef INSTRUMENT_EASYDRIVER
+#include "MoppyInstruments/EasyDrivers.h"
+MoppyInstrument *instrument = new instruments::EasyDrivers();
 #endif
 
 // L298N stepper motor driver
@@ -59,10 +62,8 @@ MoppyDecoration *decoration = new DriveLights();
  * parse them, and use the data to call the appropriate handler as implemented
  * in the instrument class defined above.
  *
- * Uncomment the appropriate networking class for your setup
+ * Configure the appropriate networking class for your setup in MoppyConfig.h
  */
-
-#include "MoppyInstruments/CompoundConsumer.h"
 
 // Standard Arduino HardwareSerial implementation
 #ifdef NETWORK_SERIAL
@@ -77,7 +78,8 @@ MoppyUDP network = MoppyUDP(new CompoundConsumer(instrument, decoration));
 #endif
 
 //The setup function is called once at startup of the sketch
-void setup() {
+void setup()
+{
     // Call setup() on the instrument to allow to to prepare for action
     instrument->setup();
 
@@ -93,7 +95,6 @@ void loop() {
     // Endlessly read messages on the network.  The network implementation
 	// will call the system or device handlers on the intrument whenever a message is received.
     network.readMessages();
-
     // Loop over decorations to give them time for processing
     decoration->decoLoop();
 }

@@ -8,6 +8,7 @@
 
 #include "MoppyInstrument.h"
 
+namespace instruments {
 // Define pins for connection to shift registers
 #define DATA_PIN 2
 #define SHIFT_CLOCK_PIN 3
@@ -20,6 +21,8 @@
 #define NUM_NOTES 24
 const uint8_t FIRST_NOTE = 79;
 const uint8_t LAST_NOTE = FIRST_NOTE + (NUM_NOTES-1);
+
+#define SHIFT_TIMER_RESOLUTION 1000 //Microsecond resolution for starting and ending notes
 
 // The velocity of the incoming notes will adjust the pulse length from MIN_PULSE_TICKS to MIN_PULSE_TICKS + PULSE_TICKS_RANGE
 #define MIN_PULSE_TICKS 10 // Minimum length of "on" pulse for each bit in ticks (e.g. RESOLUTION * PULSE_TICKS microseconds)
@@ -44,11 +47,12 @@ void ShiftRegister::setup() {
 
   pinMode(13, OUTPUT); // Built-in LED for blinking
 
-  //TODO Timer resolution should be larger (like 1ms for this library)!
 
   // With all pins setup, let's do a first run reset
   zeroOutputs();
   delay(500); // Wait a half second for safety
+  // Setup timer to handle interrupts for floppy driving
+  MoppyTimer::initialize(SHIFT_TIMER_RESOLUTION, tick);
 }
 
 
@@ -56,42 +60,24 @@ void ShiftRegister::setup() {
 //// Message Handlers
 //
 
-// Handles system messages (e.g. sequence start and stop)
-void ShiftRegister::systemMessage(uint8_t command, uint8_t payload[]) {
-  switch(command) {
-      // NETBYTE_SYS_PING is handled by the network adapter directly
-    case NETBYTE_SYS_RESET: // System reset
-      zeroOutputs();
-      break;
-    case NETBYTE_SYS_START: // Sequence start
-      // Nothing to do here yet
-      break;
-    case NETBYTE_SYS_STOP: // Sequence stop
-      zeroOutputs();
-      break;
-  }
+void ShiftRegister::sys_reset() {
+    zeroOutputs();
 }
 
-// Handles device-specific messages (e.g. playing notes)
-void ShiftRegister::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
-  switch(command) {
-    case NETBYTE_DEV_RESET: // Reset
-      zeroOutputs(); // SubAddress unimportant here since we only have one
-      break;
-    case NETBYTE_DEV_NOTEON: // Note On
-      if (payload[0] >= FIRST_NOTE && payload[0] <= LAST_NOTE) {
+void ShiftRegister::sys_sequenceStop() {
+    zeroOutputs();
+}
+
+void ShiftRegister::dev_reset(uint8_t subAddress) {
+    zeroOutputs(); // SubAddress unimportant here since we only have one
+}
+
+void ShiftRegister::dev_noteOn(uint8_t subAddress, uint8_t payload[]) {
+    if (payload[0] >= FIRST_NOTE && payload[0] <= LAST_NOTE) {
         outputOn(payload[0] - FIRST_NOTE);
-        activeTicksLeft[payload[0] - FIRST_NOTE] = MIN_PULSE_TICKS + ((payload[1] * PULSE_TICKS_RANGE)/127);
+        activeTicksLeft[payload[0] - FIRST_NOTE] = MIN_PULSE_TICKS + ((payload[1] * PULSE_TICKS_RANGE) / 127);
         shouldShift = true;
-      }
-      break;
-    case NETBYTE_DEV_NOTEOFF: // Note Off
-      // Ignore these, the solenoids are pulsed the same length for all notes
-      break;
-    case NETBYTE_DEV_BENDPITCH: //Pitch bend
-      // Ignore these, we can't bend pitch
-      break;
-  }
+    }
 }
 
 //
@@ -158,3 +144,4 @@ void ShiftRegister::zeroOutputs() {
   }
   shiftAllData();
 }
+} // namespace instruments

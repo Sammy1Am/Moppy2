@@ -1,5 +1,7 @@
 #include "MoppyUDP.h"
 
+#ifdef ARDUINO_ARCH_ESP8266 // For now, this will only work with ESP8266
+
 WiFiUDP UDP;
 
 /*
@@ -137,3 +139,4 @@ void MoppyUDP::sendPong() {
     UDP.write(pongBytes, sizeof(pongBytes));
     UDP.endPacket();
 }
+#endif /* ARDUINO_ARCH_ESP8266 */
