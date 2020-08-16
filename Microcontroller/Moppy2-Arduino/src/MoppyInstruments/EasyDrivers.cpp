@@ -100,8 +100,7 @@ void EasyDrivers::setup() {
   delay(500); // Wait a half second for safety
 
   // Setup timer to handle interrupts for drivers driving
-  Timer1.initialize(TIMER_RESOLUTION); // Set up a timer at the resolution defined in MoppyInstrument.h
-  Timer1.attachInterrupt(tick); // Attach the tick function
+  MoppyTimer::initialize(TIMER_RESOLUTION, tick);
 
   // If MoppyConfig wants a startup sound, play the startupSound on the
   // first driver.
