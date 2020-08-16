@@ -7,14 +7,6 @@
 #include "FloppyDrives.h"
 
 namespace instruments {
-// First drive being used for floppies, and the last drive.  Used for calculating
-// step and direction pins.
-const byte FIRST_DRIVE = 1;
-const byte LAST_DRIVE = 8;  // This sketch can handle only up to 9 drives (the max for Arduino Uno)
-
-// Maximum note number to attempt to play on floppy drives.  It's possible higher notes may work,
-// but they may also cause instability.
-const byte MAX_FLOPPY_NOTE = 71;
 
 /*NOTE: The arrays below contain unused zero-indexes to avoid having to do extra
  * math to shift the 1-based subAddresses to 0-based indexes here.  Unlike the previous
@@ -153,103 +145,58 @@ void FloppyDrives::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
 /*
 Called by the timer interrupt at the specified resolution.  Because this is called extremely often,
 it's crucial that any computations here be kept to a minimum!
+
+Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but may increase speed generally anyway
  */
-void FloppyDrives::tick()
-{
+#pragma GCC push_options
+#pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
+#ifdef ARDUINO_ARCH_ESP8266
+void ICACHE_RAM_ATTR FloppyDrives::tick() {
+#else
+void FloppyDrives::tick() {
+#endif
   /*
-   If there is a period set for control pin 2, count the number of
+   For each drive, count the number of
    ticks that pass, and toggle the pin if the current period is reached.
    */
-  if (currentPeriod[1]>0){
-    currentTick[1]++;
-    if (currentTick[1] >= currentPeriod[1]){
-      togglePin(1,2,3); // Drive 1 is on pins 2 and 3
-      currentTick[1]=0;
-    }
-  }
-  if (currentPeriod[2]>0){
-    currentTick[2]++;
-    if (currentTick[2] >= currentPeriod[2]){
-      togglePin(2,4,5);
-      currentTick[2]=0;
-    }
-  }
-  if (currentPeriod[3]>0){
-    currentTick[3]++;
-    if (currentTick[3] >= currentPeriod[3]){
-      togglePin(3,6,7);
-      currentTick[3]=0;
-    }
-  }
-  if (currentPeriod[4]>0){
-    currentTick[4]++;
-    if (currentTick[4] >= currentPeriod[4]){
-      togglePin(4,8,9);
-      currentTick[4]=0;
-    }
-  }
-  if (currentPeriod[5]>0){
-    currentTick[5]++;
-    if (currentTick[5] >= currentPeriod[5]){
-      togglePin(5,10,11);
-      currentTick[5]=0;
-    }
-  }
-  if (currentPeriod[6]>0){
-    currentTick[6]++;
-    if (currentTick[6] >= currentPeriod[6]){
-      togglePin(6,12,13);
-      currentTick[6]=0;
-    }
-  }
-  if (currentPeriod[7]>0){
-    currentTick[7]++;
-    if (currentTick[7] >= currentPeriod[7]){
-      togglePin(7,14,15);
-      currentTick[7]=0;
-    }
-  }
-  if (currentPeriod[8]>0){
-    currentTick[8]++;
-    if (currentTick[8] >= currentPeriod[8]){
-      togglePin(8,16,17);
-      currentTick[8]=0;
-    }
-  }
-  if (currentPeriod[9]>0){
-    currentTick[9]++;
-    if (currentTick[9] >= currentPeriod[9]){
-      togglePin(9,18,19);
-      currentTick[9]=0;
-    }
+  for (int d = 1; d <= LAST_DRIVE; d++) {
+      if (currentPeriod[d] > 0) {
+          currentTick[d]++;
+          if (currentTick[d] >= currentPeriod[d]) {
+              togglePin(d, d*2, (d*2)+1); // Drive 1 is on pins 2 and 3, etc.
+              currentTick[d] = 0;
+          }
+      }
   }
 }
 
+#ifdef ARDUINO_ARCH_ESP8266
+void ICACHE_RAM_ATTR FloppyDrives::togglePin(byte driveNum, byte pin, byte direction_pin) {
+#else
 void FloppyDrives::togglePin(byte driveNum, byte pin, byte direction_pin) {
+#endif
 
-  //Switch directions if end has been reached
-  if (currentPosition[driveNum] >= MAX_POSITION[driveNum]) {
-    currentState[direction_pin] = HIGH;
-    digitalWrite(direction_pin,HIGH);
-  }
-  else if (currentPosition[driveNum] <= 0) {
-    currentState[direction_pin] = LOW;
-    digitalWrite(direction_pin,LOW);
-  }
+        //Switch directions if end has been reached
+        if (currentPosition[driveNum] >= MAX_POSITION[driveNum]) {
+            currentState[direction_pin] = HIGH;
+            digitalWrite(direction_pin, HIGH);
+        } else if (currentPosition[driveNum] <= 0) {
+            currentState[direction_pin] = LOW;
+            digitalWrite(direction_pin, LOW);
+        }
 
-  //Update currentPosition
-  if (currentState[direction_pin] == HIGH){
-    currentPosition[driveNum]--;
-  }
-  else {
-    currentPosition[driveNum]++;
-  }
+        //Update currentPosition
+        if (currentState[direction_pin] == HIGH) {
+            currentPosition[driveNum]--;
+        } else {
+            currentPosition[driveNum]++;
+        }
 
-  //Pulse the control pin
-  digitalWrite(pin,currentState[pin]);
-  currentState[pin] = ~currentState[pin];
-}
-
+        //Pulse the control pin
+        digitalWrite(pin, currentState[pin]);
+        currentState[pin] = ~currentState[pin];
+    }
+#pragma GCC pop_options
 
 //
 //// UTILITY FUNCTIONS
