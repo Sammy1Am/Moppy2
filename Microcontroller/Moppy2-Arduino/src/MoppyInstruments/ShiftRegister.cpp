@@ -53,7 +53,7 @@ void ShiftRegister::setup() {
   delay(500); // Wait a half second for safety
 
   // Setup timer to handle interrupts for floppy driving
-  MoppyTimer::initialize(TIMER_RESOLUTION, tick);
+  MoppyTimer::initialize(SHIFT_TIMER_RESOLUTION, tick);
 }
 
 

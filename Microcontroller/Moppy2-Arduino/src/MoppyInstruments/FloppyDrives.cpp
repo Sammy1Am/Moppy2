@@ -134,7 +134,7 @@ void FloppyDrives::dev_noteOn(uint8_t subAddress, uint8_t payload[]) {
 
 void FloppyDrives::dev_noteOff(uint8_t subAddress, uint8_t payload[]) {
     currentPeriod[subAddress] = originalPeriod[subAddress] = 0;
-};
+}
 
 void FloppyDrives::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     // A value from -8192 to 8191 representing the pitch deflection
@@ -144,7 +144,7 @@ void FloppyDrives::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     // Calculate bend based on BEND_OCTAVES from MoppyInstrument.h and percentage of deflection
     //currentPeriod[subAddress] = originalPeriod[subAddress] / 1.4;
     currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES * (bendDeflection / (float)8192));
-};
+}
 
 //
 //// Floppy driving functions

@@ -19,7 +19,11 @@
  * which might interfere with other processes but will result in more accurate frequency
  * reproduction.
  */
+#ifdef ARDUINO_ARCH_AVR
 #define TIMER_RESOLUTION 40
+#elif ARDUINO_ARCH_ESP8266
+#define TIMER_RESOLUTION 20 // Higher resolution for the faster processor
+#endif
 
 // In some cases a pulse will only happen every-other tick (e.g. if the tick is
 // toggling a pin on and off and pulses happen on rising signal) so to simplify
