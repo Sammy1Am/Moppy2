@@ -20,6 +20,7 @@ namespace instruments {
  NOTE: Index zero of this array controls the "resetAll" function, and should be the
  same as the largest value in this array
  */
+unsigned int FloppyDrives::MIN_POSITION[] = {0,0,0,0,0,0,0,0,0,0};
 unsigned int FloppyDrives::MAX_POSITION[] = {158,158,158,158,158,158,158,158,158,158};
 
 //Array to track the current position of each floppy head.
@@ -138,6 +139,24 @@ void FloppyDrives::dev_bendPitch(uint8_t subAddress, uint8_t payload[]) {
     currentPeriod[subAddress] = originalPeriod[subAddress] / pow(2.0, BEND_OCTAVES * (bendDeflection / (float)8192));
 }
 
+void FloppyDrives::deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]) {
+    switch (command) {
+    case NETBYTE_DEV_SETMOVEMENT:
+        setMovement(subAddress, payload[0] == 0); // MIDI bytes only go to 127, so * 2
+        break;
+    }
+}
+
+void FloppyDrives::setMovement(byte driveNum, bool movementEnabled) {
+    if (movementEnabled) {
+        MIN_POSITION[driveNum] = 0;
+        MAX_POSITION[driveNum] = 158;
+    } else {
+        MIN_POSITION[driveNum] = 79;
+        MAX_POSITION[driveNum] = 81;
+    }
+}
+
 //
 //// Floppy driving functions
 //
@@ -180,7 +199,7 @@ void FloppyDrives::togglePin(byte driveNum, byte pin, byte direction_pin) {
         if (currentPosition[driveNum] >= MAX_POSITION[driveNum]) {
             currentState[direction_pin] = HIGH;
             digitalWrite(direction_pin, HIGH);
-        } else if (currentPosition[driveNum] <= 0) {
+        } else if (currentPosition[driveNum] <= MIN_POSITION[driveNum]) {
             currentState[direction_pin] = LOW;
             digitalWrite(direction_pin, LOW);
         }
@@ -232,6 +251,7 @@ void FloppyDrives::reset(byte driveNum)
   currentState[stepPin] = LOW;
   digitalWrite(stepPin+1,LOW);
   currentState[stepPin+1] = LOW; // Ready to go forward.
+  setMovement(driveNum, true); // Set movement to true by default
 }
 
 // Resets all the drives simultaneously
@@ -262,6 +282,7 @@ void FloppyDrives::resetAll()
     currentState[stepPin] = LOW;
     digitalWrite(stepPin+1,LOW);
     currentState[stepPin+1] = LOW; // Ready to go forward.
+    setMovement(d, true); // Set movement to true by default
   }
 }
 } // namespace instruments

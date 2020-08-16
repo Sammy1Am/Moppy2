@@ -26,9 +26,10 @@ namespace instruments {
       void dev_noteOff(uint8_t subAddress, uint8_t payload[]) override;
       void dev_bendPitch(uint8_t subAddress, uint8_t payload[]) override;
 
-      //void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
+      void deviceMessage(uint8_t subAddress, uint8_t command, uint8_t payload[]);
 
   private:
+    static unsigned int MIN_POSITION[];
     static unsigned int MAX_POSITION[];
     static unsigned int currentPosition[];
     static int currentState[];
@@ -52,6 +53,7 @@ namespace instruments {
     static void tick();
     static void blinkLED();
     static void startupSound(byte driveNum);
+    static void setMovement(byte driveNum, bool movementEnabled);
   };
 }
 

@@ -22,5 +22,9 @@
 #define NETBYTE_DEV_NOTEON 0x09
 #define NETBYTE_DEV_BENDPITCH 0x0e
 
+// Microcontroller/device-specific commands (still defined here to prevent overlap)
+#define NETBYTE_DEV_SETTARGETCOLOR 0x61
+#define NETBYTE_DEV_SETBGCOLOR 0x62
+#define NETBYTE_DEV_SETMOVEMENT 0x64
 
 #endif /* SRC_MOPPYNETWORKS_MOPPYNETWORK_H_ */
