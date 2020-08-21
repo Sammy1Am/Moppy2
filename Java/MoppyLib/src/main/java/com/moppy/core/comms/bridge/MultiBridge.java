@@ -8,7 +8,9 @@ package com.moppy.core.comms.bridge;
 import com.moppy.core.comms.MoppyMessage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
  * This allows, for example, multiple COM ports to be used, or a COM port to be used in conjunction
  * with a network bridge.
  */
-public class MultiBridge extends NetworkBridge {
+public class MultiBridge extends NetworkBridge<Object> {
 
     private Set<NetworkBridge> bridges = new HashSet<>();
 
@@ -57,6 +59,11 @@ public class MultiBridge extends NetworkBridge {
                     connectionExceptions.stream().map(ex -> ex.getMessage()).collect(Collectors.joining("\n"))));
         }
     }
+    
+    @Override
+    public void connect(Object connectionOption) throws IOException {
+        connect();  // Ignore argument since we have no options
+    }
 
     @Override
     public void sendMessage(MoppyMessage messageToSend) throws IOException {
@@ -92,6 +99,16 @@ public class MultiBridge extends NetworkBridge {
     @Override
     public boolean isConnected() {
         throw new UnsupportedOperationException("MultiBridge cannot report connected-ness");
+    }
+
+    @Override
+    public List<Object> getConnectionOptions() {
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public Object currentConnectionOption() {
+        return null;
     }
 
 }

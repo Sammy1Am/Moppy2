@@ -16,8 +16,9 @@ import java.util.stream.Collectors;
 /**
  * A Serial connection for Moppy devices.
  */
-public class BridgeSerial extends NetworkBridge {
+public class BridgeSerial extends NetworkBridge<Integer> {
 
+    private final static List<Integer> SUPPORTED_BAUDS = Arrays.asList(9600,14400,19200,28800,38400,57600,115200);
     private final SerialPort serialPort;
     private Thread listenerThread = null;
 
@@ -33,7 +34,8 @@ public class BridgeSerial extends NetworkBridge {
     }
 
     @Override
-    public void connect() throws IOException {
+    public void connect(Integer newBaudRate) throws IOException {
+        serialPort.setBaudRate(newBaudRate);
         if (!serialPort.openPort()) {
             throw new IOException("Failed to open serialPort!");
         }
@@ -47,6 +49,11 @@ public class BridgeSerial extends NetworkBridge {
         SerialListener listener = new SerialListener(serialPort, this);
         listenerThread = new Thread(listener);
         listenerThread.start();
+    }
+    
+    @Override
+    public void connect() throws IOException {
+        connect(57600);
     }
 
     @Override
@@ -76,6 +83,16 @@ public class BridgeSerial extends NetworkBridge {
     @Override
     public boolean isConnected() {
         return serialPort.isOpen();
+    }
+
+    @Override
+    public List<Integer> getConnectionOptions() {
+        return SUPPORTED_BAUDS;
+    }
+
+    @Override
+    public Integer currentConnectionOption() {
+        return serialPort.getBaudRate();
     }
 
     /**

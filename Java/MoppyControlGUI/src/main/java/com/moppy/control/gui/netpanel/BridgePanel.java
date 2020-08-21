@@ -6,9 +6,13 @@
 package com.moppy.control.gui.netpanel;
 
 import com.moppy.control.NetworkManager;
+import com.moppy.core.comms.bridge.NetworkBridge;
 import java.io.IOException;
+import java.util.List;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
 
 /**
  *
@@ -22,12 +26,19 @@ public class BridgePanel extends javax.swing.JPanel {
     /**
      * Creates new form BridgePanel
      */
-    public BridgePanel(NetworkManager netManager, String bridgeIdentifier, boolean connected) {
+    public BridgePanel(NetworkManager netManager, String bridgeIdentifier, NetworkBridge netBridge) {
         this.netManager = netManager;
         initComponents();
 
         bridgeCheckBox.setText(bridgeIdentifier);
-        bridgeCheckBox.setSelected(connected);
+        bridgeCheckBox.setSelected(netBridge.isConnected());
+        if (!netBridge.getConnectionOptions().isEmpty()) {
+            connectionOptionCB.setEnabled(!netBridge.isConnected());
+            connectionOptionCB.setModel(new DefaultComboBoxModel(netBridge.getConnectionOptions().toArray()));
+            connectionOptionCB.setSelectedItem(netBridge.currentConnectionOption());
+        } else {
+            connectionOptionCB.setVisible(false);
+        }
     }
 
     /**
@@ -38,6 +49,7 @@ public class BridgePanel extends javax.swing.JPanel {
     private void initComponents() {
 
         bridgeCheckBox = new javax.swing.JCheckBox();
+        connectionOptionCB = new javax.swing.JComboBox<>();
 
         bridgeCheckBox.setText("netBridge");
         bridgeCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -52,18 +64,22 @@ public class BridgePanel extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(bridgeCheckBox)
-                .addGap(0, 86, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(connectionOptionCB, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(25, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(bridgeCheckBox)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(bridgeCheckBox)
+                .addComponent(connectionOptionCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void bridgeCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bridgeCheckBoxActionPerformed
         try {
             if (bridgeCheckBox.isSelected()) {
-                netManager.connectBridge(bridgeCheckBox.getText());
+                netManager.connectBridge(bridgeCheckBox.getText(), connectionOptionCB.getSelectedItem());
             } else {
                 netManager.closeBridge(bridgeCheckBox.getText());
             }
@@ -75,5 +91,6 @@ public class BridgePanel extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox bridgeCheckBox;
+    private javax.swing.JComboBox<String> connectionOptionCB;
     // End of variables declaration//GEN-END:variables
 }
