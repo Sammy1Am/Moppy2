@@ -12,15 +12,18 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import com.moppy.core.comms.NetworkMessageConsumer;
+import java.util.List;
 
 /**
  * Interface for a particular form of the Moppy network; used for sending
  * and receiving MoppyMessages.
  */
-public abstract class NetworkBridge implements Closeable, NetworkMessageConsumer {
+public abstract class NetworkBridge<CONNOPTION> implements Closeable, NetworkMessageConsumer {
 
     private final Set<NetworkMessageConsumer> receivers = new HashSet<>();
 
+    public abstract void connect(CONNOPTION connectionOption) throws IOException;
+    
     public abstract void connect() throws IOException;
 
     public abstract boolean isConnected();
@@ -28,6 +31,10 @@ public abstract class NetworkBridge implements Closeable, NetworkMessageConsumer
     public abstract void sendMessage(MoppyMessage messageToSend) throws IOException;
 
     public abstract String getNetworkIdentifier();
+    
+    public abstract List<CONNOPTION> getConnectionOptions();
+    
+    public abstract CONNOPTION currentConnectionOption();
 
     public void registerMessageReceiver(NetworkMessageConsumer messageConsumer) {
         receivers.add(messageConsumer);

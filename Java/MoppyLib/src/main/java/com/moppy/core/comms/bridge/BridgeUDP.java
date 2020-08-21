@@ -14,6 +14,8 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +26,7 @@ import java.util.logging.Logger;
  * to multiple Moppy devices on a Network.  Ideally this should be an effectively zero-conf
  * bridge and work out of the box on any normal network.
  */
-public class BridgeUDP extends NetworkBridge {
+public class BridgeUDP extends NetworkBridge<Object> {
 
     private static final int MOPPY_PORT = 30994;
     private InetAddress groupAddress;
@@ -46,6 +48,11 @@ public class BridgeUDP extends NetworkBridge {
         UDPListener listener = new UDPListener(socket, this);
         listenerThread = new Thread(listener);
         listenerThread.start();
+    }
+    
+    @Override
+    public void connect(Object connectionOption) throws IOException {
+        connect(); // Ignore argument since we have no options
     }
 
     @Override
@@ -85,6 +92,16 @@ public class BridgeUDP extends NetworkBridge {
     @Override
     public boolean isConnected() {
         return socket != null && !socket.isClosed();
+    }
+
+    @Override
+    public List<Object> getConnectionOptions() {
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public Object currentConnectionOption() {
+        return null;
     }
 
     private class UDPListener implements Runnable {

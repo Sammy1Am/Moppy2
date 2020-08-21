@@ -99,12 +99,12 @@ public class NetworkManager implements NetworkMessageConsumer {
     }
 
     /**
-     * Returns a Map of unique network bridge identifiers and their current connection state
+     * Returns a Map of unique network bridge identifiers and the network bridge
      * @return
      */
-    public Map<String, Boolean> getAvailableNetworkBridges() {
+    public Map<String, NetworkBridge> getAvailableNetworkBridges() {
         return networkBridges.entrySet().stream()
-                .collect(Collectors.toMap(Entry<String, NetworkBridge>::getKey, entry -> entry.getValue().isConnected()));
+                .collect(Collectors.toMap(Entry<String, NetworkBridge>::getKey, entry -> entry.getValue()));
     }
 
     /**
@@ -115,9 +115,9 @@ public class NetworkManager implements NetworkMessageConsumer {
         return recentlySeenDevices.keySet();
     }
 
-    public void connectBridge(String bridgeIdentifier) throws IOException {
+    public void connectBridge(String bridgeIdentifier, Object connectionOption) throws IOException {
         try {
-            networkBridges.get(bridgeIdentifier).connect();
+            networkBridges.get(bridgeIdentifier).connect(connectionOption);
             networkBridges.get(bridgeIdentifier).registerMessageReceiver(multiBridge);
             multiBridge.addBridge(networkBridges.get(bridgeIdentifier));
         } finally {
