@@ -28,6 +28,7 @@ public class StatusUpdate {
 
     public static StatusUpdate SEQUENCE_START = new StatusUpdate(StatusType.SEQUENCE_START, Optional.empty());
     public static StatusUpdate SEQUENCE_PAUSE = new StatusUpdate(StatusType.SEQUENCE_PAUSE, Optional.empty());
+    public static StatusUpdate SEQUENCE_STOPPED = new StatusUpdate(StatusType.SEQUENCE_STOPPED, Optional.of(true)); // Always reset when stopped
 
     public static StatusUpdate sequenceEnd(boolean doReset) {
         return new StatusUpdate(StatusType.SEQUENCE_END, Optional.of(doReset));

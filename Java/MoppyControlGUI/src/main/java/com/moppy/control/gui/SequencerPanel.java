@@ -115,6 +115,23 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
             }
         }
     }
+    
+    /**
+     * Advanced the loaded sequence to the next in the playlist (or wraps back to 0)
+     */
+    private void advanceSequence() {
+        if (++loadedIndex >= playlistFilesModel.size() ) {
+            loadSequence(0);
+            if (repeatCheckbox.isSelected()) {
+                midiSequencer.play();
+            } else {
+                midiSequencer.stop();
+            }
+        } else {
+            loadSequence(loadedIndex);
+            midiSequencer.play();
+        }
+    }
 
     private class PlaylistCellRenderer extends DefaultListCellRenderer {
 
@@ -153,6 +170,7 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
         removeFileButton = new javax.swing.JButton();
         autoResetCB = new javax.swing.JCheckBox();
         autoResetCB.setSelected(MoppyPreferences.getConfiguration().isAutoReset());
+        repeatCheckbox = new javax.swing.JCheckBox();
 
         sequenceFileChooser.setCurrentDirectory(new File(MoppyPreferences.getConfiguration().getFileLoadDirectory()));
         sequenceFileChooser.setDialogTitle("Select MIDI File");
@@ -346,6 +364,9 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
             }
         });
 
+        repeatCheckbox.setText("Repeat");
+        repeatCheckbox.setToolTipText("Repeats playlist after the last (or only) song has finished.");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -357,6 +378,8 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(autoResetCB)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(repeatCheckbox)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(removeFileButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -372,7 +395,8 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(loadFileButton)
                     .addComponent(removeFileButton)
-                    .addComponent(autoResetCB))
+                    .addComponent(autoResetCB)
+                    .addComponent(repeatCheckbox))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(controlsPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -516,6 +540,7 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
     private javax.swing.JButton playButton;
     private javax.swing.JList<File> playlistFilesList;
     private javax.swing.JButton removeFileButton;
+    private javax.swing.JCheckBox repeatCheckbox;
     private javax.swing.JLabel sequenceCurrentTimeLabel;
     private javax.swing.JFileChooser sequenceFileChooser;
     private javax.swing.JSlider sequenceSlider;
@@ -540,6 +565,9 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                 removeFileButton.setEnabled(false);
                 break;
             case SEQUENCE_END:
+                advanceSequence();
+                break;
+            case SEQUENCE_STOPPED:
                 sequenceSlider.setValue(0);
                 sequenceCurrentTimeLabel.setText(String.format(TIME_CODE_FORMAT, 0, 0));
             case SEQUENCE_PAUSE:

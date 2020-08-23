@@ -78,7 +78,7 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
     public void stop() {
         seq.stop();
         seq.setTickPosition(0);
-        statusBus.receiveUpdate(StatusUpdate.sequenceEnd(true)); // Always reset when stop button is pressed
+        statusBus.receiveUpdate(StatusUpdate.SEQUENCE_STOPPED);
     }
 
     public boolean isPlaying() {
