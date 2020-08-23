@@ -42,6 +42,8 @@
                   <Component id="jScrollPane1" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="autoResetCB" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="repeatCheckbox" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="removeFileButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -62,6 +64,7 @@
                   <Component id="loadFileButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="removeFileButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="autoResetCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="repeatCheckbox" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="controlsPane" min="-2" max="-2" attributes="0"/>
@@ -352,6 +355,12 @@
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="autoResetCB.setSelected(MoppyPreferences.getConfiguration().isAutoReset());&#xd;&#xa;"/>
       </AuxValues>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="repeatCheckbox">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Repeat"/>
+        <Property name="toolTipText" type="java.lang.String" value="Repeats playlist after the last (or only) song has finished."/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

@@ -5,7 +5,8 @@ public enum StatusType {
         SEQUENCE_LOAD,
         SEQUENCE_START,
         SEQUENCE_PAUSE,
-        SEQUENCE_END,
+        SEQUENCE_STOPPED, // Sequence playback was stopped manually
+        SEQUENCE_END, // Sequence playback stopped because it reached the end of the sequence
         SEQUENCE_TEMPO_CHANGE,
 
         // Network statuses

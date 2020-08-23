@@ -114,6 +114,7 @@ public class MapperCollectionPanel extends javax.swing.JPanel implements StatusC
                 enableMapperEditing(false);
                 saveMappersToConfig(); // Go ahead and proactively save the mappers when we start playing
                 break;
+            case SEQUENCE_STOPPED:
             case SEQUENCE_END:
             case SEQUENCE_PAUSE:
                 enableMapperEditing(true);
