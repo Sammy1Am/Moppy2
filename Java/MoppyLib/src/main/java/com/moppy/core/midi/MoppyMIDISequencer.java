@@ -93,8 +93,9 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
 
         seq.setSequence(sequenceToLoad);
         statusBus.receiveUpdate(StatusUpdate.sequenceLoaded(sequenceToLoad));
+        statusBus.receiveUpdate(StatusUpdate.tempoChange(seq.getTempoInBPM()));
 
-        LOG.info(String.format("Loaded sequence with %s tracks", sequenceToLoad.getTracks().length-1)); // -1 for system track?
+        LOG.info(String.format("Loaded sequence with %s tracks at %s BMP", sequenceToLoad.getTracks().length-1, seq.getTempoInBPM())); // -1 for system track?
     }
     
     public boolean isSequenceLoaded() {
@@ -114,8 +115,11 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
     }
 
     public void setTempo(float newTempo){
-        seq.setTempoInBPM(newTempo);
-        statusBus.receiveUpdate(StatusUpdate.tempoChange(newTempo));
-        LOG.info(String.format("Tempo changed to %s", newTempo));
+        // Don't set the tempo again if it's not different (prevents some weird loops in GUI)
+        if (seq.getTempoInBPM() != newTempo) {
+            seq.setTempoInBPM(newTempo);
+            statusBus.receiveUpdate(StatusUpdate.tempoChange(newTempo));
+            LOG.info(String.format("Tempo changed to %s", newTempo));
+        }
     }
 }

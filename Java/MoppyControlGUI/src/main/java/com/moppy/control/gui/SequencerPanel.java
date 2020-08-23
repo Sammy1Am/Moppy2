@@ -9,6 +9,7 @@ import com.moppy.core.status.StatusUpdate;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
@@ -25,6 +26,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -165,6 +167,8 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
         midiInCB = new javax.swing.JComboBox<>();
         midiOutLabel = new javax.swing.JLabel();
         midiOutCB = new javax.swing.JComboBox<>();
+        jLabel1 = new javax.swing.JLabel();
+        tempoSpinner = new javax.swing.JSpinner();
         jScrollPane1 = new javax.swing.JScrollPane();
         playlistFilesList = new javax.swing.JList<>();
         removeFileButton = new javax.swing.JButton();
@@ -267,6 +271,21 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
             }
         });
 
+        jLabel1.setText("BPM");
+
+        tempoSpinner.setModel(new javax.swing.SpinnerNumberModel(Float.valueOf(120.0f), Float.valueOf(1.0f), Float.valueOf(990.0f), Float.valueOf(1.0f)));
+        tempoSpinner.setToolTipText("Use scrollwheel to manually adjust tempo");
+        tempoSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                tempoSpinnerStateChanged(evt);
+            }
+        });
+        tempoSpinner.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                tempoSpinnerMouseWheelMoved(evt);
+            }
+        });
+
         javax.swing.GroupLayout controlsPaneLayout = new javax.swing.GroupLayout(controlsPane);
         controlsPane.setLayout(controlsPaneLayout);
         controlsPaneLayout.setHorizontalGroup(
@@ -294,9 +313,6 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(volumeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, controlsPaneLayout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(volumeOverrideCB))
-                            .addGroup(controlsPaneLayout.createSequentialGroup()
                                 .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(midiInLabel)
                                     .addComponent(midiOutLabel))
@@ -304,7 +320,15 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                                 .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(midiOutCB, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(midiInCB, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 0, Short.MAX_VALUE)))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, controlsPaneLayout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, controlsPaneLayout.createSequentialGroup()
+                                        .addComponent(tempoSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel1))
+                                    .addComponent(volumeOverrideCB))))
                         .addContainerGap())))
         );
         controlsPaneLayout.setVerticalGroup(
@@ -327,7 +351,11 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                         .addComponent(volumeSliderLabel)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(volumeOverrideCB)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(tempoSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(3, 3, 3)
                 .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(midiInLabel)
                     .addComponent(midiInCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -335,7 +363,7 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
                 .addGroup(controlsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(midiOutLabel)
                     .addComponent(midiOutCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addContainerGap(25, Short.MAX_VALUE))
         );
 
         playlistFilesList.setModel(playlistFilesModel);
@@ -390,7 +418,7 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 78, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 55, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(loadFileButton)
@@ -413,46 +441,31 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
         }
     }//GEN-LAST:event_loadFileButtonActionPerformed
 
-    private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
-        midiSequencer.stop();
-    }//GEN-LAST:event_stopButtonActionPerformed
+    private void autoResetCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_autoResetCBActionPerformed
+        if (midiSequencer != null) {
+            midiSequencer.setAutoReset(autoResetCB.isSelected());
+        }
+        MoppyPreferences.getConfiguration().setAutoReset(autoResetCB.isSelected());
+    }//GEN-LAST:event_autoResetCBActionPerformed
 
-    private void playButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_playButtonActionPerformed
-        if (midiSequencer.isPlaying()) {
-            midiSequencer.pause();
-        } else if (!playlistFilesModel.isEmpty()){
-            if (!midiSequencer.isSequenceLoaded() || loadedIndex < 0) {
-                loadSequence(0); // Load the first song
-            }
-            if (midiSequencer.isSequenceLoaded()){
+    private void removeFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeFileButtonActionPerformed
+        playlistFilesList.getSelectedValuesList().forEach((f) -> {
+            playlistFilesModel.removeElement(f);
+        });
+        loadedIndex = -1; // We've removed things, so the index needs to be reset
+        removeFileButton.setEnabled(!playlistFilesList.isSelectionEmpty());
+    }//GEN-LAST:event_removeFileButtonActionPerformed
+
+    private void playlistFilesListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_playlistFilesListMouseClicked
+        removeFileButton.setEnabled(!playlistFilesList.isSelectionEmpty() && !midiSequencer.isPlaying());
+        
+        if (evt.getClickCount() == 2) {
+            loadSequence(playlistFilesList.getSelectedIndex());
+            if (midiSequencer.isSequenceLoaded()) {
                 midiSequencer.play();
             }
         }
-    }//GEN-LAST:event_playButtonActionPerformed
-
-    private void sequenceSliderMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sequenceSliderMouseDragged
-        midiSequencer.setSecondsPosition(sequenceSlider.getValue());
-        Duration length = Duration.ofSeconds(midiSequencer.getSecondsPosition());
-        sequenceCurrentTimeLabel.setText(String.format(TIME_CODE_FORMAT, length.toMinutes(), length.getSeconds()%60));
-    }//GEN-LAST:event_sequenceSliderMouseDragged
-
-    private void sequenceSliderMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sequenceSliderMousePressed
-        midiSequencer.pause();
-    }//GEN-LAST:event_sequenceSliderMousePressed
-
-    private void sequenceSliderMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sequenceSliderMouseReleased
-        sequenceSliderMouseDragged(evt); // Update position
-        midiSequencer.play();
-    }//GEN-LAST:event_sequenceSliderMouseReleased
-
-    private void volumeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_volumeSliderStateChanged
-        volumeSliderLabel.setText(String.format("%s%% Volume", volumeSlider.getValue()));
-        postProc.setVelocityMultiplier(volumeSlider.getValue()/100.0);
-    }//GEN-LAST:event_volumeSliderStateChanged
-
-    private void volumeOverrideCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_volumeOverrideCBActionPerformed
-        postProc.setOverrideVelocity(volumeOverrideCB.isSelected());
-    }//GEN-LAST:event_volumeOverrideCBActionPerformed
+    }//GEN-LAST:event_playlistFilesListMouseClicked
 
     private void midiOutCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_midiOutCBActionPerformed
         if (receiverSender == null) {
@@ -501,36 +514,65 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
         }
     }//GEN-LAST:event_midiInCBActionPerformed
 
-    private void autoResetCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_autoResetCBActionPerformed
-        if (midiSequencer != null) {
-            midiSequencer.setAutoReset(autoResetCB.isSelected());
-        }
-        MoppyPreferences.getConfiguration().setAutoReset(autoResetCB.isSelected());
-    }//GEN-LAST:event_autoResetCBActionPerformed
+    private void volumeOverrideCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_volumeOverrideCBActionPerformed
+        postProc.setOverrideVelocity(volumeOverrideCB.isSelected());
+    }//GEN-LAST:event_volumeOverrideCBActionPerformed
 
-    private void removeFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeFileButtonActionPerformed
-        playlistFilesList.getSelectedValuesList().forEach((f) -> {
-            playlistFilesModel.removeElement(f);
-        });
-        loadedIndex = -1; // We've removed things, so the index needs to be reset
-        removeFileButton.setEnabled(!playlistFilesList.isSelectionEmpty());
-    }//GEN-LAST:event_removeFileButtonActionPerformed
+    private void volumeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_volumeSliderStateChanged
+        volumeSliderLabel.setText(String.format("%s%% Volume", volumeSlider.getValue()));
+        postProc.setVelocityMultiplier(volumeSlider.getValue()/100.0);
+    }//GEN-LAST:event_volumeSliderStateChanged
 
-    private void playlistFilesListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_playlistFilesListMouseClicked
-        removeFileButton.setEnabled(!playlistFilesList.isSelectionEmpty() && !midiSequencer.isPlaying());
-        
-        if (evt.getClickCount() == 2) {
-            loadSequence(playlistFilesList.getSelectedIndex());
-            if (midiSequencer.isSequenceLoaded()) {
+    private void playButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_playButtonActionPerformed
+        if (midiSequencer.isPlaying()) {
+            midiSequencer.pause();
+        } else if (!playlistFilesModel.isEmpty()){
+            if (!midiSequencer.isSequenceLoaded() || loadedIndex < 0) {
+                loadSequence(0); // Load the first song
+            }
+            if (midiSequencer.isSequenceLoaded()){
                 midiSequencer.play();
             }
         }
-    }//GEN-LAST:event_playlistFilesListMouseClicked
+    }//GEN-LAST:event_playButtonActionPerformed
 
+    private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
+        midiSequencer.stop();
+    }//GEN-LAST:event_stopButtonActionPerformed
+
+    private void sequenceSliderMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sequenceSliderMouseReleased
+        sequenceSliderMouseDragged(evt); // Update position
+        midiSequencer.play();
+    }//GEN-LAST:event_sequenceSliderMouseReleased
+
+    private void sequenceSliderMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sequenceSliderMousePressed
+        midiSequencer.pause();
+    }//GEN-LAST:event_sequenceSliderMousePressed
+
+    private void sequenceSliderMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sequenceSliderMouseDragged
+        midiSequencer.setSecondsPosition(sequenceSlider.getValue());
+        Duration length = Duration.ofSeconds(midiSequencer.getSecondsPosition());
+        sequenceCurrentTimeLabel.setText(String.format(TIME_CODE_FORMAT, length.toMinutes(), length.getSeconds()%60));
+    }//GEN-LAST:event_sequenceSliderMouseDragged
+
+    private void tempoSpinnerMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_tempoSpinnerMouseWheelMoved
+        if (evt.getScrollType() == java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+            float newValue = Math.max(1,((float) tempoSpinner.getValue()) - evt.getUnitsToScroll()); // Don't go below 1
+            // If we're going down (positive units), or we haven't reached the top (NextValue != null) then continue
+            if (evt.getUnitsToScroll() > 0 || tempoSpinner.getModel().getNextValue() != null) {
+                midiSequencer.setTempo(newValue);
+            }
+        }
+    }//GEN-LAST:event_tempoSpinnerMouseWheelMoved
+
+    private void tempoSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tempoSpinnerStateChanged
+        midiSequencer.setTempo((float) tempoSpinner.getValue());
+    }//GEN-LAST:event_tempoSpinnerStateChanged
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox autoResetCB;
     private javax.swing.JPanel controlsPane;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton loadFileButton;
     private javax.swing.JComboBox<String> midiInCB;
@@ -546,6 +588,7 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
     private javax.swing.JSlider sequenceSlider;
     private javax.swing.JLabel sequenceTotalTimeLabel;
     private javax.swing.JButton stopButton;
+    private javax.swing.JSpinner tempoSpinner;
     private javax.swing.JCheckBox volumeOverrideCB;
     private javax.swing.JSlider volumeSlider;
     private javax.swing.JLabel volumeSliderLabel;
@@ -573,6 +616,9 @@ public class SequencerPanel extends JPanel implements StatusConsumer, ActionList
             case SEQUENCE_PAUSE:
                 playButton.setText(BTN_PLAY);
                 sequenceProgressUpdateTimer.stop();
+                break;
+            case SEQUENCE_TEMPO_CHANGE:
+                update.getData().ifPresent((newTempo) -> tempoSpinner.setValue((float)newTempo));
                 break;
         }
     }
