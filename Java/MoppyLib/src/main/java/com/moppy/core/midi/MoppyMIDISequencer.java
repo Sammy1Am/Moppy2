@@ -96,6 +96,10 @@ public class MoppyMIDISequencer implements MetaEventListener, Closeable {
 
         LOG.info(String.format("Loaded sequence with %s tracks", sequenceToLoad.getTracks().length-1)); // -1 for system track?
     }
+    
+    public boolean isSequenceLoaded() {
+        return seq.getSequence() != null;
+    }
 
     public long getSecondsLength(){
         return TimeUnit.SECONDS.convert(seq.getMicrosecondLength(), TimeUnit.MICROSECONDS);
