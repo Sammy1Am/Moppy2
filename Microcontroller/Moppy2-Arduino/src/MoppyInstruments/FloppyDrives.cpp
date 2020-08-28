@@ -60,8 +60,8 @@ void FloppyDrives::setup() {
   pinMode(15, OUTPUT); // Direction 7
   pinMode(16, OUTPUT); // Step control 8
   pinMode(17, OUTPUT); // Direction 8
-  pinMode(18, OUTPUT); // Direction 9
-  pinMode(19, OUTPUT); // Step control 9
+  pinMode(18, OUTPUT); // Step control 9
+  pinMode(19, OUTPUT); // Direction 9
 
 
   // With all pins setup, let's do a first run reset
