@@ -171,6 +171,8 @@ Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but m
 #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
 #ifdef ARDUINO_ARCH_ESP8266
 void ICACHE_RAM_ATTR FloppyDrives::tick() {
+#elif ARDUINO_ARCH_ESP32
+void IRAM_ATTR FloppyDrives::tick() {
 #else
 void FloppyDrives::tick() {
 #endif
@@ -191,6 +193,8 @@ void FloppyDrives::tick() {
 
 #ifdef ARDUINO_ARCH_ESP8266
 void ICACHE_RAM_ATTR FloppyDrives::togglePin(byte driveNum, byte pin, byte direction_pin) {
+#elif ARDUINO_ARCH_ESP32
+void IRAM_ATTR FloppyDrives::togglePin(byte driveNum, byte pin, byte direction_pin) {
 #else
 void FloppyDrives::togglePin(byte driveNum, byte pin, byte direction_pin) {
 #endif

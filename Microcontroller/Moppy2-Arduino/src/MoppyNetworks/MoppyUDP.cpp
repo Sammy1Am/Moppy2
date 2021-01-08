@@ -1,6 +1,7 @@
 #include "MoppyUDP.h"
 
-#ifdef ARDUINO_ARCH_ESP8266 // For now, this will only work with ESP8266
+#if !defined ARDUINO_ARCH_ESP8266 && !defined ARDUINO_ARCH_ESP32
+#else
 
 WiFiUDP UDP;
 
@@ -31,7 +32,11 @@ bool MoppyUDP::startUDP() {
     Serial.println("");
     Serial.println("Connecting to UDP");
 
+#ifdef ARDUINO_ARCH_ESP8266
     if (UDP.beginMulticast(WiFi.localIP(), IPAddress(239, 2, 2, 7), MOPPY_UDP_PORT) == 1) {
+#elif ARDUINO_ARCH_ESP32
+    if (UDP.beginMulticast(IPAddress(239, 2, 2, 7), MOPPY_UDP_PORT) == 1) {
+#endif
         Serial.println("Connection successful");
         connected = true;
     } else {
@@ -139,4 +144,4 @@ void MoppyUDP::sendPong() {
     UDP.write(pongBytes, sizeof(pongBytes));
     UDP.endPacket();
 }
-#endif /* ARDUINO_ARCH_ESP8266 */
+#endif /* ARDUINO_ARCH_ESP8266 or ARDUINO_ARCH_ESP32 */
