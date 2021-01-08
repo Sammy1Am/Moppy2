@@ -2,7 +2,9 @@
  * MoppyUDP.h
  *
  */
-#ifdef ARDUINO_ARCH_ESP8266 // For now, this will only work with ESP8266
+#if !defined ARDUINO_ARCH_ESP8266 && !defined ARDUINO_ARCH_ESP32
+// For now, this will only work with ESP8266 or ESP32
+#else
 #ifndef SRC_MOPPYNETWORKS_MOPPYUDP_H_
 #define SRC_MOPPYNETWORKS_MOPPYUDP_H_
 
@@ -11,7 +13,11 @@
 #include "Arduino.h"
 #include "MoppyNetwork.h"
 #include <ArduinoOTA.h>
+#ifdef ARDUINO_ARCH_ESP8266
 #include <ESP8266WiFi.h>
+#elif ARDUINO_ARCH_ESP32
+#include <WiFi.h>
+#endif
 #include <ESPAsyncWebServer.h>   //Local WebServer used to serve the configuration portal
 #include <ESPAsyncWiFiManager.h> // https://github.com/alanswx/ESPAsyncWiFiManager WiFi Configuration Magic
 #include <WiFiUdp.h>
@@ -38,4 +44,4 @@ private:
 };
 
 #endif /* SRC_MOPPYNETWORKS_MOPPYUDP_H_ */
-#endif /* ARDUINO_ARCH_ESP8266 */
+#endif /* ARDUINO_ARCH_ESP8266 or ARDUINO_ARCH_ESP32 */
