@@ -21,7 +21,7 @@
  */
 #ifdef ARDUINO_ARCH_AVR
 #define TIMER_RESOLUTION 40
-#elif ARDUINO_ARCH_ESP8266
+#elif ARDUINO_ARCH_ESP8266 || ARDUINO_ARCH_ESP32
 #define TIMER_RESOLUTION 20 // Higher resolution for the faster processor
 #endif
 
