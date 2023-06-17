@@ -18,7 +18,7 @@
 #elif ARDUINO_ARCH_ESP32
 #include <WiFi.h>
 #endif
-#include <ESPAsyncWebServer.h>   //Local WebServer used to serve the configuration portal
+#include <ESPAsyncWebSrv.h>   //Local WebServer used to serve the configuration portal
 #include <ESPAsyncWiFiManager.h> // https://github.com/alanswx/ESPAsyncWiFiManager WiFi Configuration Magic
 #include <WiFiUdp.h>
 #include <stdint.h>
