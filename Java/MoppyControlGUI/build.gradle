@@ -33,9 +33,9 @@ repositories {
 
 dependencies {
     implementation project(':MoppyLib')
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.2'
-    compileOnly 'org.projectlombok:lombok:1.18.12'
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
     // Use JUnit test framework
     //testImplementation 'junit:junit:4.12'
