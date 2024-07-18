@@ -21,6 +21,10 @@
 
 # Gradle Artifacts #
 **/.gradle/**
+**/gradle/**
+gradle
+gradlew
+gradlew.bat
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
@@ -41,3 +45,6 @@ Java/*/.settings/org.eclipse.jdt.core.prefs
 Java/*/.settings/org.eclipse.buildship.core.prefs
 Java/MoppyControlGUI/**/*.form
 **/.vscode
+
+# JetBrains IntelliJ
+.idea
