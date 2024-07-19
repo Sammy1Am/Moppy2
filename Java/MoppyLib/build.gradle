@@ -20,7 +20,8 @@ repositories {
 
 dependencies {
     implementation 'com.fazecast:jSerialComm:2.11.+'
-    api 'org.graalvm.js:js:23.0.+'
+    api 'org.graalvm.polyglot:polyglot:24.0.+'
+    api 'org.graalvm.polyglot:js:24.0.+'
     compileOnly 'org.projectlombok:lombok:1.18.34'
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
