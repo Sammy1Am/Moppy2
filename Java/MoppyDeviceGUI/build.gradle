@@ -1,9 +1,10 @@
 apply plugin: 'java'
 apply plugin: 'application'
 
-mainClassName = 'com.moppy.device.gui.MoppyDeviceGUI'
+application {
+    mainClass.set('com.moppy.device.gui.MoppyDeviceGUI')
+}
 
-sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 // NetBeans will automatically add "run" and "debug" tasks relying on the
@@ -25,6 +26,6 @@ repositories {
 }
 
 dependencies {
-    compile project(':MoppyLib')
-    compile 'com.jsyn:jsyn:+' // For sound synthesizing
+    implementation project(':MoppyLib')
+    implementation 'com.jsyn:jsyn:+' // For sound synthesizing
 }

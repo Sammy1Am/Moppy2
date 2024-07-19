@@ -6,12 +6,15 @@ plugins {
     id 'application'
 }
 
-mainClassName = 'com.moppy.control.MoppyControlGUI'
-version = '2.1.0'
+application {
+    mainClass.set('com.moppy.control.MoppyControlGUI')
+}
+
+version = '2.2.0'
 
 jar {
     manifest {
-        attributes ('Main-Class': mainClassName,
+        attributes ('Main-Class': application.mainClass,
                     'Implementation-Title': project.name,
                     'Implementation-Version': version)
     }
@@ -39,9 +42,4 @@ dependencies {
 
     // Use JUnit test framework
     //testImplementation 'junit:junit:4.12'
-}
-
-application {
-    // Define the main class for the application.
-    mainClassName = 'com.moppy.control.MoppyControlGUI'
 }
