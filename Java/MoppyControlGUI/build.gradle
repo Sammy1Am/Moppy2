@@ -8,6 +8,11 @@ plugins {
 
 application {
     mainClass.set('com.moppy.control.MoppyControlGUI')
+    applicationDefaultJvmArgs = [
+        '--enable-native-access=ALL-UNNAMED',
+        '--sun-misc-unsafe-memory-access=allow',
+        '-Dpolyglot.engine.WarnInterpreterOnly=false'
+    ]
 }
 
 version = '2.2.0'
@@ -37,8 +42,8 @@ repositories {
 dependencies {
     implementation project(':MoppyLib')
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
-    compileOnly 'org.projectlombok:lombok:1.18.34'
-    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    compileOnly 'org.projectlombok:lombok:1.18.46'
+    annotationProcessor 'org.projectlombok:lombok:1.18.46'
 
     // Use JUnit test framework
     //testImplementation 'junit:junit:4.12'

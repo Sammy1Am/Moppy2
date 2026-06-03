@@ -20,10 +20,10 @@ repositories {
 
 dependencies {
     implementation 'com.fazecast:jSerialComm:2.11.+'
-    api 'org.graalvm.polyglot:polyglot:24.0.+'
-    api 'org.graalvm.polyglot:js:24.0.+'
-    compileOnly 'org.projectlombok:lombok:1.18.34'
-    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    api 'org.graalvm.polyglot:polyglot:25.0.+'
+    api 'org.graalvm.polyglot:js:25.0.+'
+    compileOnly 'org.projectlombok:lombok:1.18.46'
+    annotationProcessor 'org.projectlombok:lombok:1.18.46'
 
     // Use JUnit test framework
     //testImplementation 'junit:junit:4.+'
